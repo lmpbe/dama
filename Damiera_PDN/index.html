@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Claude Dama — Gioco</title>
+<style>
+  :root {
+    --bg:      #d0e0f0;
+    --panel:   #b8cfe0;
+    --border:  #8aaac0;
+    --accent:  #2060a0;
+    --accent2: #1a4880;
+    --text:    #1a2a3a;
+    --muted:   #4a6a88;
+    --radius:  8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { height: 100%; overflow: hidden; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100%; overflow: hidden;
+    display: flex; flex-direction: column; align-items: center;
+  }
+  header { width:100%; background:var(--accent); padding:10px 16px; text-align:center; flex-shrink:0; }
+  header h1 { font-size:clamp(1rem,3.5vw,1.5rem); color:#fff; font-weight:bold; }
+  header p  { font-size:.75rem; color:#cce0ff; margin-top:2px; }
+
+  main {
+    width:100%; max-width:860px; padding:12px 12px 36px;
+    display:flex; flex-direction:column; gap:12px;
+    flex:1; overflow-y:auto; overscroll-behavior:contain;
+  }
+
+  /* ── status bar ── */
+  #status-bar {
+    background:var(--panel); border:1px solid var(--border);
+    border-radius:var(--radius); padding:8px 14px;
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  #turn-badge {
+    font-weight:bold; font-size:1rem;
+    padding:5px 16px; border-radius:20px;
+    background:#fff; border:3px solid #909090;
+    display:flex; align-items:center; gap:7px;
+    min-width:110px; flex-shrink:0;
+  }
+  #turn-dot {
+    width:18px; height:18px; border-radius:50%;
+    border:2px solid #888; display:inline-block; flex-shrink:0;
+  }
+  #turn-dot.white { background:#f0f0f0; border-color:#808080; }
+  #turn-dot.red   { background:#cc2020; border-color:#7a0000; }
+  #status-msg { display:none; }
+
+  /* ── conteggio pezzi ── */
+  #piece-count {
+    display:flex; gap:8px; font-size:.92rem; font-weight:bold; flex-shrink:0;
+  }
+  .pc-item {
+    display:flex; align-items:center; gap:5px;
+    width:70px; flex-shrink:0;
+  }
+  .pc-dot {
+    width:16px; height:16px; border-radius:50%; flex-shrink:0;
+  }
+  .pc-dot.white { background:#f0f0f0; border:2px solid #808080; }
+  .pc-dot.red   { background:#cc2020; border:2px solid #7a0000; }
+
+  /* ── layout ── */
+  #game-area { display:flex; flex-direction:row; gap:14px; flex-wrap:wrap; align-items:flex-start; }
+  #board-wrap { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  canvas { display:block; border:2px solid #5a8aaa; touch-action:none; }
+  #side { flex:1; min-width:190px; display:flex; flex-direction:column; gap:14px; }
+
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; }
+  .card h3 { font-size:.7rem; text-transform:uppercase; color:var(--muted); font-weight:bold; margin-bottom:10px; letter-spacing:.06em; }
+
+  /* ── pulsanti grandi per touch ── */
+  button {
+    cursor:pointer; font-family:Arial,sans-serif;
+    border-radius:6px; border:1px solid var(--border);
+    transition:background .12s;
+    user-select:none; -webkit-user-select:none; touch-action:manipulation;
+  }
+  button:disabled { opacity:.35; cursor:default; }
+  .btn-primary { background:var(--accent); color:#fff; font-weight:bold; border-color:var(--accent2); font-size:1rem; padding:11px 20px; }
+  .btn-primary:hover:not(:disabled) { background:var(--accent2); }
+  .btn-big { background:#e0ecf8; color:var(--text); font-size:1.1rem; font-weight:bold; padding:12px 22px; border-color:var(--border); }
+  .btn-big:hover:not(:disabled) { background:#c8ddf0; }
+
+  /* ── pulsanti navigazione partita ── */
+  .action-btns { display:flex; flex-direction:column; gap:14px; }
+
+  /* ── PDN box ── */
+  #pdn-box {
+    width:100%;
+    height:120px;
+    overflow-y:auto;
+    background:#ffffff; color:#000000;
+    border:2px solid #5a8aaa;
+    border-radius:4px; padding:8px 10px;
+    font-family:'Courier New',monospace; font-size:13px; font-weight:bold;
+    line-height:1.7; white-space:pre-wrap; word-break:break-word;
+  }
+
+  #copy-msg { font-size:.8rem; color:#2a7a2a; font-weight:bold; display:none; margin-top:3px; }
+
+  /* ── overlays ── */
+  .overlay-bg {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,.55); z-index:100;
+    align-items:center; justify-content:center;
+  }
+  .overlay-bg.show { display:flex; }
+  .overlay-box {
+    background:#fff; border-radius:12px; padding:28px 32px;
+    text-align:center; max-width:320px; width:90%;
+    box-shadow:0 8px 32px rgba(0,0,0,.4);
+  }
+  .overlay-title { font-size:1.4rem; font-weight:bold; margin-bottom:8px; }
+  .overlay-sub   { font-size:.95rem; color:#555; margin-bottom:20px; }
+  .overlay-btns  { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+
+  @media(max-width:540px){
+    #game-area { flex-direction:column; }
+    #side { min-width:unset; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>♟ Claude Dama</h1>
+  <p>Dama Italiana — 2 giocatori</p>
+</header>
+
+<main>
+  <div id="status-bar">
+    <div id="turn-badge">
+      <span id="turn-dot" class="white"></span>
+      <span id="turn-text">Muove</span>
+    </div>
+    <div id="piece-count">
+      <div class="pc-item"><div class="pc-dot white"></div><span id="cnt-white">12</span></div>
+      <div class="pc-item"><div class="pc-dot red"></div><span id="cnt-black">12</span></div>
+    </div>
+  </div>
+
+  <div id="game-area">
+    <div id="board-wrap">
+      <canvas id="board"></canvas>
+    </div>
+
+    <div id="side">
+      <div class="card">
+        <h3>Partita</h3>
+        <div class="action-btns">
+          <button class="btn-big" id="btn-undo" tabindex="-1">↩ Annulla mossa</button>
+          <button class="btn-big" id="btn-new" tabindex="-1">↺ Nuova partita</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Testo PDN della partita</h3>
+        <div id="pdn-box"></div>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap">
+          <button class="btn-primary" tabindex="-1" onclick="copyPDN()">📋 Copia PDN</button>
+          <span id="copy-msg">✓ Copiato!</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Overlay fine partita -->
+<div id="overlay" class="overlay-bg">
+  <div class="overlay-box">
+    <div id="overlay-title" class="overlay-title"></div>
+    <div id="overlay-sub" class="overlay-sub"></div>
+    <div class="overlay-btns">
+      <button class="btn-primary" id="overlay-new-btn" tabindex="-1">↺ Nuova partita</button>
+      <button class="btn-big" tabindex="-1" onclick="closeOverlay()">✕ Chiudi</button>
+    </div>
+  </div>
+</div>
+
+<!-- Overlay conferma nuova partita -->
+<div id="overlay-confirm" class="overlay-bg">
+  <div class="overlay-box">
+    <div class="overlay-title">Nuova partita?</div>
+    <div class="overlay-sub">La partita in corso andrà persa.</div>
+    <div class="overlay-btns">
+      <button class="btn-primary" tabindex="-1" onclick="confirmNewGame()">✓ Sì, nuova</button>
+      <button class="btn-big" tabindex="-1" onclick="closeConfirm()">✕ Annulla</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+//  DAMA ITALIANA — motore di gioco
+//
+//  8×8, caselle scure = (r+c)%2===0
+//  Cantone (7,7) scuro ✓
+//  Numerazione PDN: sq 1..32, riga pari→col 0,2,4,6; dispari→col 1,3,5,7
+//  Bianchi: sq 21-32 (righe 5-7), muovono verso l'alto (r decrescente)
+//  Neri:    sq 1-12  (righe 0-2), muovono verso il basso (r crescente)
+//
+//  Regole applicate:
+//  - Presa obbligatoria con OBBLIGO DI MASSIMO
+//  - Pedina: muove/prende solo in avanti; dama: muove/prende in ogni direzione
+//  - Promozione a dama a fine mossa (dopo tutte le catture)
+//  - Fine automatica: chi non può muovere perde
+// ═══════════════════════════════════════════════════════════════════
+
+const N = 8;
+const canvas = document.getElementById('board');
+const ctx = canvas.getContext('2d');
+
+// ── Coordinate ────────────────────────────────────────────────────
+function isDark(r,c){ return (r+c)%2===0; }
+
+function sqToRC(sq){
+  const i=sq-1, r=Math.floor(i/4), pos=i%4;
+  return {r, c:(r%2===0)?pos*2:pos*2+1};
+}
+function rcToSq(r,c){
+  if(r<0||r>=N||c<0||c>=N||!isDark(r,c)) return null;
+  return r*4+((r%2===0)?c/2:(c-1)/2)+1;
+}
+
+// ── Stato ─────────────────────────────────────────────────────────
+let board=[], turn='white', selected=null;
+let legalMoves=[], mustCapture=false;
+let history=[];
+let halfMoves=[];
+let lastFrom=null, lastTo=null;
+let gameOver=false;
+let partialPath=[];   // caselle già toccate durante una presa multipla ambigua
+
+function makeInitBoard(){
+  const b=new Array(64).fill(null);
+  for(let sq=1;sq<=12;sq++){const {r,c}=sqToRC(sq);b[r*N+c]={color:'black',king:false};}
+  for(let sq=21;sq<=32;sq++){const {r,c}=sqToRC(sq);b[r*N+c]={color:'white',king:false};}
+  return b;
+}
+function cloneBoard(b){ return b.map(p=>p?{...p}:null); }
+
+// ── Generazione mosse ──────────────────────────────────────────────
+// Restituisce array di mosse: {sqs:[...caselle percorso], captured:[...idx]}
+// Per la pedina: solo avanti; per la dama: tutte le direzioni.
+// Obbligo di massimo: si trovano tutte le sequenze di cattura e si torna
+// solo quelle con il numero massimo di pezzi catturati.
+
+function forwardDirs(color){
+  return color==='white'?[[-1,-1],[-1,1]]:[[1,-1],[1,1]];
+}
+const allDirs=[[-1,-1],[-1,1],[1,-1],[1,1]];
+
+// Mosse semplici (senza cattura)
+function getSimpleMoves(b, r, c){
+  const p=b[r*N+c]; if(!p) return [];
+  // Dama italiana: la dama avanza di UNA casella (in tutte e 4 le direzioni)
+  // NON vola come nella dama internazionale
+  const dirs=p.king?allDirs:forwardDirs(p.color);
+  const moves=[];
+  for(const [dr,dc] of dirs){
+    const rr=r+dr, cc=c+dc;
+    if(rr<0||rr>=N||cc<0||cc>=N||!isDark(rr,cc)) continue;
+    if(!b[rr*N+cc]) moves.push({sqs:[rcToSq(r,c),rcToSq(rr,cc)],captured:[]});
+  }
+  return moves;
+}
+
+// Catture ricorsive (DFS)
+// Regole dama italiana:
+// 1. La pedina NON può catturare le dame
+// 2. Quando una pedina si promuove, la mossa finisce subito (justPromoted)
+// 3. La dama cattura solo di una casella (non vola)
+function getCaptureMoves(b, r, c, piece, visitedCaptured, path, justPromoted){
+  if(justPromoted) return [];
+
+  const effectivePiece = {...piece};
+  if(!effectivePiece.king){
+    if(effectivePiece.color==='white' && r===0){ effectivePiece.king=true; return []; }
+    if(effectivePiece.color==='black' && r===7){ effectivePiece.king=true; return []; }
+  }
+
+  const dirs = effectivePiece.king ? allDirs : forwardDirs(effectivePiece.color);
+  let found = [];
+
+  for(const [dr,dc] of dirs){
+    const mr=r+dr, mc=c+dc;
+    const lr=r+2*dr, lc=c+2*dc;
+    if(lr<0||lr>=N||lc<0||lc>=N||!isDark(lr,lc)||!isDark(mr,mc)) continue;
+    const victim=b[mr*N+mc];
+    if(!victim) continue;
+    if(victim.color===effectivePiece.color) continue;
+    if(visitedCaptured.has(mr*N+mc)) continue;
+    // REGOLA: la pedina non può catturare la dama
+    if(!effectivePiece.king && victim.king) continue;
+    if(b[lr*N+lc]!==null) continue;
+
+    const newPath=[...path, rcToSq(lr,lc)];
+    const newVisited=new Set(visitedCaptured); newVisited.add(mr*N+mc);
+    const nb=cloneBoard(b);
+    nb[mr*N+mc]=null;
+    nb[lr*N+lc]=nb[r*N+c]; nb[r*N+c]=null;
+
+    // La pedina si promuove atterrando? → la mossa finisce qui
+    const landPromotes = !effectivePiece.king &&
+      ((effectivePiece.color==='white' && lr===0) ||
+       (effectivePiece.color==='black' && lr===7));
+
+    const deeper = getCaptureMoves(nb, lr, lc, effectivePiece, newVisited, newPath, landPromotes);
+    if(deeper.length>0) found.push(...deeper);
+    else found.push({sqs:newPath, captured:[...newVisited]});
+  }
+  return found;
+}
+
+// Tutte le mosse legali per il colore corrente.
+// Regola "mangia il più, con il più":
+//   1. Massimo numero di pezzi catturati
+//   2. A parità di numero, massimo numero di DAME catturate
+//   3. A parità ancora, preferisce la dama come pezzo che esegue la cattura
+function getAllLegalMoves(b, color){
+  let captures=[], simples=[];
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+    const p=b[r*N+c];
+    if(!p||p.color!==color) continue;
+    const sq=rcToSq(r,c);
+    const caps=getCaptureMoves(b,r,c,p,new Set(),[sq],false);
+    // Arricchisce con il conteggio di dame catturate (usando la board originale)
+    for(const cap of caps){
+      let kings=0;
+      for(const idx of cap.captured){ if(b[idx]&&b[idx].king) kings++; }
+      cap.kings=kings;
+      captures.push(cap);
+    }
+    if(caps.length===0) simples.push(...getSimpleMoves(b,r,c));
+  }
+
+  if(captures.length===0) return {moves:simples, mustCapture:false};
+
+  // 1. Massimo totale pezzi catturati
+  const maxTotal=Math.max(...captures.map(m=>m.captured.length));
+  let best=captures.filter(m=>m.captured.length===maxTotal);
+
+  // 2. A parità: massimo dame catturate
+  const maxKings=Math.max(...best.map(m=>m.kings));
+  best=best.filter(m=>m.kings===maxKings);
+
+  // 3. A parità: preferisce la dama come pezzo che cattura
+  const fromKing=best.filter(m=>{ const {r,c}=sqToRC(m.sqs[0]); return b[r*N+c]&&b[r*N+c].king; });
+  if(fromKing.length>0) best=fromKing;
+
+  return {moves:best, mustCapture:true};
+}
+
+// ── Applicazione mossa ─────────────────────────────────────────────
+function applyMoveObj(b, move){
+  const nb=cloneBoard(b);
+  const fromSq=move.sqs[0], toSq=move.sqs[move.sqs.length-1];
+  const {r:fr,c:fc}=sqToRC(fromSq);
+  const {r:tr,c:tc}=sqToRC(toSq);
+  const piece=nb[fr*N+fc];
+  nb[tr*N+tc]=piece; nb[fr*N+fc]=null;
+  for(const idx of move.captured) nb[idx]=null;
+  // promozione
+  if(piece.color==='white'&&tr===0) piece.king=true;
+  if(piece.color==='black'&&tr===7) piece.king=true;
+  return nb;
+}
+
+// ── PDN ───────────────────────────────────────────────────────────
+function moveToPDN(move){
+  const sep=move.captured.length>0?'x':'-';
+  return move.sqs.join(sep);
+}
+
+function buildPDNText(){
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const date=`${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()}`;
+  const time=`${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  let s=`[Event "Claude Dama"]\n[Date "${date} - ${time}"]\n[Result "*"]\n\n`;
+  let line='';
+  for(let i=0;i<halfMoves.length;i++){
+    let token='';
+    if(i%2===0) token=`${Math.floor(i/2)+1}. ${halfMoves[i]}`;
+    else token=halfMoves[i];
+    if(line.length+token.length+1>52){s+=line.trim()+'\n';line=token+' ';}
+    else line+=token+' ';
+  }
+  if(line.trim()) s+=line.trim()+'\n';
+  s+='*';
+  return s;
+}
+
+function updatePDN(){
+  const box=document.getElementById('pdn-box');
+  box.textContent=buildPDNText();
+  // scorre in fondo dentro il box (le ultime mosse sempre visibili)
+  box.scrollTop=box.scrollHeight;
+}
+
+function copyPDN(){
+  const text=buildPDNText();
+  navigator.clipboard.writeText(text).then(()=>{
+    const m=document.getElementById('copy-msg');
+    m.style.display='inline';
+    setTimeout(()=>m.style.display='none',2000);
+  }).catch(()=>{
+    // fallback
+    const ta=document.createElement('textarea');
+    ta.value=text; document.body.appendChild(ta);
+    ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    const m=document.getElementById('copy-msg');
+    m.style.display='inline';
+    setTimeout(()=>m.style.display='none',2000);
+  });
+}
+
+// ── UI helpers ─────────────────────────────────────────────────────
+function updateStatus(){
+  const badge=document.getElementById('turn-badge');
+  const msg=document.getElementById('status-msg');
+  const cnt=document.getElementById('piece-count');
+  let w=0,b=0,wk=0,bk=0;
+  board.forEach(p=>{if(!p)return;if(p.color==='white'){w++;if(p.king)wk++;}else{b++;if(p.king)bk++;}});
+  cnt.textContent=`⬜ ${w} (♛${wk})  ⬛ ${b} (♛${bk})`;
+  if(gameOver) return;
+  if(turn==='white'){badge.className='white';badge.textContent='⬜ Tocca ai Bianchi';}
+  else{badge.className='black';badge.textContent='⬛ Tocca ai Neri';}
+  if(mustCapture) msg.textContent='Presa obbligatoria!';
+  else msg.textContent='Seleziona una pedina per muovere';
+}
+
+function SQ(){ return canvas.width/N; }
+
+function resizeCanvas(){
+  const sz=Math.max(240,Math.min(window.innerWidth-24,480));
+  canvas.width=canvas.height=sz;
+  drawAll();
+}
+window.addEventListener('resize',resizeCanvas);
+
+// ── Disegno ────────────────────────────────────────────────────────
+function drawAll(){
+  const sq=SQ(), sz=canvas.width;
+  ctx.clearRect(0,0,sz,sz);
+
+  // caselle
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+    ctx.fillStyle=isDark(r,c)?'#5a9a50':'#e8e0c0';
+    ctx.fillRect(c*sq,r*sq,sq,sq);
+  }
+
+  // highlight ultima mossa
+  if(lastFrom!=null){
+    const {r:r1,c:c1}=sqToRC(lastFrom);
+    const {r:r2,c:c2}=sqToRC(lastTo);
+    ctx.fillStyle='rgba(255,220,0,0.40)';
+    ctx.fillRect(c1*sq,r1*sq,sq,sq);
+    ctx.fillRect(c2*sq,r2*sq,sq,sq);
+  }
+
+  // highlight selezionato
+  if(selected!=null){
+    const {r,c}=sqToRC(selected);
+    ctx.fillStyle='rgba(255,220,0,0.70)';
+    ctx.fillRect(c*sq,r*sq,sq,sq);
+  }
+
+  // mosse possibili
+  const moveSqs=new Set();    // destinazioni finali raggiungibili
+  const nextSqs=new Set();    // prossime tappe intermedie (disambiguazione)
+  const mustSqs=new Set();    // pezzi che devono prendere
+  if(!gameOver){
+    if(selected!=null){
+      // candidati compatibili con partialPath già inserito
+      const candidates=legalMoves.filter(m=>{
+        if(m.sqs[0]!==selected) return false;
+        for(let i=0;i<partialPath.length;i++){
+          if(m.sqs[i+1]!==partialPath[i]) return false;
+        }
+        return true;
+      });
+      const nextStep=partialPath.length+1;
+      for(const mv of candidates){
+        if(mv.sqs.length===nextStep+0){
+          // mossa già definita? non dovrebbe
+        }
+        if(nextStep<mv.sqs.length){
+          nextSqs.add(mv.sqs[nextStep]);
+        }
+      }
+      // se tutte le destinazioni finali dei candidati convergono sullo stesso passo,
+      // mostra le destinazioni finali solo se il prossimo passo È la destinazione
+      const allDests=new Set(candidates.map(m=>m.sqs[m.sqs.length-1]));
+      for(const d of allDests) moveSqs.add(d);
+
+    } else if(mustCapture){
+      for(const mv of legalMoves) mustSqs.add(mv.sqs[0]);
+    }
+  }
+
+  // evidenzia pezzi da cui si deve prendere (rosso)
+  for(const sq2 of mustSqs){
+    const {r,c}=sqToRC(sq2);
+    ctx.fillStyle='rgba(220,60,60,0.38)';
+    ctx.fillRect(c*sq,r*sq,sq,sq);
+  }
+  // evidenzia destinazioni finali (verde)
+  for(const sq2 of moveSqs){
+    const {r,c}=sqToRC(sq2);
+    ctx.fillStyle='rgba(100,200,80,0.55)';
+    ctx.fillRect(c*sq,r*sq,sq,sq);
+    ctx.beginPath();ctx.arc(c*sq+sq/2,r*sq+sq/2,sq*0.14,0,Math.PI*2);
+    ctx.fillStyle='rgba(60,160,40,0.7)';ctx.fill();
+  }
+  // evidenzia tappe intermedie alternative (azzurro) — sovrascrive il verde se coincidono
+  for(const sq2 of nextSqs){
+    if(moveSqs.has(sq2)) continue; // è già una destinazione finale, il verde va bene
+    const {r,c}=sqToRC(sq2);
+    ctx.fillStyle='rgba(60,160,220,0.55)';
+    ctx.fillRect(c*sq,r*sq,sq,sq);
+    ctx.beginPath();ctx.arc(c*sq+sq/2,r*sq+sq/2,sq*0.14,0,Math.PI*2);
+    ctx.fillStyle='rgba(20,100,180,0.7)';ctx.fill();
+  }
+
+  // numeri caselle scure
+  ctx.textBaseline='top'; ctx.textAlign='left';
+  ctx.font=`bold ${Math.round(sq*0.22)}px Arial`;
+  for(let s=1;s<=32;s++){
+    const {r,c}=sqToRC(s);
+    const x=c*sq+3, y=r*sq+2;
+    ctx.strokeStyle='rgba(0,40,0,0.5)';ctx.lineWidth=2;ctx.strokeText(s,x,y);
+    ctx.fillStyle='rgba(255,255,200,0.75)';ctx.fillText(s,x,y);
+  }
+
+  // pezzi
+  for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+    const p=board[r*N+c]; if(!p) continue;
+    const cx=c*sq+sq/2, cy=r*sq+sq/2, rad=sq*0.40;
+    const isW=p.color==='white';
+    ctx.beginPath();ctx.arc(cx+1.5,cy+2,rad,0,Math.PI*2);
+    ctx.fillStyle='rgba(0,0,0,0.22)';ctx.fill();
+    ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);
+    ctx.fillStyle=isW?'#f0f0f0':'#cc2020';ctx.fill();
+    ctx.strokeStyle=isW?'#808080':'#7a0000';
+    ctx.lineWidth=Math.max(1.5,sq*0.04);ctx.stroke();
+    if(p.king){
+      ctx.beginPath();ctx.arc(cx,cy,rad*0.38,0,Math.PI*2);
+      ctx.fillStyle=isW?'#505050':'#ffeeee';ctx.fill();
+    }
+  }
+
+  // bordo
+  ctx.strokeStyle='#3a7030';ctx.lineWidth=2;
+  ctx.strokeRect(1,1,sz-2,sz-2);
+}
+
+// ── Audio ──────────────────────────────────────────────────────────
+let audioCtx=null;
+function playSound(type){
+  try{
+    if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    const osc=audioCtx.createOscillator();
+    const gain=audioCtx.createGain();
+    osc.connect(gain);gain.connect(audioCtx.destination);
+    if(type==='move'){osc.type='square';osc.frequency.value=800;}
+    else if(type==='capture'){osc.type='sawtooth';osc.frequency.value=400;}
+    else if(type==='king'){osc.type='sine';osc.frequency.value=1200;}
+    gain.gain.setValueAtTime(0.15,audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+0.08);
+    osc.start();osc.stop(audioCtx.currentTime+0.08);
+  }catch(e){}
+}
+
+// ── Input (touch + mouse) ──────────────────────────────────────────
+function getSquareFromEvent(e){
+  const rect=canvas.getBoundingClientRect();
+  const scaleX=canvas.width/rect.width;
+  const scaleY=canvas.height/rect.height;
+  let x,y;
+  if(e.touches&&e.touches.length>0){
+    x=(e.touches[0].clientX-rect.left)*scaleX;
+    y=(e.touches[0].clientY-rect.top)*scaleY;
+  } else {
+    x=(e.clientX-rect.left)*scaleX;
+    y=(e.clientY-rect.top)*scaleY;
+  }
+  const sq=SQ();
+  const c=Math.floor(x/sq), r=Math.floor(y/sq);
+  return rcToSq(r,c);
+}
+
+canvas.addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  if(gameOver) return;
+  const sq=getSquareFromEvent(e);
+  if(sq==null) return;
+  handleTap(sq);
+});
+
+function handleTap(sq){
+  const {r,c}=sqToRC(sq);
+  const p=board[r*N+c];
+
+  if(selected!=null){
+    // Mosse candidate: partono da selected e il loro percorso inizia con partialPath
+    const candidates=legalMoves.filter(m=>{
+      if(m.sqs[0]!==selected) return false;
+      for(let i=0;i<partialPath.length;i++){
+        if(m.sqs[i+1]!==partialPath[i]) return false;
+      }
+      return true;
+    });
+
+    // Il giocatore ha toccato la destinazione finale di almeno un candidato?
+    const byDest=candidates.filter(m=>m.sqs[m.sqs.length-1]===sq);
+    if(byDest.length===1){
+      // percorso univoco: esegui
+      partialPath=[]; executeMove(byDest[0]); return;
+    }
+    if(byDest.length>1){
+      // più percorsi con stessa dest: aggiungi sq a partialPath e aspetta
+      // (non dovrebbe mai succedere con dama italiana, ma per sicurezza)
+      partialPath.push(sq); drawAll(); return;
+    }
+
+    // Il giocatore ha toccato una casella intermedia (prossimo passo)?
+    const nextStep=partialPath.length+1; // indice nella sqs[] del prossimo step
+    const byIntermediate=candidates.filter(m=>m.sqs.length>nextStep && m.sqs[nextStep]===sq);
+    if(byIntermediate.length>0){
+      partialPath.push(sq);
+      // Ora ricontrolla: i candidati rimasti hanno tutti la stessa destinazione?
+      const remaining=byIntermediate;
+      const dests=new Set(remaining.map(m=>m.sqs[m.sqs.length-1]));
+      if(dests.size===1 && remaining.every(m=>m.sqs.length===nextStep+1)){
+        // un solo percorso possibile da qui: esegui
+        partialPath=[]; executeMove(remaining[0]); return;
+      }
+      // altrimenti aspetta ancora la prossima tappa
+      drawAll(); return;
+    }
+
+    // Click su un altro pezzo dello stesso colore → cambia selezione
+    if(p && p.color===turn){
+      const hasMoves=legalMoves.some(m=>m.sqs[0]===sq);
+      if(hasMoves){ selected=sq; partialPath=[]; drawAll(); return; }
+    }
+    // Click altrove → deseleziona
+    selected=null; partialPath=[]; drawAll(); return;
+  }
+
+  // Nessuna selezione: seleziona il pezzo
+  if(p && p.color===turn){
+    const hasMoves=legalMoves.some(m=>m.sqs[0]===sq);
+    if(hasMoves){ selected=sq; partialPath=[]; drawAll(); }
+  }
+}
+
+// ── Esecuzione mossa ───────────────────────────────────────────────
+function executeMove(move){
+  // salva snapshot per undo
+  history.push({board:cloneBoard(board), turn, halfMoves:[...halfMoves],
+                lastFrom, lastTo, gameOver});
+
+  const pdn=moveToPDN(move);
+  halfMoves.push(pdn);
+
+  const wasKing=board[sqToRC(move.sqs[0]).r*N+sqToRC(move.sqs[0]).c].king;
+  board=applyMoveObj(board,move);
+  lastFrom=move.sqs[0]; lastTo=move.sqs[move.sqs.length-1];
+  selected=null;
+
+  // suono
+  if(move.captured.length>0) playSound('capture');
+  else playSound('move');
+  const {r:tr,c:tc}=sqToRC(move.sqs[move.sqs.length-1]);
+  if(!wasKing && board[tr*N+tc].king) playSound('king');
+
+  turn=turn==='white'?'black':'white';
+  updatePDN();
+  computeLegal();
+  checkEndGame();
+  updateStatus();
+  drawAll();
+}
+
+function computeLegal(){
+  const res=getAllLegalMoves(board,turn);
+  legalMoves=res.moves;
+  mustCapture=res.mustCapture;
+}
+
+function checkEndGame(){
+  if(legalMoves.length===0){
+    const winner=turn==='white'?'Neri':'Bianchi';
+    const result=turn==='white'?'0-1':'1-0';
+    setTimeout(()=>showOverlay(`Vincono i ${winner}!`,`I ${turn==='white'?'Bianchi':'Neri'} non possono muovere.`,result),300);
+  }
+}
+
+function showOverlay(title,sub,result){
+  gameOver=true;
+  const pdnFinal=buildPDNText().replace('[Result "*"]',`[Result "${result}"]`).replace(/\*$/,result);
+  document.getElementById('pdn-box').textContent=pdnFinal;
+  document.getElementById('turn-text').textContent='Fine';
+  document.getElementById('overlay-title').textContent=title;
+  document.getElementById('overlay-sub').textContent=sub;
+  document.getElementById('overlay').classList.add('show');
+}
+
+function closeOverlay(){ document.getElementById('overlay').classList.remove('show'); }
+
+function updateStatus(){
+  const dot=document.getElementById('turn-dot');
+  const txt=document.getElementById('turn-text');
+  if(!gameOver){
+    if(turn==='white'){ dot.className='white'; }
+    else              { dot.className='red';   }
+    txt.textContent='Muove';
+  }
+  // conteggio pezzi
+  let w=0,b=0,wk=0,bk=0;
+  board.forEach(p=>{if(!p)return;if(p.color==='white'){w++;if(p.king)wk++;}else{b++;if(p.king)bk++;}});
+  document.getElementById('cnt-white').textContent=`${w} ♛${wk}`;
+  document.getElementById('cnt-black').textContent=`${b} ♛${bk}`;
+}
+
+// ── Undo ───────────────────────────────────────────────────────────
+function undoMove(){
+  if(history.length===0) return;
+  const snap=history.pop();
+  board=snap.board; turn=snap.turn;
+  halfMoves=snap.halfMoves;
+  lastFrom=snap.lastFrom; lastTo=snap.lastTo;
+  gameOver=snap.gameOver;
+  selected=null; partialPath=[];
+  playSound('move');
+  closeOverlay();
+  computeLegal();
+  updatePDN();
+  updateStatus();
+  drawAll();
+}
+
+// ── Nuova partita (con conferma) ───────────────────────────────────
+function askNewGame(){
+  // se la partita è appena iniziata o finita, non chiedere conferma
+  if(halfMoves.length===0 || gameOver){ confirmNewGame(); return; }
+  document.getElementById('overlay-confirm').classList.add('show');
+}
+function confirmNewGame(){
+  document.getElementById('overlay-confirm').classList.remove('show');
+  closeOverlay();
+  board=makeInitBoard(); turn='white'; selected=null; partialPath=[];
+  history=[]; halfMoves=[]; lastFrom=null; lastTo=null; gameOver=false;
+  computeLegal(); updatePDN(); updateStatus(); drawAll();
+  try { localStorage.removeItem('dg_board'); } catch(e) {}
+}
+function closeConfirm(){ document.getElementById('overlay-confirm').classList.remove('show'); }
+
+// ── Salvataggio e ripristino stato su localStorage ──────────────────────
+function saveSession(){
+  try {
+    localStorage.setItem('dg_board', JSON.stringify(board));
+    localStorage.setItem('dg_turn', turn);
+    localStorage.setItem('dg_halfMoves', JSON.stringify(halfMoves));
+    localStorage.setItem('dg_lastFrom', lastFrom===null?'':lastFrom);
+    localStorage.setItem('dg_lastTo', lastTo===null?'':lastTo);
+    localStorage.setItem('dg_gameOver', gameOver?'1':'0');
+  } catch(e) {}
+}
+
+function restoreSession(){
+  try {
+    const b = localStorage.getItem('dg_board');
+    if (!b) return false;
+    const savedHalfMoves = JSON.parse(localStorage.getItem('dg_halfMoves') || '[]');
+    const lf = localStorage.getItem('dg_lastFrom');
+    const lt = localStorage.getItem('dg_lastTo');
+    gameOver = localStorage.getItem('dg_gameOver') === '1';
+    selected = null; partialPath = [];
+
+    // Ricostruisce la history ripercorrendo tutte le mosse dalla posizione iniziale
+    // così il pulsante Annulla funziona correttamente
+    board = makeInitBoard();
+    turn = 'white';
+    halfMoves = [];
+    lastFrom = null;
+    lastTo = null;
+    history = [];
+
+    for (const raw of savedHalfMoves) {
+      // snapshot prima della mossa
+      history.push({
+        board: cloneBoard(board),
+        turn,
+        halfMoves: [...halfMoves],
+        lastFrom,
+        lastTo,
+        gameOver: false
+      });
+      // applica la mossa
+      const isCapture = raw.includes('x');
+      const sqs = raw.split(isCapture ? 'x' : '-').map(Number);
+      const {r, c} = sqToRC(sqs[0]);
+      const piece = board[r*N+c];
+      if (piece) {
+        board = applyMoveObj(board, {
+          sqs,
+          captured: getCapturedFromSqs(board, sqs, piece)
+        });
+      }
+      lastFrom = sqs[0];
+      lastTo = sqs[sqs.length-1];
+      halfMoves.push(raw);
+      turn = turn === 'white' ? 'black' : 'white';
+    }
+
+    computeLegal();
+    updatePDN();
+    updateStatus();
+    return true;
+  } catch(e) { console.error('restoreSession error:', e); return false; }
+}
+
+// Ricostruisce l'array dei catturati da una sequenza di caselle
+// (necessario per applyMoveObj durante il ripristino)
+function getCapturedFromSqs(b, sqs, piece){
+  const captured = [];
+  const isCapture = sqs.length > 2 ||
+    (sqs.length === 2 && (() => {
+      const {r:ra,c:ca}=sqToRC(sqs[0]), {r:rb,c:cb}=sqToRC(sqs[1]);
+      return Math.abs(rb-ra)===2 && Math.abs(cb-ca)===2;
+    })());
+  if (!isCapture) return captured;
+  const tmp = cloneBoard(b);
+  tmp[sqToRC(sqs[0]).r*N+sqToRC(sqs[0]).c] = null;
+  for (let i=0; i<sqs.length-1; i++){
+    const {r:ra,c:ca}=sqToRC(sqs[i]);
+    const {r:rb,c:cb}=sqToRC(sqs[i+1]);
+    const mr=(ra+rb)/2, mc=(ca+cb)/2;
+    if(Number.isInteger(mr)&&Number.isInteger(mc)&&tmp[mr*N+mc]&&tmp[mr*N+mc].color!==piece.color){
+      captured.push(mr*N+mc);
+      tmp[mr*N+mc]=null;
+    }
+  }
+  return captured;
+}
+
+// ── Collegamento pulsanti (pointerdown per evitare scroll) ─────────
+function wireBtn(id, action){
+  const btn=document.getElementById(id);
+  if(!btn) return;
+  btn.addEventListener('pointerdown', e=>{ e.preventDefault(); e.stopPropagation(); });
+  btn.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); action(); });
+}
+
+// ── IntersectionObserver ───────────────────────────────────────────
+const ioObs=new IntersectionObserver(entries=>{
+  if(entries[0].isIntersecting) drawAll();
+},{threshold:0.1});
+ioObs.observe(canvas);
+
+// ── Init ───────────────────────────────────────────────────────────
+function init(){
+  resizeCanvas();
+  wireBtn('btn-undo', undoMove);
+  wireBtn('btn-new',  askNewGame);
+  wireBtn('overlay-new-btn', askNewGame);
+  // Tenta di ripristinare la sessione precedente
+  if (!restoreSession()) {
+    // nessuna sessione salvata: nuova partita pulita
+    board=makeInitBoard(); turn='white'; selected=null; partialPath=[];
+    history=[]; halfMoves=[]; lastFrom=null; lastTo=null; gameOver=false;
+    computeLegal(); updatePDN(); updateStatus();
+  }
+  drawAll();
+}
+if(document.readyState==='loading')
+  document.addEventListener('DOMContentLoaded',()=>requestAnimationFrame(init));
+else
+  requestAnimationFrame(init);
+
+// ── Mantieni schermo acceso: Wake Lock API con riacquisto periodico ───────
+let _wakeLock = null;
+let _wakeLockTimer = null;
+
+async function keepAwakeStart() {
+  try {
+    if ('wakeLock' in navigator) {
+      if (_wakeLock) { try { _wakeLock.release(); } catch(e){} }
+      _wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+  clearInterval(_wakeLockTimer);
+  _wakeLockTimer = setInterval(async () => {
+    if (!document.hidden) {
+      try {
+        if ('wakeLock' in navigator) {
+          if (_wakeLock) { try { _wakeLock.release(); } catch(e){} }
+          _wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch(e) {}
+    }
+  }, 14000);
+}
+
+function keepAwakeStop() {
+  clearInterval(_wakeLockTimer);
+  try { if (_wakeLock) { _wakeLock.release(); _wakeLock = null; } } catch(e) {}
+}
+
+// Salva quando la pagina va in background o viene chiusa
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){ saveSession(); keepAwakeStop(); }
+  else{ drawAll(); keepAwakeStart(); }
+});
+window.addEventListener('pagehide', saveSession);
+
+// Salva dopo ogni mossa
+const _origExecuteMove = executeMove;
+executeMove = function(move){ _origExecuteMove(move); saveSession(); };
+
+// Parte al primo tocco
+document.addEventListener('pointerdown', function startOnFirstTouch() {
+  keepAwakeStart();
+  document.removeEventListener('pointerdown', startOnFirstTouch);
+}, {once: true});
+</script>
+</body>
+</html>

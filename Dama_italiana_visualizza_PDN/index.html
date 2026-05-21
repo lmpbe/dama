@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Visualizzatore Dama Italiana</title>
+<style>
+  :root {
+    --bg:        #d0e0f0;
+    --panel:     #b8cfe0;
+    --border:    #8aaac0;
+    --accent:    #2060a0;
+    --accent-h:  #1a4880;
+    --text:      #1a2a3a;
+    --muted:     #4a6a88;
+    --radius:    8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    background: var(--accent);
+    padding: 12px 20px;
+    text-align: center;
+  }
+  header h1 {
+    font-size: clamp(1.1rem, 3.5vw, 1.6rem);
+    font-weight: bold;
+    color: #ffffff;
+    letter-spacing: .02em;
+  }
+  header p {
+    font-size: .8rem;
+    color: #cce0ff;
+    margin-top: 2px;
+  }
+
+  main {
+    width: 100%;
+    max-width: 920px;
+    padding: 16px 14px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  /* ── Input PDN ─────────────────────────────────────── */
+  .pdn-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .pdn-card label {
+    font-size: .8rem;
+    font-weight: bold;
+    color: var(--accent);
+  }
+
+  /* ── Area PDN ──────────────────────────────────────── */
+  #pdn-input {
+    width: 100%;
+    min-height: 120px;
+    background: #ffffff;
+    color: #111111;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 1.6;
+    resize: none;
+  }
+  #pdn-input::placeholder { color: #8aaacc; font-weight: normal; }
+  #pdn-input:focus { outline: none; border-color: var(--accent); }
+
+  /* div di sola lettura con annotazioni colorate */
+  #pdn-display {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 1.6;
+    color: #111111;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  #pdn-display .ann { color: #cc0000; font-weight: bold; }
+
+  .btn-row { display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+
+  button {
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    padding: 12px 24px;
+    font-weight: bold;
+    transition: background .12s;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+  button:active { opacity: .85; }
+  button:disabled { opacity: .4; cursor: default; }
+
+  .btn-primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent-h);
+  }
+  .btn-primary:hover:not(:disabled) { background: var(--accent-h); }
+  .btn-secondary {
+    background: #e0ecf8;
+    color: var(--text);
+  }
+  .btn-secondary:hover:not(:disabled) { background: #c8ddf0; }
+
+  #err {
+    font-size: .82rem;
+    color: #8b0000;
+    background: #ffe0e0;
+    border: 1px solid #cc8080;
+    border-radius: 4px;
+    padding: 5px 10px;
+    display: none;
+  }
+
+  /* ── Debug bar: nascosta ───────────────────────────── */
+  #dbg { display: none !important; }
+
+  /* ── Viewer ────────────────────────────────────────── */
+  #viewer { display: flex; flex-direction: row; gap: 16px; flex-wrap: wrap; align-items: flex-start; }
+  #no-game { color: var(--muted); font-size: .9rem; font-style: italic; padding: 4px 0; }
+
+  /* ── Board ─────────────────────────────────────────── */
+  #board-wrap {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+  canvas {
+    display: block;
+    border: 2px solid #5a8aaa;
+    max-width: 100%;
+    height: auto;
+  }
+  #turn-indicator { display: none; }
+
+  /* ── Info panel ────────────────────────────────────── */
+  #info-panel {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .meta-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+  }
+  .meta-row { display: flex; gap: 20px; flex-wrap: wrap; }
+  .meta-item b {
+    display: block;
+    font-size: .7rem;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 1px;
+  }
+  .meta-item span { font-size: .92rem; color: var(--text); font-weight: bold; }
+  #m-result { color: var(--accent); }
+
+  /* ── Nav controls ──────────────────────────────────── */
+  .nav-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+  .nav-btns { display: flex; gap: 10px; align-items: center; }
+  .nav-btns button {
+    background: #e0ecf8;
+    color: var(--text);
+    padding: 12px 20px;
+    font-size: 1.4rem;
+    font-weight: bold;
+    border-color: var(--border);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+  }
+  .nav-btns button:hover:not(:disabled) { background: #c8ddf0; }
+  #progress {
+    flex: 1;
+    text-align: center;
+    font-size: .85rem;
+    color: var(--muted);
+    font-weight: bold;
+  }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  /* ── Moves list ────────────────────────────────────── */
+  .moves-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    flex: 1;
+  }
+  .moves-card h3 {
+    font-size: .72rem;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: bold;
+  }
+  #moves-list {
+    overflow-y: auto;
+    max-height: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .move-pair {
+    display: flex;
+    gap: 2px;
+    align-items: baseline;
+    padding: 2px 3px;
+    border-radius: 3px;
+  }
+  .move-pair:hover { background: #c8ddf0; }
+  .mn {
+    font-size: .72rem;
+    color: var(--muted);
+    min-width: 26px;
+    font-family: monospace;
+    padding-top: 2px;
+  }
+  .mw, .mb {
+    font-family: 'Courier New', monospace;
+    font-size: .85rem;
+    padding: 2px 7px;
+    border-radius: 3px;
+    cursor: pointer;
+    min-width: 56px;
+  }
+  .mw:hover { background: #b8d0e8; }
+  .mb:hover { background: #b8d0e8; }
+  .mw.active { background: var(--accent); color: #fff; }
+  .mb.active { background: #c03030; color: #fff; }
+
+  /* ── Responsive ────────────────────────────────────── */
+  @media (max-width: 560px) {
+    #viewer { flex-direction: column; }
+    #info-panel { min-width: unset; }
+    #moves-list { max-height: 160px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>♟ Visualizzatore di Dama Italiana</h1>
+  <p>Incolla un file PDN per visualizzare la partita</p>
+</header>
+
+<main>
+
+  <!-- ① Damiera + controlli: sempre in cima, subito visibili su mobile -->
+  <div id="viewer">
+    <div id="board-wrap">
+      <canvas id="board"></canvas>
+    </div>
+
+    <div id="info-panel">
+      <div id="no-game">Incolla un PDN in fondo e premi "Carica partita".</div>
+
+      <div class="nav-card">
+        <div class="nav-btns">
+          <button id="btn-first" tabindex="-1" title="Inizio">&#x23EE;</button>
+          <button id="btn-prev"  tabindex="-1" title="Mossa precedente">&#x25C0;</button>
+          <span id="progress">0 / 0</span>
+          <button id="btn-next"  tabindex="-1" title="Mossa successiva">&#x25B6;</button>
+          <button id="btn-last"  tabindex="-1" title="Fine">&#x23ED;</button>
+        </div>
+        <input type="range" id="slider" min="0" max="0" value="0" oninput="goTo(+this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- ② Debug bar -->
+  <div id="dbg"></div>
+
+  <!-- ③ Area PDN in fondo -->
+  <div class="pdn-card">
+    <label>Testo PDN della partita</label>
+    <textarea id="pdn-input"
+              spellcheck="false"
+              placeholder='[Event "Partita amichevole"]&#10;[White "Rossi"]&#10;[Black "Neri"]&#10;[Result "1-0"]&#10;&#10;1. 11-15 22-18 2. 15x22 {annotazione} 25x18 ...'></textarea>
+    <div id="pdn-display" style="display:none"></div>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn-primary" tabindex="-1" onclick="loadPDN()">&#x25B6; Carica partita</button>
+      <button class="btn-secondary" tabindex="-1" onclick="askReset()">&#x21BA; Azzera</button>
+      <div id="err"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Overlay conferma Azzera -->
+<div id="overlay-confirm" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:12px;padding:26px 28px;text-align:center;max-width:300px;width:88%;box-shadow:0 8px 32px rgba(0,0,0,.4);">
+    <div style="font-size:1.2rem;font-weight:bold;margin-bottom:8px;">Azzerare la partita?</div>
+    <div style="font-size:.9rem;color:#555;margin-bottom:18px;">Il PDN caricato andrà perso.</div>
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+      <button class="btn-primary" tabindex="-1" onclick="confirmReset()">✓ Sì, azzera</button>
+      <button class="btn-secondary" tabindex="-1" onclick="closeConfirm()">✕ Annulla</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  DAMA ITALIANA — logica damiera
+//
+//  8×8, pezzi sulle caselle SCURE = (r+c) % 2 === 0
+//  Cantone (basso destra) = (7,7) → 7+7=14 pari → scuro ✓
+//
+//  Numerazione PDN (1..32):
+//    Riga 0 pari:    scure a col 0,2,4,6  → sq 1,2,3,4
+//    Riga 1 dispari: scure a col 1,3,5,7  → sq 5,6,7,8
+//    ...
+//    Riga 7 dispari: scure a col 1,3,5,7  → sq 29,30,31,32
+//    Cantone = (7,7) → sq 32 ✓
+//
+//  Posizione iniziale:
+//    Neri   sq  1-12  (righe 0-2, in alto)
+//    Bianchi sq 21-32 (righe 5-7, in basso)
+//
+//  Promozione:
+//    Bianchi → riga 0 (sq 1-4)
+//    Neri    → riga 7 (sq 29-32)
+// ═══════════════════════════════════════════════════════════
+
+const N = 8;
+const canvas = document.getElementById('board');
+const ctx    = canvas.getContext('2d');
+
+// Dimensione canvas adattiva
+function boardSize() {
+  const maxW = Math.min(window.innerWidth - 32, 480);
+  return Math.max(240, maxW > 480 ? 360 : maxW);
+}
+function resizeCanvas() {
+  const sz = boardSize();
+  canvas.width  = sz;
+  canvas.height = sz;
+  // ridisegna la board corrente dopo il resize
+  const board = states.length ? states[curStep] : makeInitBoard();
+  drawBoard(board);
+}
+window.addEventListener('resize', resizeCanvas);
+
+// Ridisegna ogni volta che la pagina torna visibile (es. dopo scroll su mobile)
+document.addEventListener('visibilitychange', () => {
+  const board = states.length ? states[curStep] : makeInitBoard();
+  resizeCanvas();
+  drawBoard(board);
+});
+
+function SQ() { return canvas.width / N; }
+
+function isDark(r, c) { return (r + c) % 2 === 0; }
+
+function sqToRC(sq) {
+  const i   = sq - 1;
+  const r   = Math.floor(i / 4);
+  const pos = i % 4;
+  const c   = (r % 2 === 0) ? pos * 2 : pos * 2 + 1;
+  return { r, c };
+}
+function rcToSq(r, c) {
+  if (r < 0 || r >= N || c < 0 || c >= N || !isDark(r, c)) return null;
+  const pos = (r % 2 === 0) ? (c / 2) : ((c - 1) / 2);
+  return r * 4 + pos + 1;
+}
+
+function makeInitBoard() {
+  const b = new Array(64).fill(null);
+  for (let sq = 1;  sq <= 12; sq++) { const {r,c} = sqToRC(sq); b[r*N+c] = {color:'black', king:false}; }
+  for (let sq = 21; sq <= 32; sq++) { const {r,c} = sqToRC(sq); b[r*N+c] = {color:'white', king:false}; }
+  return b;
+}
+function cloneBoard(b) { return b.map(p => p ? {...p} : null); }
+
+// ── Parser FEN per posizioni intermedie ───────────────────────────────────
+// Formato: "B:WK10,18:B02,K25"  oppure  "W:W21,22,23:BK5,6"
+//   - Prima lettera (B/W): chi muove per primo
+//   - W...: lista pezzi bianchi  (K davanti = dama, numero semplice = pedina)
+//   - B...: lista pezzi neri
+// Restituisce {board, firstColor} oppure null se FEN assente/non valido.
+function parseFEN(fenStr) {
+  if (!fenStr) return null;
+  fenStr = fenStr.trim();
+
+  // Chi muove per primo (prima lettera prima dei due punti)
+  const firstColor = fenStr.toUpperCase().startsWith('W') ? 'white' : 'black';
+
+  const b = new Array(64).fill(null);
+
+  // Estrae il gruppo di pezzi dopo :W e dopo :B (case-insensitive)
+  const wMatch = fenStr.match(/:W([^:B]*)/i);
+  const bMatch = fenStr.match(/:B([^:W]*)/i);
+
+  function placePieces(str, color) {
+    if (!str) return;
+    const tokens = str.split(/[\s,;]+/).filter(Boolean);
+    for (const tok of tokens) {
+      const isKing = tok.toUpperCase().startsWith('K');
+      const sq = parseInt(isKing ? tok.slice(1) : tok, 10);
+      if (isNaN(sq) || sq < 1 || sq > 32) continue;
+      const {r, c} = sqToRC(sq);
+      b[r*N+c] = {color, king: isKing};
+    }
+  }
+
+  placePieces(wMatch ? wMatch[1] : null, 'white');
+  placePieces(bMatch ? bMatch[1] : null, 'black');
+  return {board: b, firstColor};
+}
+
+// ── Trova pezzo avversario lungo diagonale (per tappe esplicite) ──────────
+function findCapturedOnSegment(b, ra, ca, rb, cb, myColor) {
+  const dr = Math.sign(rb - ra), dc = Math.sign(cb - ca);
+  let r = ra + dr, c = ca + dc;
+  while (!(r === rb && c === cb)) {
+    const p = b[r*N+c];
+    if (p) {
+      if (p.color !== myColor) return r*N+c;
+      else return null;
+    }
+    r += dr; c += dc;
+  }
+  return null;
+}
+
+// ── DFS per ricostruire catture in forma compatta (es. 3x1) ──────────────
+function reconstructCaptures(board, fromSq, targetSq, isKing, myColor) {
+  const stack = [];
+  const b0 = cloneBoard(board);
+  const {r: r0, c: c0} = sqToRC(fromSq);
+  b0[r0*N+c0] = null;
+  stack.push({sq: fromSq, b: b0, captured: []});
+
+  while (stack.length) {
+    const {sq, b, captured} = stack.pop();
+    const {r: cr, c: cc} = sqToRC(sq);
+    const dirs = [[-1,-1],[-1,1],[1,-1],[1,1]];
+
+    for (const [dr, dc] of dirs) {
+      if (!isKing) {
+        // pedina: salto esatto di 2
+        const mr = cr+dr, mc = cc+dc;
+        const lr = cr+2*dr, lc = cc+2*dc;
+        if (lr<0||lr>=N||lc<0||lc>=N) continue;
+        if (!isDark(mr,mc) || !isDark(lr,lc)) continue;
+        const victim = b[mr*N+mc];
+        if (!victim || victim.color === myColor) continue;
+        if (b[lr*N+lc] !== null) continue;
+        const nb = cloneBoard(b);
+        nb[mr*N+mc] = null;
+        const newCap = [...captured, mr*N+mc];
+        const landSq = rcToSq(lr, lc);
+        if (landSq === targetSq) return newCap;
+        stack.push({sq: landSq, b: nb, captured: newCap});
+      } else {
+        // dama: vola sulla diagonale
+        let r = cr+dr, c = cc+dc;
+        let victimIdx = null;
+        while (r >= 0 && r < N && c >= 0 && c < N) {
+          if (!isDark(r, c)) { r += dr; c += dc; continue; }
+          const p = b[r*N+c];
+          if (p) {
+            if (p.color === myColor) break;
+            if (victimIdx !== null) break;
+            victimIdx = r*N+c;
+            r += dr; c += dc; continue;
+          }
+          if (victimIdx !== null) {
+            const nb = cloneBoard(b);
+            nb[victimIdx] = null;
+            const newCap = [...captured, victimIdx];
+            const landSq = rcToSq(r, c);
+            if (landSq === targetSq) return newCap;
+            stack.push({sq: landSq, b: nb, captured: newCap});
+          }
+          r += dr; c += dc;
+        }
+      }
+    }
+  }
+  return null;
+}
+
+// ── Applica una mossa PDN alla board ─────────────────────────────────────
+function applyMove(board, raw) {
+  const b = cloneBoard(board);
+  const isCapture = raw.includes('x');
+  const sqs = raw.split(isCapture ? 'x' : '-').map(Number);
+  if (sqs.some(isNaN) || sqs.length < 2) return b;
+
+  const {r: r0, c: c0} = sqToRC(sqs[0]);
+  const piece = b[r0*N+c0];
+  if (!piece) { console.warn('Nessun pezzo in sq', sqs[0], 'mossa:', raw); return b; }
+
+  if (!isCapture) {
+    const {r: r1, c: c1} = sqToRC(sqs[1]);
+    b[r1*N+c1] = piece;
+    b[r0*N+c0] = null;
+  } else {
+    let capturedIdxs = [];
+    const isSingleDirect = (s1, s2) => {
+      const {r:ra,c:ca} = sqToRC(s1), {r:rb,c:cb} = sqToRC(s2);
+      return Math.abs(rb-ra) === 2 && Math.abs(cb-ca) === 2;
+    };
+    const useExplicit = sqs.length > 2 ||
+      (sqs.length === 2 && isSingleDirect(sqs[0], sqs[1]));
+
+    if (useExplicit) {
+      const tmp = cloneBoard(b);
+      tmp[r0*N+c0] = null;
+      for (let i = 0; i < sqs.length - 1; i++) {
+        const {r:ra,c:ca} = sqToRC(sqs[i]);
+        const {r:rb,c:cb} = sqToRC(sqs[i+1]);
+        const idx = findCapturedOnSegment(tmp, ra, ca, rb, cb, piece.color);
+        if (idx !== null) { capturedIdxs.push(idx); tmp[idx] = null; }
+      }
+    } else {
+      const res = reconstructCaptures(b, sqs[0], sqs[1], piece.king, piece.color);
+      if (res) capturedIdxs = res;
+      else console.warn('Percorso non trovato per', raw);
+    }
+
+    const {r:rf,c:cf} = sqToRC(sqs[sqs.length-1]);
+    b[rf*N+cf] = piece;
+    b[r0*N+c0] = null;
+    for (const idx of capturedIdxs) b[idx] = null;
+  }
+
+  // promozione
+  const {r:rf,c:cf} = sqToRC(sqs[sqs.length-1]);
+  const p = b[rf*N+cf];
+  if (p) {
+    if (p.color === 'white' && rf === 0) p.king = true;
+    if (p.color === 'black' && rf === 7) p.king = true;
+  }
+  return b;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Stato
+// ═══════════════════════════════════════════════════════════
+let allMoves = [], states = [], curStep = 0, tags = {}, fenData = null;
+
+function buildStates() {
+  const startBoard = fenData ? cloneBoard(fenData.board) : makeInitBoard();
+  const s = [cloneBoard(startBoard)];
+  let cur = cloneBoard(startBoard);
+  for (const m of allMoves) { cur = applyMove(cur, m.raw); s.push(cloneBoard(cur)); }
+  return s;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Disegno
+// ═══════════════════════════════════════════════════════════
+function drawBoard(state) {
+  const sq = SQ();
+  const sz = canvas.width;
+  ctx.clearRect(0, 0, sz, sz);
+
+  // caselle: verde scuro / beige chiaro, stile PlayOK
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    ctx.fillStyle = isDark(r, c) ? '#5a9a50' : '#e8e0c0';
+    ctx.fillRect(c*sq, r*sq, sq, sq);
+  }
+
+  // evidenzia ultima mossa: casella di partenza e arrivo più chiara
+  if (curStep > 0) {
+    const raw = allMoves[curStep-1].raw;
+    const pts = raw.split(/[x-]/).map(Number);
+    [[pts[0], 'rgba(255,220,0,0.5)'], [pts[pts.length-1], 'rgba(255,220,0,0.5)']].forEach(([s, col]) => {
+      const {r, c} = sqToRC(s);
+      ctx.fillStyle = col;
+      ctx.fillRect(c*sq, r*sq, sq, sq);
+    });
+  }
+
+  // numeri caselle scure — giallo chiaro semitrasparente, leggibile ma non invadente
+  ctx.textBaseline = 'top';
+  ctx.textAlign    = 'left';
+  ctx.font = `bold ${Math.round(sq * 0.22)}px Arial`;
+  for (let s = 1; s <= 32; s++) {
+    const {r, c} = sqToRC(s);
+    const x = c*sq + 3, y = r*sq + 2;
+    ctx.strokeStyle = 'rgba(0,40,0,0.5)';
+    ctx.lineWidth = 2;
+    ctx.strokeText(s, x, y);
+    ctx.fillStyle = 'rgba(255,255,200,0.75)';
+    ctx.fillText(s, x, y);
+  }
+
+  // pezzi stile PlayOK: disco pieno + bordo scuro + cerchio interno bianco
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const p = state[r*N+c]; if (!p) continue;
+    const cx = c*sq + sq/2, cy = r*sq + sq/2, rad = sq * 0.40;
+    const isWhite = p.color === 'white';
+
+    // disco principale
+    ctx.beginPath(); ctx.arc(cx, cy, rad, 0, Math.PI*2);
+    ctx.fillStyle = isWhite ? '#f0f0f0' : '#cc2020';
+    ctx.fill();
+
+    // bordo esterno scuro
+    ctx.strokeStyle = isWhite ? '#808080' : '#7a0000';
+    ctx.lineWidth = Math.max(1.5, sq * 0.04);
+    ctx.stroke();
+
+    // dama: disco pieno al centro
+    if (p.king) {
+      ctx.beginPath(); ctx.arc(cx, cy, rad * 0.38, 0, Math.PI*2);
+      ctx.fillStyle = isWhite ? '#505050' : '#ffeeee';
+      ctx.fill();
+    }
+  }
+
+  // bordo damiera
+  ctx.strokeStyle = '#3a7030';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(1, 1, sz - 2, sz - 2);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  UI
+// ═══════════════════════════════════════════════════════════
+function updateUI() {
+  if (!states.length) return;
+  drawBoard(states[curStep]);
+  document.getElementById('progress').textContent = `${curStep} / ${allMoves.length}`;
+  document.getElementById('slider').value = curStep;
+  document.getElementById('btn-prev').disabled  = curStep <= 0;
+  document.getElementById('btn-first').disabled = curStep <= 0;
+  document.getElementById('btn-next').disabled  = curStep >= allMoves.length;
+  document.getElementById('btn-last').disabled  = curStep >= allMoves.length;
+
+}
+
+// ── Suono mossa (Web Audio API, nessun file esterno) ─────────────────────
+let audioCtx = null;
+function playMoveSound() {
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // "click" secco: oscillatore a 900Hz, durata 60ms
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.type = 'square';
+    osc.frequency.setValueAtTime(900, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.06);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + 0.06);
+  } catch(e) { /* silenzioso se audio non disponibile */ }
+}
+
+function goTo(n) {
+  const prev = curStep;
+  curStep = Math.max(0, Math.min(allMoves.length, +n));
+  if (curStep !== prev) playMoveSound();
+  updateUI();
+}
+function stepBy(d) { goTo(curStep + d); }
+
+// ── Bottoni navigazione: preventDefault impedisce il focus/scroll ─────────
+// Usiamo pointerdown invece di click così funziona bene anche su touch
+function wireNavBtn(id, action) {
+  const btn = document.getElementById(id);
+  // pointerdown con preventDefault blocca sia il focus che lo scroll
+  btn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+  // click separato per eseguire l'azione (funziona anche da tastiera)
+  btn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    action();
+  });
+}
+
+// tasti freccia
+document.addEventListener('keydown', e => {
+  if (!allMoves.length) return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  { stepBy(1);  e.preventDefault(); }
+  if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    { stepBy(-1); e.preventDefault(); }
+  if (e.key === 'Home') { goTo(0);               e.preventDefault(); }
+  if (e.key === 'End')  { goTo(allMoves.length); e.preventDefault(); }
+});
+
+// Collegamento bottoni (dopo che il DOM è pronto)
+document.addEventListener('DOMContentLoaded', () => {
+  wireNavBtn('btn-first', () => goTo(0));
+  wireNavBtn('btn-prev',  () => stepBy(-1));
+  wireNavBtn('btn-next',  () => stepBy(1));
+  wireNavBtn('btn-last',  () => goTo(allMoves.length));
+
+  // Slider: stopPropagation evita interferenze col touch della pagina
+  const slider = document.getElementById('slider');
+  slider.addEventListener('touchstart', e => e.stopPropagation(), {passive: true});
+});
+
+// ═══════════════════════════════════════════════════════════
+//  Parser PDN
+// ═══════════════════════════════════════════════════════════
+function parsePDN(text, firstColor) {
+  tags = {};
+  const tagRe = /\[(\w+)\s+"([^"]*)"\]/g;
+  let m;
+  while ((m = tagRe.exec(text)) !== null) tags[m[1]] = m[2];
+  let body = text
+    .replace(/\[[^\]]*\]/g, '')
+    .replace(/\{[^}]*\}/g,  ' ')
+    .replace(/;[^\n]*/g,    ' ')
+    .replace(/\b(1-0|0-1|1\/2-1\/2|\*)\b/g, ' ')
+    .trim();
+  const tokenRe = /(\d+\.+)|(\d+(?:[x-]\d+)+)/g;
+  const tokens = [];
+  let mt;
+  while ((mt = tokenRe.exec(body)) !== null) {
+    if (mt[1]) tokens.push({type:'num'});
+    else if (mt[2]) tokens.push({type:'move', val:mt[2]});
+  }
+  const hms = [];
+  // Se FEN indica che muovono i neri per primi, partiamo da black
+  let white = (firstColor !== 'black');
+  for (const tok of tokens) {
+    if (tok.type === 'num') white = (firstColor !== 'black'); // reset al primo colore ad ogni numero di mossa
+    else { hms.push({raw: tok.val, color: white ? 'white' : 'black'}); white = !white; }
+  }
+  return hms;
+}
+
+function buildMovesList() {
+  const ml = document.getElementById('moves-list');
+  ml.innerHTML = '';
+  for (let i = 0; i < allMoves.length; i += 2) {
+    const row = document.createElement('div'); row.className = 'move-pair';
+    const mn  = document.createElement('span'); mn.className = 'mn';
+    mn.textContent = `${Math.floor(i/2)+1}.`; row.appendChild(mn);
+    const ws  = document.createElement('span'); ws.className = 'mw';
+    ws.textContent = allMoves[i].raw; ws.onclick = () => goTo(i+1); row.appendChild(ws);
+    if (allMoves[i+1]) {
+      const bs = document.createElement('span'); bs.className = 'mb';
+      bs.textContent = allMoves[i+1].raw; bs.onclick = () => goTo(i+2); row.appendChild(bs);
+    }
+    ml.appendChild(row);
+  }
+}
+
+function showErr(msg) {
+  const e = document.getElementById('err');
+  e.textContent = msg; e.style.display = msg ? 'block' : 'none';
+}
+
+// Legge il testo puro dalla textarea
+function getPDNText() {
+  return document.getElementById('pdn-input').value || '';
+}
+
+// Mostra il testo PDN nel div di lettura con annotazioni in rosso
+function showPDNDisplay(text) {
+  const div = document.getElementById('pdn-display');
+  const html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\{([^}]*)\}/g, '<span class="ann">{$1}</span>');
+  div.innerHTML = html;
+  div.style.display = 'block';
+  document.getElementById('pdn-input').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════════
+//  Load / Reset
+// ═══════════════════════════════════════════════════════════
+function loadPDN() {
+  showErr('');
+  const text = getPDNText().trim();
+  if (!text) { showErr('Incolla un file PDN prima di caricare.'); return; }
+  try {
+    const tagRe2 = /\[(\w+)\s+"([^"]*)"\]/g;
+    const tmpTags = {};
+    let m2;
+    while ((m2 = tagRe2.exec(text)) !== null) tmpTags[m2[1]] = m2[2];
+
+    fenData = parseFEN(tmpTags['FEN'] || tmpTags['Setup'] || null);
+    const firstColor = fenData ? fenData.firstColor : 'white';
+
+    allMoves = parsePDN(text, firstColor);
+
+    if (!allMoves.length && !fenData) {
+      showErr('Nessuna mossa trovata. Verifica il formato PDN.'); return;
+    }
+
+    const dbg = document.getElementById('dbg');
+    dbg.style.display = 'block';
+    const fenInfo = fenData ? ` | FEN: ${tmpTags['FEN'] || tmpTags['Setup']}` : '';
+    dbg.textContent = 'Mosse (' + allMoves.length + '): ' + allMoves.map(m => m.raw).join(' ') + fenInfo;
+
+    states  = buildStates();
+    curStep = 0;
+
+    document.getElementById('slider').max = allMoves.length;
+    document.getElementById('no-game').style.display = 'none';
+
+    showPDNDisplay(text);
+    updateUI();
+  } catch(e) { showErr('Errore nel parsing: ' + e.message); console.error(e); }
+}
+
+function askReset() {
+  // se non c'è nulla caricato, azzera direttamente
+  if (!allMoves.length && !fenData) { confirmReset(); return; }
+  const ov = document.getElementById('overlay-confirm');
+  ov.style.display = 'flex';
+}
+function confirmReset() {
+  closeConfirm();
+  resetAll();
+}
+function closeConfirm() {
+  document.getElementById('overlay-confirm').style.display = 'none';
+}
+
+function resetAll() {
+  allMoves = []; states = [makeInitBoard()]; curStep = 0; fenData = null;
+  document.getElementById('dbg').style.display = 'none';
+  document.getElementById('pdn-input').value = '';
+  document.getElementById('pdn-input').style.display = '';
+  document.getElementById('pdn-display').style.display = 'none';
+  document.getElementById('pdn-display').innerHTML = '';
+  document.getElementById('slider').value = 0;
+  document.getElementById('slider').max = 0;
+  document.getElementById('no-game').style.display = '';
+  document.getElementById('progress').textContent = '0 / 0';
+  showErr('');
+  drawBoard(makeInitBoard());
+}
+
+// ── Salvataggio e ripristino stato su localStorage ──────────────────────
+function saveSession() {
+  try {
+    localStorage.setItem('di_pdn', getPDNText());
+    localStorage.setItem('di_step', curStep);
+    localStorage.setItem('di_loaded', allMoves.length > 0 || fenData ? '1' : '0');
+  } catch(e) {}
+}
+
+function restoreSession() {
+  try {
+    const pdn = localStorage.getItem('di_pdn');
+    const step = parseInt(localStorage.getItem('di_step') || '0', 10);
+    const loaded = localStorage.getItem('di_loaded') === '1';
+    if (!pdn) return;
+    // Ripristina il testo nella textarea
+    document.getElementById('pdn-input').value = pdn;
+    if (loaded) {
+      // Ricarica la partita
+      loadPDN();
+      // Ripristina la mossa corrente
+      if (step > 0 && step <= allMoves.length) {
+        curStep = step;
+        updateUI();
+      }
+    }
+  } catch(e) {}
+}
+
+// Salva ad ogni cambio di mossa e ad ogni caricamento
+const _origGoTo = goTo;
+goTo = function(n) { _origGoTo(n); saveSession(); };
+
+// Disegna la posizione iniziale dopo che il browser ha completato il layout
+function initDraw() {
+  resizeCanvas();
+  restoreSession();
+  if (!allMoves.length && !fenData) drawBoard(makeInitBoard());
+}
+// requestAnimationFrame garantisce che il canvas abbia dimensioni reali
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(initDraw));
+} else {
+  requestAnimationFrame(initDraw);
+}
+
+// IntersectionObserver: ridisegna quando il canvas torna visibile dopo scroll
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const board = states.length ? states[curStep] : makeInitBoard();
+      drawBoard(board);
+    }
+  });
+}, {threshold: 0.1});
+observer.observe(canvas);
+
+// ── Mantieni schermo acceso: Wake Lock API con riacquisto periodico ───────
+// Riacquista il wake lock ogni 25 secondi (alcuni dispositivi lo rilasciano
+// automaticamente dopo 30 secondi di inattività)
+let _wakeLock = null;
+let _wakeLockTimer = null;
+
+async function keepAwakeStart() {
+  try {
+    if ('wakeLock' in navigator) {
+      if (_wakeLock) { try { _wakeLock.release(); } catch(e){} }
+      _wakeLock = await navigator.wakeLock.request('screen');
+    }
+  } catch(e) {}
+  clearInterval(_wakeLockTimer);
+  _wakeLockTimer = setInterval(async () => {
+    if (!document.hidden) {
+      try {
+        if ('wakeLock' in navigator) {
+          if (_wakeLock) { try { _wakeLock.release(); } catch(e){} }
+          _wakeLock = await navigator.wakeLock.request('screen');
+        }
+      } catch(e) {}
+    }
+  }, 14000);
+}
+
+function keepAwakeStop() {
+  clearInterval(_wakeLockTimer);
+  try { if (_wakeLock) { _wakeLock.release(); _wakeLock = null; } } catch(e) {}
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { saveSession(); keepAwakeStop(); }
+  else { resizeCanvas(); drawBoard(states.length ? states[curStep] : makeInitBoard()); keepAwakeStart(); }
+});
+window.addEventListener('pagehide', saveSession);
+
+// Parte al primo tocco (richiesto dai browser mobile)
+document.addEventListener('pointerdown', function startOnFirstTouch() {
+  keepAwakeStart();
+  document.removeEventListener('pointerdown', startOnFirstTouch);
+}, {once: true});
+</script>
+</body>
+</html>
