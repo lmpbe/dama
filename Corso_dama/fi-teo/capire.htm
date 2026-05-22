@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>Dama - Finali teorici - Capire il finale</TITLE>
+   
+   
+   
+   
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8">
+   <style>
+     body {
+       font-family: Verdana, sans-serif;
+       font-size: 16px;
+       line-height: 1.6;
+       max-width: 860px;
+       margin: 0 auto;
+       padding: 0 12px;
+       color: #000;
+       background: #fff;
+     }
+     img {
+       max-width: 100%;
+       height: auto;
+     }
+     /* Su schermi stretti le immagini float diventano block centrate */
+     @media (max-width: 520px) {
+       img[align="LEFT"], img[align="left"] {
+         float: none !important;
+         display: block;
+         margin: 12px auto;
+       }
+     }
+     table {
+       width: 100%;
+       border-collapse: collapse;
+     }
+     td {
+       padding: 4px 8px;
+       vertical-align: middle;
+     }
+     a { color: #0000CC; }
+     a:visited { color: #551A8B; }
+     hr { border: none; border-top: 1px solid #ccc; margin: 16px 0; }
+     center, [align="center"] { text-align: center; }
+     /* Indicatore Wake Lock */
+     #wl-badge {
+       position: fixed;
+       bottom: 10px;
+       right: 10px;
+       background: rgba(0,0,0,0.55);
+       color: #fff;
+       font-size: 12px;
+       padding: 4px 8px;
+       border-radius: 12px;
+       display: none;
+       z-index: 9999;
+       user-select: none;
+     }
+   </style>
+   <script>
+   // Screen Wake Lock API: impedisce lo spegnimento dello schermo su mobile/tablet
+   (function() {
+     let wakeLock = null;
+     async function requestWakeLock() {
+       if (!('wakeLock' in navigator)) return;
+       try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         var badge = document.getElementById('wl-badge');
+         if (badge) badge.style.display = 'block';
+         wakeLock.addEventListener('release', function() {
+           var badge = document.getElementById('wl-badge');
+           if (badge) badge.style.display = 'none';
+         });
+       } catch(e) {}
+     }
+     document.addEventListener('DOMContentLoaded', function() {
+       requestWakeLock();
+     });
+     document.addEventListener('visibilitychange', function() {
+       if (document.visibilityState === 'visible') requestWakeLock();
+     });
+   })();
+   </script>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" ALINK="#FF0000">
+   <div id="wl-badge">&#9679; schermo attivo</div>
+
+
+<CENTER><P><B><FONT FACE="Verdana"><FONT SIZE=+2>CAPIRE IL FINALE</FONT></FONT></B></P></CENTER>
+
+<P>
+<HR></P>
+
+<CENTER><P><IMG SRC="a0.gif" HEIGHT=212 WIDTH=168></P></CENTER>
+
+<P>
+<HR></P>
+
+<P><BR>
+<FONT FACE="Verdana"><FONT SIZE=-1>Il primo obiettivo del finale &egrave;
+fare una dama in pi&ugrave; dell'avversario. La manovra pu&ograve; essere
+complessa e spesso basta la sola perdita di un tempo per compromettere
+la partita. Si devono sfruttare tutti i possibili vantaggi posizionali,
+fra cui: </FONT></FONT></P>
+
+<TABLE CELLSPACING=0 >
+<TR>
+<TD VALIGN="MIDDLE">
+<UL>
+<LI><FONT FACE="Verdana"><FONT SIZE=-1>Damare in anticipo sull'avversario,
+per portare in gioco per primi la forza della dama. </FONT></FONT></LI>
+</UL>
+</TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE">
+<UL>
+<LI><FONT FACE="Verdana"><FONT SIZE=-1>Avere le dame unite, perch&eacute;
+possano appoggiarsi a vicenda. </FONT></FONT></LI>
+</UL>
+</TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE">
+<UL>
+<LI><FONT FACE="Verdana"><FONT SIZE=-1>Godere, con le nostre dame, del
+favore della mossa su quelle avversarie, per poterle respingere e guadagnare
+spazio. </FONT></FONT></LI>
+</UL>
+</TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE">
+<UL>
+<LI><FONT FACE="Verdana"><FONT SIZE=-1>Avere la base protetta, anche parzialmente,
+per ostacolare damature avversarie. </FONT></FONT></LI>
+</UL>
+</TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE">
+<UL>
+<LI><FONT FACE="Verdana"><FONT SIZE=-1>Costringere le pedine avversarie
+su una sola sponda, per poterle bloccare con una sola dama, e posizionare
+le nostre su entrambe le sponde. </FONT></FONT></LI>
+</UL>
+</TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE">
+<UL>
+<LI><FONT FACE="Verdana"><FONT SIZE=-1>Minacciare tiri, che, anche se &quot;visti&quot;,
+precludono all'avversario determinate case, con perdita di tempi. </FONT></FONT></LI>
+</UL>
+</TD>
+</TR>
+</TABLE>
+
+<P><B><FONT FACE="Verdana">Parit&agrave; di pezzi</FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Oltre ad ottenere una dama in pi&ugrave;,
+generalmente, per vincere &egrave; necessario fermare almeno due pedine
+avversarie. Quindi, manovrando con il vantaggio della dama, occorre damare
+una nostra pedina bloccata, ottenendo due dame in pi&ugrave;, e poi forzare
+la vittoria (vedi Quarta Posizione). Se si ferma una sola pedina avversaria,
+nonostante la dama in pi&ugrave;, generalmente si patta (vedi tre dame
+contro due dame e una pedina).</FONT></FONT></P>
+
+<P><B><FONT FACE="Verdana">Sopra pezzo</FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Manovrando con la dama in pi&ugrave;,
+occorre damare una eventuale nostra pedina bloccata e poi forzare la vittoria
+(vedi quattro dame contro tre). Se l'avversario fa il nostro stesso numero
+di dame, fermandoci delle pedine, pu&ograve; pattare sotto pezzo (vedi
+tre dame e una pedina contro tre dame). Se l'avversario fa una dama in
+pi&ugrave;, di norma patta sotto pezzo.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><BR>
+<BR>
+<BR>
+<U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><B><FONT SIZE=-1><A HREF="indice.htm">Indice<BR>
+<BR>
+<BR>
+</A></FONT></B><I><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio Bellini</A></FONT></I></FONT></FONT></U></P>
+
+</BODY>
+</HTML>

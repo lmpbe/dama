@@ -1,0 +1,202 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>Dama - Finali teorici - Tre dame contro due dame</TITLE>
+   
+   
+   
+   
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8">
+   <style>
+     body {
+       font-family: Verdana, sans-serif;
+       font-size: 16px;
+       line-height: 1.6;
+       max-width: 860px;
+       margin: 0 auto;
+       padding: 0 12px;
+       color: #000;
+       background: #fff;
+     }
+     img {
+       max-width: 100%;
+       height: auto;
+     }
+     /* Su schermi stretti le immagini float diventano block centrate */
+     @media (max-width: 520px) {
+       img[align="LEFT"], img[align="left"] {
+         float: none !important;
+         display: block;
+         margin: 12px auto;
+       }
+     }
+     table {
+       width: 100%;
+       border-collapse: collapse;
+     }
+     td {
+       padding: 4px 8px;
+       vertical-align: middle;
+     }
+     a { color: #0000CC; }
+     a:visited { color: #551A8B; }
+     hr { border: none; border-top: 1px solid #ccc; margin: 16px 0; }
+     center, [align="center"] { text-align: center; }
+     /* Indicatore Wake Lock */
+     #wl-badge {
+       position: fixed;
+       bottom: 10px;
+       right: 10px;
+       background: rgba(0,0,0,0.55);
+       color: #fff;
+       font-size: 12px;
+       padding: 4px 8px;
+       border-radius: 12px;
+       display: none;
+       z-index: 9999;
+       user-select: none;
+     }
+   </style>
+   <script>
+   // Screen Wake Lock API: impedisce lo spegnimento dello schermo su mobile/tablet
+   (function() {
+     let wakeLock = null;
+     async function requestWakeLock() {
+       if (!('wakeLock' in navigator)) return;
+       try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         var badge = document.getElementById('wl-badge');
+         if (badge) badge.style.display = 'block';
+         wakeLock.addEventListener('release', function() {
+           var badge = document.getElementById('wl-badge');
+           if (badge) badge.style.display = 'none';
+         });
+       } catch(e) {}
+     }
+     document.addEventListener('DOMContentLoaded', function() {
+       requestWakeLock();
+     });
+     document.addEventListener('visibilitychange', function() {
+       if (document.visibilityState === 'visible') requestWakeLock();
+     });
+   })();
+   </script>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" ALINK="#FF0000">
+   <div id="wl-badge">&#9679; schermo attivo</div>
+
+
+<CENTER><P><B><FONT FACE="Verdana"><FONT SIZE=+2>TRE DAME CONTRO DUE DAME</FONT></FONT></B></P></CENTER>
+
+<P>
+<HR></P>
+
+<CENTER><P><IMG SRC="a0.gif" HEIGHT=212 WIDTH=168></P></CENTER>
+
+<P>
+<HR></P>
+
+<P><BR>
+<FONT FACE="Verdana"><FONT SIZE=-1>Il finale di tre dame contro due dame
+&egrave; vinto dal Bianco, con l'eccezione di alcune posizioni particolari,
+di cui do un esempio pi&ugrave; sotto. Il Nero offre la maggiore resistenza
+quando ha le dame unite e si rifugia nel biscacco o nel cantone. Se le
+dame nere sono separate, l'unico caso in cui la manovra del Bianco non
+&egrave; banale &egrave; quando sono negli opposti biscacchi. </FONT></FONT></P>
+
+<P>
+<HR></P>
+
+<P><BR>
+<B><FONT FACE="Verdana"><FONT SIZE=+1>Dame nere negli opposti biscacchi</FONT></FONT></B></P>
+
+<P><IMG SRC="c1.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana"><B><FONT SIZE=+2>
+</FONT></B><FONT SIZE=-1>Il Bianco deve formare una fila di tre dame lungo
+una delle due parallele, occupando le case 11-14-18 oppure 15-19-22. Deve
+scegliere l'una o l'altra parallela in modo che le dame nere abbiano la
+mossa sulle due dame bianche agli estremi della fila (in 11 e 18 oppure
+in 15 e 22). </FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 1</B>. Il Bianco muove:
+la fila &egrave; sulla parallela giusta: le dame nere hanno la mossa sulle
+due dame bianche agli estremi delle fila: 1.19-14 7-4 2.15-12 21-25 * 3.22-18
+4-8 * 4.12-7 8-4 (se 25-29,18-21 cambio forzato e Bv) 5.7-11 cambio forzato.
+Il Bianco vince.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il Nero muove: la fila &egrave; sulla
+parallela sbagliata: sono le due dame bianche agli estremi delle fila che
+hanno la mossa sulle dame nere. Per invertire la mossa, il Bianco deve
+formare la fila sull'altra parallela: 1.7-4 2.19-14 4-8 3.15-11 8-12 4.22-18
+(la fila &egrave; sulla parallela giusta. Il Bianco vince con la stessa
+manovra) 21-26 5.14-19 26-29 6.18-21 12-8 7.11-15 29-25 8.21-26 25-29 9.26-22
+il Bianco vince.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><BR>
+<B><FONT FACE="Verdana"><FONT SIZE=+1>Dame nere nel biscacco</FONT></FONT></B></P>
+
+<P><IMG SRC="c2.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana"><B><FONT SIZE=+2>
+</FONT></B><FONT SIZE=-1>Il Bianco deve assumere la posizione del <B>Diagramma
+2</B>.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il Bianco muove: 1.18-22 30-26 2.17-13
+26-30 (se 26-21, 19-14, 29-25, 13-17 Bv) 3.13-10 29-25 4.10-14 25-29 5.22-27
+il Bianco vince.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il Nero muove: 1.30-27 (se 29-25,
+19-22 stessa manovra) 2.18-21 27-30 (se 29-25, 19-22 Bv) 3.19-22 29-25
+4.21-26 il Bianco vince.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Si noti come le linee di gioco siano
+diverse. Per capire in quale dei due casi ci si trova, si calcoli la mossa,
+escludendo dal computo la dama in 17. Se la mossa &egrave; del Nero siamo
+nel primo caso. Se la mossa &egrave; del Bianco, siamo nel secondo caso,
+pi&ugrave; semplice. </FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><BR>
+<B><FONT FACE="Verdana"><FONT SIZE=+1>Dame nere nel cantone</FONT></FONT></B></P>
+
+<P><IMG SRC="c3.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana"><B><FONT SIZE=+2>
+</FONT></B><FONT SIZE=-1>Il Bianco deve assumere la posizione del <B>Diagramma
+3</B>.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il Bianco muove: 1.22-26 28-24 2.19-22
+24-28 3.26-29 il Bianco vince.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il Nero muove: 1.28-31 2.22-26 31-28
+3.19-22 il Bianco vince.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><BR>
+<B><FONT FACE="Verdana"><FONT SIZE=+1>Posizioni di pari</FONT></FONT></B></P>
+
+<P><IMG SRC="c4.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana"><B><FONT SIZE=+2>
+</FONT></B><FONT SIZE=-1>Riporto due esempi in cui il Bianco non riesce
+a liberare le proprie dame legate a sponda e patta:</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 4</B>. Il Nero muove:
+1.14-10 2.2-5 18-14 ecc. Pari. </FONT></FONT></P>
+
+<P><IMG SRC="c5.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=RIGHT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 5</B>. Il Nero muove:
+1.15-11 2.7-3 14-10 3.2-5 11-14 4.3-7 10-6 5.5-9 6-10 6.9-5 10-6 ecc. Pari.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><BR>
+<BR>
+<BR>
+<U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><B><FONT SIZE=-1><A HREF="indice.htm">Indice<BR>
+<BR>
+<BR>
+</A></FONT></B><I><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio Bellini</A></FONT></I></FONT></FONT></U></P>
+
+</BODY>
+</HTML>

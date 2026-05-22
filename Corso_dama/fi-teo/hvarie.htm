@@ -1,0 +1,234 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>Dama - Finali teorici - Posizioni teoriche</TITLE>
+   
+   
+   
+   
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8">
+   <style>
+     body {
+       font-family: Verdana, sans-serif;
+       font-size: 16px;
+       line-height: 1.6;
+       max-width: 860px;
+       margin: 0 auto;
+       padding: 0 12px;
+       color: #000;
+       background: #fff;
+     }
+     img {
+       max-width: 100%;
+       height: auto;
+     }
+     /* Su schermi stretti le immagini float diventano block centrate */
+     @media (max-width: 520px) {
+       img[align="LEFT"], img[align="left"] {
+         float: none !important;
+         display: block;
+         margin: 12px auto;
+       }
+     }
+     table {
+       width: 100%;
+       border-collapse: collapse;
+     }
+     td {
+       padding: 4px 8px;
+       vertical-align: middle;
+     }
+     a { color: #0000CC; }
+     a:visited { color: #551A8B; }
+     hr { border: none; border-top: 1px solid #ccc; margin: 16px 0; }
+     center, [align="center"] { text-align: center; }
+     /* Indicatore Wake Lock */
+     #wl-badge {
+       position: fixed;
+       bottom: 10px;
+       right: 10px;
+       background: rgba(0,0,0,0.55);
+       color: #fff;
+       font-size: 12px;
+       padding: 4px 8px;
+       border-radius: 12px;
+       display: none;
+       z-index: 9999;
+       user-select: none;
+     }
+   </style>
+   <script>
+   // Screen Wake Lock API: impedisce lo spegnimento dello schermo su mobile/tablet
+   (function() {
+     let wakeLock = null;
+     async function requestWakeLock() {
+       if (!('wakeLock' in navigator)) return;
+       try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         var badge = document.getElementById('wl-badge');
+         if (badge) badge.style.display = 'block';
+         wakeLock.addEventListener('release', function() {
+           var badge = document.getElementById('wl-badge');
+           if (badge) badge.style.display = 'none';
+         });
+       } catch(e) {}
+     }
+     document.addEventListener('DOMContentLoaded', function() {
+       requestWakeLock();
+     });
+     document.addEventListener('visibilitychange', function() {
+       if (document.visibilityState === 'visible') requestWakeLock();
+     });
+   })();
+   </script>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" ALINK="#FF0000">
+   <div id="wl-badge">&#9679; schermo attivo</div>
+
+
+<CENTER><P><B><FONT FACE="Verdana"><FONT SIZE=+2>POSIZIONI TEORICHE</FONT></FONT></B></P></CENTER>
+
+<P>
+<HR></P>
+
+<CENTER><P><IMG SRC="a0.gif" HEIGHT=212 WIDTH=168></P></CENTER>
+
+<P>
+<HR></P>
+
+<P><BR>
+<FONT FACE="Verdana"><FONT SIZE=-1>In questo articolo riporto le &quot;posizioni
+teoriche&quot; e la chiusura di due dame contro due nel cantone che, per
+la loro frequenza ed importanza, &egrave; bene conoscere.</FONT></FONT></P>
+
+<P>
+<HR></P>
+
+<P><BR>
+<B><FONT FACE="Verdana"><FONT SIZE=+1>Prima posizione</FONT></FONT></B></P>
+
+<P><IMG SRC="h1.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana"><B><FONT SIZE=+3>
+</FONT></B><FONT SIZE=-1>La &quot;Prima Posizione&quot; &egrave; un finale
+di quattro pezzi, disposti come nel <B>Diagramma 1</B>, in cui il Bianco
+ha la mossa in favore. La pedina pu&ograve; trovarsi indifferentemente
+in 1, 2, 9 o 17. Il Bianco vince in ogni caso.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Se il Bianco non ha la mossa, il
+finale, che &egrave; talvolta detto &quot;Falsa Prima Posizione&quot;,
+&egrave; pari.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Le linee di gioco sono nel capitolo
+&quot;Due dame contro una dama e una pedina&quot;. </FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><BR>
+<B><FONT FACE="Verdana"><FONT SIZE=+1>Seconda posizione</FONT></FONT></B></P>
+
+<P><IMG SRC="h2.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana"><B><FONT SIZE=+3>
+</FONT></B><FONT SIZE=-1>La &quot;Seconda Posizione&quot; &egrave; un finale
+di quattro pezzi in cui il Bianco con una dama lega una dama e una pedina
+nere nel cantone, come nel <B>Diagramma 2</B>.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il Nero &egrave; costretto a muovere
+la dama fra le case 32 e 28 perch&eacute; se avanza la pedina il Bianco
+vince con 27-31, e se porta la dama in 31, con la risposta 27-23 perde
+un pezzo. Il Bianco vince damando la pedina (che pu&ograve; trovarsi anche
+in altre posizioni) e portandola nella casa 19. Qui, se ha la mossa (muove
+il Nero): 32-28, 27-31, 28-32, 19-23 Bv. Se non ha la mossa (muove il Bianco):
+19-23, 24-28, 27-31 Bv.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><BR>
+<B><FONT FACE="Verdana"><FONT SIZE=+1>Terza posizione</FONT></FONT></B></P>
+
+<P><IMG SRC="h3.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana"><B><FONT SIZE=+3>
+</FONT></B><FONT SIZE=-1>La &quot;Terza Posizione&quot; &egrave; un finale
+di quattro dame in cui una dama bianca ne chiude una nera a lato del biscacco,
+la seconda dama bianca &egrave; nel biscacco e la seconda dama nera nei
+pressi della base, come nel <B>Diagramma 3</B>. </FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il Bianco vince in ogni caso. Se
+ha la mossa (muove il Nero), semplicemente chiudendo la dama nera in 32
+(che pu&ograve; trovarsi anche in altre posizioni). Se non ha la mossa
+(muove il Bianco) con il cambio 18-21, che inverte la mossa, e poi chiudendo
+la dama nera. </FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><BR>
+<B><FONT FACE="Verdana"><FONT SIZE=+1>Quarta posizione</FONT></FONT></B></P>
+
+<P><IMG SRC="h4.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana"><B><FONT SIZE=+3>
+</FONT></B><FONT SIZE=-1>Se entrambi i giocatori hanno tre pezzi, ma il
+Bianco riesce a ottenere tre dame contro una sola del Nero (due vantaggi
+di qualit&agrave;), vince. Se le due pedine nere sono vicine e controllabili
+da una sola dama, la vittoria del Bianco &egrave; banale, potendo attaccare
+la dama nera con due dame. Se invece le pedine nere sono sulle sponde opposte,
+vince con una manovra pi&ugrave; elaborata. </FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Una posizione frequente in gioco
+vivo, da cui scaturisce questo tipo di finali, &egrave; la &quot;Quarta
+Posizione&quot;, in cui due pedine si fronteggiano nella zona del cantone,
+come nel <B>Diagramma 4</B>. Mentre la pedina in 24 non pu&ograve; muoversi
+pena la cattura, quella in 31 pu&ograve; avanzare. Questa libert&agrave;
+di manovra, sommata al vantaggio di avere due dame contro una dama e una
+pedina nere, assicura al Bianco la vittoria. La condotta di gioco consiste
+nell'allontanare la dama nera dal biscacco inferiore e, impedendo l'avanzata
+delle pedine nere, portare a dama la pedina in 31. </FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 4</B>. Il Bianco muove
+(il Nero ha la mossa): 1.13-17 26-29 2.17-21 29-25 3.21-26 9-13 4.23-27
+13-17 5.26-29 25-21 6.29-25 21-18 (se 21-26, 25-21, 26-30, 27-23 Bv) 7.27-30
+18-22 8.25-21 22-19 (se 22-26, 30-27 Bv) 9.30-27 19-14 10.27-23 14-11 11.31-27
+11-14 12.27-22 14-11 13.22-18 (se 22-19?, 11-15 il Bianco perde la pedina)
+11-6 14.18-14 6-11 15.14-10 11-7 16.10-6 7-4 17. 6-3 4-8 18. 3-7 8-4 19.
+7-12 4-8 20.23-20 8x15 21.20x11 24-28 22.11-15 28-31 23.15-19 31-27 24.21-25
+27-30 25.19-22 il Bianco vince.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il Nero muove (il Bianco ha la mossa):
+1. 26-22 2.23-27 22-19 (se il Bianco ha la mossa, il Nero deve portare
+la dama verso il biscacco superiore, altrimenti perde per Prima Posizione)
+(A) 3.13-10 19-15 4.27-23 15-11 5.31-27 11-15 6.27-22 15-11 7.22-18 (se
+22-19?, 11-15, 19-14, 15-19, 23-28, 9-13 patta) 11-15 8. 10-13 15-12 9.
+18-14 ecc. Il Bianco dama e vince con la manovra gi&agrave; vista.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>(A) - 2.22-26 3.13-17 26-29 4.27-22
+29-25 5.22-18 25-29 6.17-21 29-25 7.18-13 il Bianco vince per Prima Posizione.
+</FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><BR>
+<B><FONT FACE="Verdana"><FONT SIZE=+1>Due dame vs. due dame. Chiusura nel
+cantone</FONT></FONT></B></P>
+
+<P><IMG SRC="h5.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana"><B><FONT SIZE=+3>
+</FONT></B><FONT SIZE=-1>L'unico caso in cui due dame, con la mossa in
+favore, riescono a chiudere due dame avversarie unite, si ha nel cantone.
+</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 5</B>. Il Bianco muove:
+1.16-20 (A) 32-28 (se 31-28, 20-24, 28-31 [se 28-23, 18-22 Bv], 18-22 siamo
+al tronco. Se 31-27, 20-24, 27-31, 18-22 siamo al tronco) 2.18-22 28-32
+3.20-24 (la casa 24 &egrave; la chiave della manovra vincente) 32-28 4.22-19
+28-32 5.19-23 il Bianco vince.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>(A) - 1.18-22? (perde un tempo decisivo)
+31-28 2.16-20 28-24 il Nero prende la casa 24 e blocca l'attacco avversario.
+Pari. </FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><BR>
+<BR>
+<BR>
+<U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><B><FONT SIZE=-1><A HREF="indice.htm">Indice<BR>
+<BR>
+<BR>
+</A></FONT></B><I><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio Bellini</A></FONT></I></FONT></FONT></U></P>
+
+</BODY>
+</HTML>

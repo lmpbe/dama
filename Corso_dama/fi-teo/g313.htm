@@ -1,0 +1,134 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>Dama - Finali teorici - Tre dame e una pedina contro tre dame</TITLE>
+   
+   
+   
+   
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8">
+   <style>
+     body {
+       font-family: Verdana, sans-serif;
+       font-size: 16px;
+       line-height: 1.6;
+       max-width: 860px;
+       margin: 0 auto;
+       padding: 0 12px;
+       color: #000;
+       background: #fff;
+     }
+     img {
+       max-width: 100%;
+       height: auto;
+     }
+     /* Su schermi stretti le immagini float diventano block centrate */
+     @media (max-width: 520px) {
+       img[align="LEFT"], img[align="left"] {
+         float: none !important;
+         display: block;
+         margin: 12px auto;
+       }
+     }
+     table {
+       width: 100%;
+       border-collapse: collapse;
+     }
+     td {
+       padding: 4px 8px;
+       vertical-align: middle;
+     }
+     a { color: #0000CC; }
+     a:visited { color: #551A8B; }
+     hr { border: none; border-top: 1px solid #ccc; margin: 16px 0; }
+     center, [align="center"] { text-align: center; }
+     /* Indicatore Wake Lock */
+     #wl-badge {
+       position: fixed;
+       bottom: 10px;
+       right: 10px;
+       background: rgba(0,0,0,0.55);
+       color: #fff;
+       font-size: 12px;
+       padding: 4px 8px;
+       border-radius: 12px;
+       display: none;
+       z-index: 9999;
+       user-select: none;
+     }
+   </style>
+   <script>
+   // Screen Wake Lock API: impedisce lo spegnimento dello schermo su mobile/tablet
+   (function() {
+     let wakeLock = null;
+     async function requestWakeLock() {
+       if (!('wakeLock' in navigator)) return;
+       try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         var badge = document.getElementById('wl-badge');
+         if (badge) badge.style.display = 'block';
+         wakeLock.addEventListener('release', function() {
+           var badge = document.getElementById('wl-badge');
+           if (badge) badge.style.display = 'none';
+         });
+       } catch(e) {}
+     }
+     document.addEventListener('DOMContentLoaded', function() {
+       requestWakeLock();
+     });
+     document.addEventListener('visibilitychange', function() {
+       if (document.visibilityState === 'visible') requestWakeLock();
+     });
+   })();
+   </script>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" ALINK="#FF0000">
+   <div id="wl-badge">&#9679; schermo attivo</div>
+
+
+<CENTER><P><B><FONT FACE="Verdana"><FONT SIZE=+2>TRE DAME E UNA PEDINA
+CONTRO TRE DAME</FONT></FONT></B></P></CENTER>
+
+<P>
+<HR></P>
+
+<CENTER><P><IMG SRC="a0.gif" HEIGHT=212 WIDTH=168></P></CENTER>
+
+<P>
+<HR></P>
+
+<P><BR>
+<FONT FACE="Verdana"><FONT SIZE=-1>Il finale di tre dame e una pedina contro
+tre dame presenta una casistica molto vasta, a seconda della posizione
+reciproca delle dame e della pedina. Lo scopo principale del Bianco &egrave;
+damare la pedina, mentre il Nero deve impedirglielo. Durante la manovra
+entrambi devono cercare cambi o baratti che portino a un finale favorevole
+di due dame e una pedina contro due dame, che di fatto &egrave; il punto
+di riferimento per giocare questo finale complesso. Una norma di carattere
+generale, sempre valida, &egrave; quella di mantenere le dame unite. </FONT></FONT></P>
+
+<P><IMG SRC="g1.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+<FONT SIZE=-1>Le posizioni pi&ugrave; frequenti in gioco vivo sono quelle
+in cui il Bianco ha la pedina sulla base o sulla sponda, bloccata dalle
+tre dame nere, con le dame bianche pi&ugrave; lontane, come nel <B>Diagramma
+1</B>.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Tutti i finali di questo tipo sono
+pari. Il Bianco ha una gran variet&agrave; di attacchi, di cui non &egrave;
+possibile rendere conto in poche linee. In ogni caso il Nero, con manovra
+attenta, riesce a impedire l'avanzata della pedina e ad evitare un cambio
+o un baratto che lo immetta in un finale perdente. </FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><BR>
+<BR>
+<BR>
+<U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><B><FONT SIZE=-1><A HREF="indice.htm">Indice<BR>
+<BR>
+<BR>
+</A></FONT></B><I><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio Bellini</A></FONT></I></FONT></FONT></U></P>
+
+</BODY>
+</HTML>

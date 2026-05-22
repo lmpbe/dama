@@ -1,0 +1,187 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>Dama - Finali teorici</TITLE>
+   
+   
+   <META NAME="keywords" CONTENT="dama italiana, italian checkers">
+   
+   
+   <META NAME="KeyWords" CONTENT="dama, dama italiana, italian checkers">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8">
+   <style>
+     body {
+       font-family: Verdana, sans-serif;
+       font-size: 16px;
+       line-height: 1.6;
+       max-width: 860px;
+       margin: 0 auto;
+       padding: 0 12px;
+       color: #000;
+       background: #fff;
+     }
+     img {
+       max-width: 100%;
+       height: auto;
+     }
+     /* Su schermi stretti le immagini float diventano block centrate */
+     @media (max-width: 520px) {
+       img[align="LEFT"], img[align="left"] {
+         float: none !important;
+         display: block;
+         margin: 12px auto;
+       }
+     }
+     table {
+       width: 100%;
+       border-collapse: collapse;
+     }
+     td {
+       padding: 4px 8px;
+       vertical-align: middle;
+     }
+     a { color: #0000CC; }
+     a:visited { color: #551A8B; }
+     hr { border: none; border-top: 1px solid #ccc; margin: 16px 0; }
+     center, [align="center"] { text-align: center; }
+     /* Indicatore Wake Lock */
+     #wl-badge {
+       position: fixed;
+       bottom: 10px;
+       right: 10px;
+       background: rgba(0,0,0,0.55);
+       color: #fff;
+       font-size: 12px;
+       padding: 4px 8px;
+       border-radius: 12px;
+       display: none;
+       z-index: 9999;
+       user-select: none;
+     }
+   </style>
+   <script>
+   // Screen Wake Lock API: impedisce lo spegnimento dello schermo su mobile/tablet
+   (function() {
+     let wakeLock = null;
+     async function requestWakeLock() {
+       if (!('wakeLock' in navigator)) return;
+       try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         var badge = document.getElementById('wl-badge');
+         if (badge) badge.style.display = 'block';
+         wakeLock.addEventListener('release', function() {
+           var badge = document.getElementById('wl-badge');
+           if (badge) badge.style.display = 'none';
+         });
+       } catch(e) {}
+     }
+     document.addEventListener('DOMContentLoaded', function() {
+       requestWakeLock();
+     });
+     document.addEventListener('visibilitychange', function() {
+       if (document.visibilityState === 'visible') requestWakeLock();
+     });
+   })();
+   </script>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" ALINK="#FF0000">
+   <div id="wl-badge">&#9679; schermo attivo</div>
+
+
+<CENTER><P><B><FONT FACE="Verdana"><FONT SIZE=+2>FINALI TEORICI</FONT></FONT></B></P></CENTER>
+
+<CENTER><P><FONT FACE="Verdana"><FONT COLOR="#FF0000"><FONT SIZE=-2>(Ultima
+revisione il 21.01.2003)</FONT></FONT></FONT></P></CENTER>
+
+<P>
+<HR></P>
+
+<CENTER><TABLE CELLSPACING=0 >
+<TR>
+<TD VALIGN="MIDDLE"><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="./amossa.htm">Teoria
+della mossa</A></FONT></U></B> </FONT></FONT></TD>
+
+<TD VALIGN="MIDDLE"><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="./f43.htm">Quattro
+dame contro tre dame</A></FONT></U></B> </FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE"><B><FONT SIZE=-1><FONT FACE="Verdana"><U><FONT COLOR="#0000FF"><A HREF="./b-5.htm">Finali
+teorici semplici</A></FONT></U>(2/1, 1+1/1, 2/1+1)</FONT> </FONT></B></TD>
+
+<TD VALIGN="MIDDLE"><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="./g313.htm">Tre
+dame e una pedina contro tre dame</A></FONT></U></B> &nbsp;&nbsp;&nbsp;</FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE"><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="./c32.htm">Tre
+dame contro due dame</A></FONT></U></B> </FONT></FONT></TD>
+
+<TD VALIGN="MIDDLE"><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="./hvarie.htm">Posizioni
+teoriche</A></FONT></U></B> </FONT></FONT></TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE"><B><FONT FACE="Verdana"><FONT SIZE=-1><U><FONT COLOR="#0000FF"><A HREF="./d212.htm">Due
+dame e una pedina contro due dame</A></FONT></U>&nbsp;&nbsp;&nbsp;</FONT></FONT></B><FONT FACE="Verdana"><FONT SIZE=-1>
+</FONT></FONT></TD>
+
+<TD VALIGN="MIDDLE"><B><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-1><A HREF="capire.htm">Capire
+il finale</A></FONT></FONT></FONT></U></B></TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE"><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="./e321.htm">Tre
+dame contro due dame e una pedina</A></FONT></U></B> &nbsp;&nbsp;&nbsp;</FONT></FONT></TD>
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+</TR>
+</TABLE></CENTER>
+
+<P>
+<HR></P>
+
+<CENTER><P><IMG SRC="a0.gif" HEIGHT=212 WIDTH=168></P></CENTER>
+
+<P>
+<HR></P>
+
+<P><BR>
+<FONT FACE="Verdana"><FONT SIZE=-1>I finali teorici sono finali con un
+numero limitato di pezzi, che si presentano frequentemente in gioco vivo,
+per i quali si pu&ograve; dar conto con linee di gioco relativamente semplici.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>La padronanza dei finali teorici
+&egrave; fondamentale per &quot;vincere le partite vinte&quot; e per fissare
+in modo corretto gli obiettivi da porsi in centro partita e in finale.
+</FONT></FONT></P>
+
+<P><IMG SRC="i1.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana"><FONT SIZE=-1>Per
+un esempio concreto, si consideri la posizione del <B>Diagramma 1</B>.
+Il Nero muove. </FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Se gioca 4-8, perde. Il Bianco con
+20-16 blocca pedina in 8. Poi entrambi damano le pedine in 11 e 18, ma
+la dama bianca , con la mossa in favore, spinge la dama nera nel biscacco
+inferiore e vince il finale teorico di Prima Posizione. </FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il Nero invece patta con 4-7, 20-16,
+11-15, 18-14 ecc. perch&eacute; fa due dame, come da finale teorico di
+tre dame contro due dame e una pedina. </FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>In tutti i finali presi in esame
+in questo testo, per convenzione, il Bianco &egrave; il partito in vantaggio.<BR CLEAR=BOTH>
+<BR>
+<BR>
+<BR>
+<B><I><U><FONT COLOR="#0000FF"><A HREF="../index.html">Corso di Dama </A></FONT></U></I></B></FONT></FONT></P>
+
+<P>
+<HR></P>
+
+<P><I><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio
+Bellini</A></FONT></FONT></FONT></U></I></P>
+
+</BODY>
+</HTML>
