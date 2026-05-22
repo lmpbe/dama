@@ -863,7 +863,11 @@ function wireBtn(id, action){
   const btn=document.getElementById(id);
   if(!btn) return;
   btn.addEventListener('pointerdown', e=>{ e.preventDefault(); e.stopPropagation(); });
-  btn.addEventListener('click', e=>{ e.preventDefault(); e.stopPropagation(); action(); });
+  btn.addEventListener('click', e=>{
+    e.preventDefault(); e.stopPropagation();
+    keepAwakeStart();
+    action();
+  });
 }
 
 // ── IntersectionObserver ───────────────────────────────────────────
@@ -913,7 +917,7 @@ async function keepAwakeStart() {
         }
       } catch(e) {}
     }
-  }, 14000);
+  }, 5000);
 }
 
 function keepAwakeStop() {
@@ -932,11 +936,8 @@ window.addEventListener('pagehide', saveSession);
 const _origExecuteMove = executeMove;
 executeMove = function(move){ _origExecuteMove(move); saveSession(); };
 
-// Parte al primo tocco
-document.addEventListener('pointerdown', function startOnFirstTouch() {
-  keepAwakeStart();
-  document.removeEventListener('pointerdown', startOnFirstTouch);
-}, {once: true});
+// Rinnova il wake lock ad ogni tocco sulla pagina
+document.addEventListener('pointerdown', () => keepAwakeStart());
 </script>
 </body>
 </html>
