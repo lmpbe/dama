@@ -1,0 +1,144 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>Corso Elementare di Dama - La partita</TITLE>
+   
+   
+   
+   
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8">
+   <style>
+     body {
+       font-family: Verdana, sans-serif;
+       font-size: 16px;
+       line-height: 1.6;
+       max-width: 860px;
+       margin: 0 auto;
+       padding: 0 12px;
+       color: #000;
+       background: #fff;
+     }
+     img {
+       max-width: 100%;
+       height: auto;
+     }
+     /* Su schermi stretti le immagini float diventano block centrate */
+     @media (max-width: 520px) {
+       img[align="LEFT"], img[align="left"] {
+         float: none !important;
+         display: block;
+         margin: 12px auto;
+       }
+     }
+     table {
+       width: 100%;
+       border-collapse: collapse;
+     }
+     td {
+       padding: 4px 8px;
+       vertical-align: middle;
+     }
+     a { color: #0000CC; }
+     a:visited { color: #551A8B; }
+     hr { border: none; border-top: 1px solid #ccc; margin: 16px 0; }
+     center, [align="center"] { text-align: center; }
+     /* Indicatore Wake Lock */
+     #wl-badge {
+       position: fixed;
+       bottom: 10px;
+       right: 10px;
+       background: rgba(0,0,0,0.55);
+       color: #fff;
+       font-size: 12px;
+       padding: 4px 8px;
+       border-radius: 12px;
+       display: none;
+       z-index: 9999;
+       user-select: none;
+     }
+   </style>
+   <script>
+   // Screen Wake Lock API: impedisce lo spegnimento dello schermo su mobile/tablet
+   (function() {
+     let wakeLock = null;
+     async function requestWakeLock() {
+       if (!('wakeLock' in navigator)) return;
+       try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         var badge = document.getElementById('wl-badge');
+         if (badge) badge.style.display = 'block';
+         wakeLock.addEventListener('release', function() {
+           var badge = document.getElementById('wl-badge');
+           if (badge) badge.style.display = 'none';
+         });
+       } catch(e) {}
+     }
+     document.addEventListener('DOMContentLoaded', function() {
+       requestWakeLock();
+     });
+     document.addEventListener('visibilitychange', function() {
+       if (document.visibilityState === 'visible') requestWakeLock();
+     });
+   })();
+   </script>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" ALINK="#FF0000">
+   <div id="wl-badge">&#9679; schermo attivo</div>
+
+
+<CENTER><P><B><U><FONT FACE="Verdana"><FONT SIZE=+1>La partita</FONT></FONT></U></B></P></CENTER>
+
+<P>
+<HR></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Nel gioco della dama, chi riesce
+ad ottenere un vantaggio materiale, anche di una sola pedina, normalmente
+vince. Esistono posizioni in cui il partito in svantaggio pu&ograve; ottenere
+una patta sotto pezzo, ma sono delle eccezioni. Ottenere un vantaggio materiale
+per&ograve;, a meno che l'avversario non commetta una svista, non &egrave;
+facile. Il guadagno di un pezzo, di solito, &egrave; la concretizzazione
+di un vantaggio posizionale, ottenuto con manovre delicate e pazienti.
+Quindi non si deve cercare subito di guadagnare dei pezzi, magari approntando
+tranelli che, se evitati dall'avversario, ci lasciano in cattiva posizione.
+E' necessario invece porsi degli obiettivi intermedi, che variano con il
+procedere della partita, con la diminuzione dei pezzi in gioco, con la
+promozione a dama delle pedine. </FONT></FONT></P>
+
+<P><IMG SRC="immagini/pa1.gif" HSPACE=20 VSPACE=20 HEIGHT=170 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana"><FONT SIZE=-1>A
+titolo di esempio, riporto una partita commentata.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>1.23-19 (la mossa iniziale pi&ugrave;
+forte: un passo verso il centro dalla parte del cantone) 11-14 (forma l'apertura
+&quot;Controdiagonale&quot;: inceppa il centro per una successiva semplificazione)
+2.28-23 (se 21-18, 14x21 indebolisce il biscacco) 7-11 3.32-28 (mossa d'attesa:
+sdama la 32 e non indebolisce il biscacco e la base. Giocabile anche 22-18,
+11-15 ecc.) 11-15 (se 12-15 indebolisce il biscacco) 4.22-18 (semplifica.
+Se 21-18 indebolisce il biscacco) 15x22 5.18x11 6x15 6.27x18 (se 26x19
+toglie entrambe le pedine 26 e 27 che sono sostegni importanti per il centro.
+Dopo questo doppio cambio possiamo ritenerci nel centro partita) 2-6 (se
+15-19 avanza un pezzo poco difendibile) 7.26-22 (cerca il controllo del
+centro) 12-16 8.23-19 6-11 9.19x12 8x15 10.28-23 10-14 11.21-17 14x21 12.25x18
+5-10 13.23-19 4-8 14.19x12 8x15 15.31-27 (<B>Diagramma 1</B>) (il Nero
+ha sguarnito il biscacco e il Bianco cerca di sfondare) 16-20! (se 10-14?,
+27-23, X, 23-19 il Bianco, per l'attacco precipitoso del Nero, dama nel
+biscacco) 16.27-23 (il Bianco pu&ograve; aprirsi la via per damare: siamo
+in finale. Buona anche 18-13. Se 22-19?, X, 10-14 il Nero ferma 3 pedine
+bianche e ottiene una dama in pi&ugrave;) 20x27 17.30x23 10-14 18.29-25
+14x21 19.25x18 1-5 20.23-19 5-10 21.19x12 10-14 22.12-8 14x21 23.22-19
+3-7 24.8-4 7-12 25.24-20 (se 4-7, 11-15 pari) 12-16 26.19-15 ecc. Pari.
+Anche se un colore ottiene la terza dama non vince, come da finale teorico
+di tre dame contro due dame e una pedina. <BR CLEAR=BOTH>
+<BR>
+<BR>
+<BR>
+<B><U><FONT COLOR="#0000FF"><A HREF="index.html">Indice</A></FONT></U></B></FONT></FONT></P>
+
+<P><FONT FACE="Verdana">&nbsp; </FONT>
+<HR></P>
+
+<P><I><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio
+Bellini</A></FONT></FONT></FONT></U></I></P>
+
+</BODY>
+</HTML>

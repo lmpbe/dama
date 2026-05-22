@@ -1,0 +1,289 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>Corso Elementare di Dama - Le regole</TITLE>
+   
+   
+   
+   
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8">
+   <style>
+     body {
+       font-family: Verdana, sans-serif;
+       font-size: 16px;
+       line-height: 1.6;
+       max-width: 860px;
+       margin: 0 auto;
+       padding: 0 12px;
+       color: #000;
+       background: #fff;
+     }
+     img {
+       max-width: 100%;
+       height: auto;
+     }
+     /* Su schermi stretti le immagini float diventano block centrate */
+     @media (max-width: 520px) {
+       img[align="LEFT"], img[align="left"] {
+         float: none !important;
+         display: block;
+         margin: 12px auto;
+       }
+     }
+     table {
+       width: 100%;
+       border-collapse: collapse;
+     }
+     td {
+       padding: 4px 8px;
+       vertical-align: middle;
+     }
+     a { color: #0000CC; }
+     a:visited { color: #551A8B; }
+     hr { border: none; border-top: 1px solid #ccc; margin: 16px 0; }
+     center, [align="center"] { text-align: center; }
+     /* Indicatore Wake Lock */
+     #wl-badge {
+       position: fixed;
+       bottom: 10px;
+       right: 10px;
+       background: rgba(0,0,0,0.55);
+       color: #fff;
+       font-size: 12px;
+       padding: 4px 8px;
+       border-radius: 12px;
+       display: none;
+       z-index: 9999;
+       user-select: none;
+     }
+   </style>
+   <script>
+   // Screen Wake Lock API: impedisce lo spegnimento dello schermo su mobile/tablet
+   (function() {
+     let wakeLock = null;
+     async function requestWakeLock() {
+       if (!('wakeLock' in navigator)) return;
+       try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         var badge = document.getElementById('wl-badge');
+         if (badge) badge.style.display = 'block';
+         wakeLock.addEventListener('release', function() {
+           var badge = document.getElementById('wl-badge');
+           if (badge) badge.style.display = 'none';
+         });
+       } catch(e) {}
+     }
+     document.addEventListener('DOMContentLoaded', function() {
+       requestWakeLock();
+     });
+     document.addEventListener('visibilitychange', function() {
+       if (document.visibilityState === 'visible') requestWakeLock();
+     });
+   })();
+   </script>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" ALINK="#FF0000">
+   <div id="wl-badge">&#9679; schermo attivo</div>
+
+
+<CENTER><P><B><U><FONT FACE="Verdana"><FONT SIZE=+1>Le regole</FONT></FONT></U></B></P></CENTER>
+
+<P>
+<HR></P>
+
+<P><BR>
+</P>
+
+<P><IMG SRC="immagini/re1.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Posizione iniziale</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>La partita di dama si svolge fra
+due giocatori su una damiera di 64 caselle (32 bianche e 32 nere), disposta
+con le caselle nere d'angolo (cantone) alla destra dei giocatori. Un giocatore
+ha 12 pedine bianche, l'altro 12 pedine nere. Inizialmente ognuno schiera
+le proprie pedine sulle caselle nere della damiera, come nel <B>Diagramma
+1</B>. (Nei diagrammi di questo corso, per una migliore visualizzazione,
+le caselle &quot;nere&quot; sono colorate in giallo e le pedine &quot;nere&quot;
+in rosso).</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<P><IMG SRC="immagini/re2.gif" HSPACE=20 VSPACE=20 HEIGHT=212 WIDTH=144 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Notazione</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Per poter trascrivere le mosse, alle
+caselle nere della damiera viene associato un numero da 1 a 32, a partire
+dal cantone del Nero e proseguendo verso destra e verso il basso (<B>Diagramma
+2</B>). Una mossa si indica scrivendo il numero della casella di partenza
+e di arrivo separati da un trattino. Se la mossa &egrave; una presa, invece
+del trattino si pu&ograve; usare una &quot;x&quot;. Se una o pi&ugrave;
+prese sono univocamente detrminate, al posto di tutta la serie di prese
+si pu&ograve; scrivere &quot;X&quot;. L'indicazione di una mossa pu&ograve;
+essere seguita dai seguenti segni di commento: &quot;!&quot; = mossa forte,
+&quot;!!&quot; = mossa fortissima, &quot;?&quot; = mossa debole, &quot;??&quot;
+= mossa debolissima, &quot;!?&quot; = mossa dubbia, &quot;*&quot; = mossa
+forzata.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<P><IMG SRC="immagini/re3.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Mossa</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Chi ha il Bianco muove per primo,
+poi i giocatori muovono alternativamente. I pezzi possono occupare solo
+le caselle nere della damiera. Un pezzo muove procedendo in diagonale di
+una casella e occupandola, la mossa &egrave; possibile solo se la casella
+di arrivo &egrave; libera (nel <B>Diagramma 3</B> il Bianco ha mosso 23-19).
+La pedina pu&ograve; muovere solo avanzando, la dama pu&ograve; anche indietreggiare.
+Quando una pedina arriva all'ultima riga della damiera viene promossa e
+diventa dama. Un tipo ulteriore di mossa &egrave; la presa.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<P><IMG SRC="immagini/re4.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Presa</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Se un giocatore, dovendo muovere,
+ha un pezzo a contatto con uno avversario che ha dietro una casella libera,
+&egrave; obbligato a prenderlo (mangiarlo). La presa si effettua ponendo
+il pezzo nella casa libera dietro il pezzo avversario e togliendo quest'ultimo
+dalla damiera. Se in questa nuova posizione il pezzo pu&ograve; ancora
+effettuare una presa, deve effettuarla subito, senza aspettare la mossa
+successiva, e cos&igrave; via. Queste catture successive costituiscono
+una unica presa multipla. Quando per&ograve; una pedina arriva alla riga
+di dama, deve fermarsi anche se potrebbe effettuare una presa all'indietro.
+Al termine della presa la mossa passa all'avversario (nel <B>Diagramma
+4</B> la pedina bianca &egrave; obbligata a effettuare la presa multipla
+27x18x9x2 e poi la mossa passa al Nero). Le pedine possono prendere solo
+in avanti. Le dame possono prendere anche all'indietro. Le pedine non possono
+mangiare le dame. Le dame possono mangiare sia dame che pedine.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<P><IMG SRC="immagini/re5.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Precedenza nelle prese</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Se un giocatore pu&ograve; effettuare
+pi&ugrave; di una presa &egrave; obbligato a prendere dalla parte in cui
+cattura il maggior numero di pezzi, a parit&agrave; di questi, a prendere
+con il pezzo pi&ugrave; forte, a parit&agrave; di questo, a prendere dalla
+parte in cui cattura i pezzi di maggior valore (mangiare il pi&ugrave;
+con il pi&ugrave;), a parit&agrave; di questo, a prendere dalla parte dove
+incontra prima i pezzi pi&ugrave; forti. A parit&agrave; di tutte queste
+condizioni, pu&ograve; effettuare la presa che preferisce (nel <B>Diagramma
+5</B> la dama bianca &egrave; obbligata a effettuare la presa 31x22x13x6).
+Esempi: </FONT></FONT></P>
+
+<TABLE CELLSPACING=0 >
+<TR>
+<TD VALIGN="MIDDLE">
+<UL>
+<LI><FONT FACE="Verdana"><FONT SIZE=-1>Fra una pedina che cattura una pedina,
+e una dama che cattura una pedina, si deve eseguire quest'ultima presa.
+</FONT></FONT></LI>
+</UL>
+</TD>
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE">
+<UL>
+<LI><FONT FACE="Verdana"><FONT SIZE=-1>Fra una dama che cattura una dama,
+e una pedina che cattura due pedine, si deve eseguire quest'ultima presa.
+</FONT></FONT></LI>
+</UL>
+</TD>
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE">
+<UL>
+<LI><FONT FACE="Verdana"><FONT SIZE=-1>Fra una dama che cattura due pedine,
+e una dama che cattura una dama e una pedina, si deve eseguire quest'ultima
+presa. </FONT></FONT></LI>
+</UL>
+</TD>
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+</TR>
+
+<TR>
+<TD VALIGN="MIDDLE">
+<UL>
+<LI><FONT FACE="Verdana"><FONT SIZE=-1>Fra una dama che cattura prima una
+pedina e poi una dama, e una dama che cattura prima una dama e poi una
+pedina, si deve eseguire quest'ultima presa. </FONT></FONT></LI>
+</UL>
+</TD>
+
+<TD VALIGN="MIDDLE"><BR>
+</TD>
+</TR>
+</TABLE>
+
+<P>
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<P><IMG SRC="immagini/re6.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Vincita</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Un giocatore vince la partita se
+mangia tutti i pezzi avversari; se li chiude in modo che l'avversario,
+al suo turno, non possa muovere; se l'avversario, giudicandosi in posizione
+perdente, abbandona (nel <B>Diagramma 6</B> il Bianco muove e, pur non
+essendo stata catturata nemmeno una pedina, non potendo effettuare alcuna
+mossa, perde).</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<DIR>
+<DIR>
+<DIR>
+<DIR>
+<DIR>
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Patta</FONT></FONT></B></P>
+</DIR>
+</DIR>
+</DIR>
+</DIR>
+</DIR>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Una partita &egrave; patta se entrambi
+i giocatori, giudicando impossibile la vincita, si accordano in tal senso.
+Se manca l'accordo, un giocatore pu&ograve; richiedere il conteggio delle
+40 mosse (chiamare le mosse). Vengono allora contate le mosse del giocatore
+richiedente e, se al termine della 40esima nessuno ha vinto, la partita
+&egrave; dichiarata patta. Il conteggio delle mosse viene ricominciato
+da capo ogni volta che viene mossa una pedina o che viene effettuata una
+presa.</FONT></FONT></P>
+
+<P><BR>
+<BR>
+<BR>
+<B><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-1><A HREF="index.html">Indice</A></FONT></FONT></FONT></U></B></P>
+
+<P>
+<HR></P>
+
+<P><I><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio
+Bellini</A></FONT></FONT></FONT></U></I></P>
+
+</BODY>
+</HTML>

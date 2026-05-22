@@ -1,0 +1,198 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>Corso Elementare di Dama - Elementi tattici</TITLE>
+   
+   
+   
+   
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8">
+   <style>
+     body {
+       font-family: Verdana, sans-serif;
+       font-size: 16px;
+       line-height: 1.6;
+       max-width: 860px;
+       margin: 0 auto;
+       padding: 0 12px;
+       color: #000;
+       background: #fff;
+     }
+     img {
+       max-width: 100%;
+       height: auto;
+     }
+     /* Su schermi stretti le immagini float diventano block centrate */
+     @media (max-width: 520px) {
+       img[align="LEFT"], img[align="left"] {
+         float: none !important;
+         display: block;
+         margin: 12px auto;
+       }
+     }
+     table {
+       width: 100%;
+       border-collapse: collapse;
+     }
+     td {
+       padding: 4px 8px;
+       vertical-align: middle;
+     }
+     a { color: #0000CC; }
+     a:visited { color: #551A8B; }
+     hr { border: none; border-top: 1px solid #ccc; margin: 16px 0; }
+     center, [align="center"] { text-align: center; }
+     /* Indicatore Wake Lock */
+     #wl-badge {
+       position: fixed;
+       bottom: 10px;
+       right: 10px;
+       background: rgba(0,0,0,0.55);
+       color: #fff;
+       font-size: 12px;
+       padding: 4px 8px;
+       border-radius: 12px;
+       display: none;
+       z-index: 9999;
+       user-select: none;
+     }
+   </style>
+   <script>
+   // Screen Wake Lock API: impedisce lo spegnimento dello schermo su mobile/tablet
+   (function() {
+     let wakeLock = null;
+     async function requestWakeLock() {
+       if (!('wakeLock' in navigator)) return;
+       try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         var badge = document.getElementById('wl-badge');
+         if (badge) badge.style.display = 'block';
+         wakeLock.addEventListener('release', function() {
+           var badge = document.getElementById('wl-badge');
+           if (badge) badge.style.display = 'none';
+         });
+       } catch(e) {}
+     }
+     document.addEventListener('DOMContentLoaded', function() {
+       requestWakeLock();
+     });
+     document.addEventListener('visibilitychange', function() {
+       if (document.visibilityState === 'visible') requestWakeLock();
+     });
+   })();
+   </script>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" ALINK="#FF0000">
+   <div id="wl-badge">&#9679; schermo attivo</div>
+
+
+<CENTER><P><B><U><FONT FACE="Verdana"><FONT SIZE=+1>Elementi tattici</FONT></FONT></U></B></P></CENTER>
+
+<P>
+<HR></P>
+
+<P><IMG SRC="immagini/et1.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Cambio e baratto</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Con il cambio si d&agrave; un pezzo
+in presa e si riprende il pezzo avversario che ha effettuato la presa (nel
+<B>Diagramma 1 in alto</B> la pedina bianca prende e viene ripresa).</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Con il baratto si d&agrave; (o si
+lascia) un pezzo in presa, e si riprende un pezzo avversario diverso da
+quello che ha effettuato la presa (nel <B>Diagramma 1 in basso</B> la pedina
+nera in 22 prende, ma non &egrave; ripresa: il Bianco mangia la pedina
+in 26). Cambio e baratto influiscono in modo diverso sull'opposizione,
+come &egrave; spiegato nell'appendice sui finali teorici.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<P><IMG SRC="immagini/et2.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Attacco </FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>L'attacco &egrave; la minaccia di
+prendere un pezzo. E' una manovra da effettuare con attenzione perch&eacute;
+poi la presa &egrave; obbligata e si concede all'avversario un tempo di
+vantaggio. Nel <B>Diagramma 2</B> il Bianco muove. La dama nera ha attaccato
+sconsideratamente la pedina in 28 e il Bianco guadagna un pezzo con 29-25.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<P><IMG SRC="immagini/et3.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Forzatura</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>La forzatura &egrave; un attacco
+a cui l'avversario deve rispondere con una mossa obbligata, pena la perdita
+del pezzo attaccato. In finale non sono rare forzature multiple.&nbsp;<B>Diagramma
+3</B>. Il Bianco move: 1. 2-6 (inizia la serie delle forzature, che permette
+al Bianco di guadagnare i tempi necessari per far avanzare la dama fino
+al posto giusto) 10-14 2. 6-10 14-19 3.10-14 19-23 4.29-25 (ancora una
+forzatura) 21-26 5.17-13 il Bianco guadagna un pezzo e vince.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<P><IMG SRC="immagini/et4.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Mossa di attesa</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Mossa che ha il solo scopo di fare
+muovere di nuovo l'avversario, generalmente per farlo cadere in una trappola.
+Nel <B>Diagramma 4</B> il Bianco muove 25-29 e il Nero, sia con 14-19 che
+con 16-20, perde un pezzo per la risposta 26-22.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<P><IMG SRC="immagini/et5.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Occhiali</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Formazione in cui una dama entra
+fra due pezzi avversari e ne cattura uno. <B>Diagramma 5</B>. Il Bianco
+muove e perde un pezzo.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<P><IMG SRC="immagini/et6.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Forchette</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Formazione in cui una dama attacca
+contemporaneamente due pedine e ne cattura una (<B>Diagramma 6 in basso</B>).
+Se la dama ha l'appoggio di un altro pezzo (amico o avversario) pu&ograve;
+attaccare anche una pedina e una dama (<B>Diagramma 6 in alto</B>).</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="LEFT" WIDTH="25%"></P>
+
+<P><IMG SRC="immagini/et7.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Barriera</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Formazione dove tre pedine ne fronteggiano
+una avversaria e la catturano. Nel <B>Diagramma 7 in basso</B> il Bianco
+cattura la pedina in 23 con 31-27 o 31-28. Uno dei punti esterni della
+barriera pu&ograve; anche essere una pedina avversaria o una sponda. Nel
+<B>Diagramma 7 in alto</B> il Bianco cattura la pedina in 6 con 14-10.<BR CLEAR=BOTH>
+<BR>
+<BR>
+<BR>
+<B><U><FONT COLOR="#0000FF"><A HREF="index.html">Indice</A></FONT></U></B></FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>&nbsp; </FONT></FONT>
+<HR></P>
+
+<P><I><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio
+Bellini</A></FONT></FONT></FONT></U></I></P>
+
+</BODY>
+</HTML>

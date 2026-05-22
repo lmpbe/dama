@@ -1,0 +1,339 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+<HTML>
+<HEAD>
+   <TITLE>Corso Elementare di Dama - Motivi tattici</TITLE>
+   
+   
+   
+   
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8">
+   <style>
+     body {
+       font-family: Verdana, sans-serif;
+       font-size: 16px;
+       line-height: 1.6;
+       max-width: 860px;
+       margin: 0 auto;
+       padding: 0 12px;
+       color: #000;
+       background: #fff;
+     }
+     img {
+       max-width: 100%;
+       height: auto;
+     }
+     /* Su schermi stretti le immagini float diventano block centrate */
+     @media (max-width: 520px) {
+       img[align="LEFT"], img[align="left"] {
+         float: none !important;
+         display: block;
+         margin: 12px auto;
+       }
+     }
+     table {
+       width: 100%;
+       border-collapse: collapse;
+     }
+     td {
+       padding: 4px 8px;
+       vertical-align: middle;
+     }
+     a { color: #0000CC; }
+     a:visited { color: #551A8B; }
+     hr { border: none; border-top: 1px solid #ccc; margin: 16px 0; }
+     center, [align="center"] { text-align: center; }
+     /* Indicatore Wake Lock */
+     #wl-badge {
+       position: fixed;
+       bottom: 10px;
+       right: 10px;
+       background: rgba(0,0,0,0.55);
+       color: #fff;
+       font-size: 12px;
+       padding: 4px 8px;
+       border-radius: 12px;
+       display: none;
+       z-index: 9999;
+       user-select: none;
+     }
+   </style>
+   <script>
+   // Screen Wake Lock API: impedisce lo spegnimento dello schermo su mobile/tablet
+   (function() {
+     let wakeLock = null;
+     async function requestWakeLock() {
+       if (!('wakeLock' in navigator)) return;
+       try {
+         wakeLock = await navigator.wakeLock.request('screen');
+         var badge = document.getElementById('wl-badge');
+         if (badge) badge.style.display = 'block';
+         wakeLock.addEventListener('release', function() {
+           var badge = document.getElementById('wl-badge');
+           if (badge) badge.style.display = 'none';
+         });
+       } catch(e) {}
+     }
+     document.addEventListener('DOMContentLoaded', function() {
+       requestWakeLock();
+     });
+     document.addEventListener('visibilitychange', function() {
+       if (document.visibilityState === 'visible') requestWakeLock();
+     });
+   })();
+   </script>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" ALINK="#FF0000">
+   <div id="wl-badge">&#9679; schermo attivo</div>
+
+
+<CENTER><P><B><U><FONT FACE="Verdana"><FONT SIZE=+1>Motivi tattici</FONT></FONT></U></B></P></CENTER>
+
+<CENTER><P><FONT FACE="Verdana">&nbsp; </FONT></P></CENTER>
+
+<P>
+<HR></P>
+
+<P><IMG SRC="immagini/mt1.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT>
+</P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Tiro</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il tiro &egrave; una manovra con
+cui si danno dei pezzi in presa per preparare una nostra presa finale che
+consegua vantaggi materiali o di posizione. E' l'elemento forse pi&ugrave;
+spettacolare del gioco della dama e pu&ograve; raggiungere una notevole
+complessit&agrave;, la cui misura &egrave; la cosiddetta &quot;intenzione&quot;,
+cio&egrave; il numero di mosse che deve fare il giocatore prima di effettuare
+la presa finale. Nel <B>Diagramma 1</B> il Bianco muove e fa un tiro di
+2a intenzione: 19-15 (prima mossa), 11x20 (12x19 produce lo stesso risultato);
+26-22 (seconda mossa), 18x27; 30x7 (presa finale).</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Un altro aspetto importante del tiro
+&egrave; che, di fatto, allunga il raggio di azione delle pedine. Nel <B>Diagramma
+1</B> le caselle 11 e 12 non sono inibite al Nero da nessuna pedina bianca,
+ma dal meccanismo di tiro approntato con le pedine bianche in 19, 26 e
+30 e la pedina nera in 18, che in questo caso gioca per l'avversario.&nbsp;</FONT></FONT></P>
+
+<P><IMG SRC="immagini/mt2.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=RIGHT><FONT FACE="Verdana"><FONT SIZE=-1>
+</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Nel <B>Diagramma 2</B> &egrave; riportato
+un altro tiro di 2a intenzione piuttosto comune detto &quot;ribattino&quot;.
+Il Bianco muove: 19-14, 10x19, 22x15, 12x19, 29x15.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>In gioco vivo, di norma, ci sono
+anche pezzi non coinvolti nella manovra e i tiri sono pi&ugrave; difficili
+da &quot;vedere&quot;. Soprattutto in apertura, dove le posizioni sono
+complesse per l'alto numero di pedine, e nei finali, dove le dame aumentano
+le possibilit&agrave; combinatorie.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="RIGHT" WIDTH="40%"></P>
+
+<P><IMG SRC="immagini/mt3.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT>
+</P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Tiri di apertura</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 3</B>. Il Nero muove:
+15-19; 22x15, 7-12; 16x7, 3x28; 32x23, 14-18; 21x14, 10x28 il Nero dama
+e vince. E' il celeberrimo &quot;Tiro di Canalejas&quot;, presentato dall'autore
+spagnolo nel suo trattato del 1650.</FONT></FONT></P>
+
+<P><IMG SRC="immagini/mt4.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=RIGHT><FONT FACE="Verdana"><FONT SIZE=-1>
+</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 4</B>. Il Nero muove:
+10-13; 17x10, 16-20; 23x16, 9-13; 18x9, 11x18; 22x13, 5x30 il Nero vince.
+E' il famoso &quot;Tiro del Vigevano&quot;, presentato dal Lanci nel suo
+trattato del 1837.</FONT></FONT><BR CLEAR=BOTH>
+<IMG SRC="immagini/mt5.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 5</B>. Il Nero muove:
+15-20; 24x15, 14-18; 22x6, 2x20; 23x16, 9-13; 17x10, 5x32 il Nero vince.
+E' il &quot;Tiro del Bolognese&quot;, anch'esso presentato dal Lanci nel
+suo trattato del 1837.</FONT></FONT></P>
+
+<P><IMG SRC="immagini/mt6.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=RIGHT><B><FONT FACE="Verdana">
+</FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 6</B>. Il Nero muove:
+17-21; 26x10, 9-13; 18x9, 15-20; 23x7, 4x18; 22x13, 5x32 il Nero ha un
+pezzo in meno, ma porta in gioco la dama e vince.</FONT></FONT><BR CLEAR=BOTH>
+<IMG SRC="immagini/mt7.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 7</B>. Il Nero muove:
+10-13; 17x1, 6-10; 14x5, 19-23; 28x19, 12-15; 20x11 7x30 il Nero ha due
+pezzi in meno, ma la dama bianca &egrave; fuori gioco. Il Nero dovrebbe
+vincere il finale.</FONT></FONT></P>
+
+<P><IMG SRC="immagini/mt8.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=RIGHT><B><FONT FACE="Verdana">
+</FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 8</B>. Il Nero muove:
+18-21; 25x18, 10-13; 17x10, 3-6; 10x3, 12-15; 3x12, 15x31; 14x7, 31x8 il
+Bianco deve muovere 7-3 e il Nero vince facile con 4-7.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR ALIGN="RIGHT" WIDTH="40%"></P>
+
+<P><IMG SRC="immagini/mt9.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><B>
+</B></P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Tiri di finale</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 9</B>. Il Bianco muove:
+11-7, 23x14; 24-20, 16x23; 15-11, 8x15; 7-4, 14x7; 4x18 il Bianco vince.&nbsp;</FONT></FONT></P>
+
+<P><IMG SRC="immagini/mt10.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=RIGHT><B><FONT FACE="Verdana">
+</FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 10</B>. Il Bianco muove:
+15-11, 6x15; 14-11, 21x14 (oppure 15x6); 7-3, 15x6 (oppure 14x7); 3x26
+il Bianco vince.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><IMG SRC="immagini/mt11.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT>
+</P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Blocco</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il blocco &egrave; una posizione
+in cui un giocatore non pu&ograve; muovere e quindi perde.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 11.</B> Il Nero muove
+e perde.</FONT></FONT><BR CLEAR=BOTH>
+<IMG SRC="immagini/mt12.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1><B>Diagramma 12.</B> Il Nero muove
+e perde.</FONT></FONT></P>
+
+<P><IMG SRC="immagini/mt13.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=RIGHT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Spettacolari blocchi possono verificarsi
+in apertura, in partite simmetriche, dove il Nero copia le mosse del Bianco.
+<B>Diagramma 13.</B> Il Bianco muove e perde. </FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><IMG SRC="immagini/mt14.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT>
+</P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Legatura</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>La legatura &egrave; una posizione
+in cui un giocatore pu&ograve; effettuare soltanto mosse con cui perde
+materiale. Di seguito alcune legature elementari. Il Nero muove.<BR CLEAR=BOTH>
+<IMG SRC="immagini/mt15.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT><IMG SRC="immagini/mt16.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=RIGHT></FONT></FONT>
+</P>
+
+<P><FONT FACE="Verdana">&nbsp;<BR CLEAR=BOTH>
+<IMG SRC="immagini/mt17.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT>&nbsp;</FONT><IMG SRC="immagini/mt18.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=RIGHT><BR CLEAR=BOTH>
+
+<HR ALIGN="RIGHT" WIDTH="40%"></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>In gioco vivo le possibilit&agrave;
+di legature sono molto varie. In apertura e centro partita si possono formare
+spettacolari legature totali, in cui la posizione avversaria crolla di
+colpo, come un castello di carte. Ma, attenzione: se si sbagliano i calcoli
+anche di un solo tempo, pu&ograve; essere la nostra posizione a rimanere
+legata!</FONT></FONT></P>
+
+<P><FONT FACE="Verdana">&nbsp;<IMG SRC="immagini/mt19.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT>
+</FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>&nbsp;<B>Diagramma 19</B>. Il Nero
+muove ed &egrave; legato.</FONT></FONT></P>
+
+<P><IMG SRC="immagini/mt20.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=RIGHT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>&nbsp;<B>Diagramma 20</B>. Il Bianco
+muove ed &egrave; legato.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><IMG SRC="immagini/mt21.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT>
+</P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Sacrificio </FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il sacrificio &egrave; l'offerta
+di un pezzo per conseguire vantaggi di posizione che portino a guadagni
+futuri. E' una manovra brillante che spesso spiazza l'avversario, ma, se
+si &egrave; stati carenti nell'analisi e non si riesce a sfruttare il vantaggio
+posizionale, di norma si perde. </FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Si sacrifica per effettuare (o per
+evitare) un tiro, un blocco o una legatura. <B>Diagramma 21</B>. Il Bianco
+muove: 24-20 (sacrificio per liberarsi dalla legatura), X, 23-19, 24-28,
+18-14 il Bianco riprende il pezzo e patta.</FONT></FONT><BR CLEAR=BOTH>
+<IMG SRC="immagini/mt22.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Si sacrifica per forzare la damatura.<B>
+Diagramma 22</B>. Il Bianco muove: 12-7! sacrifica per damare la pedina
+in 11, poi , con la base protetta, che impedisce al Nero la damatura, porta
+in gioco la dama e vince.</FONT></FONT></P>
+
+<P><IMG SRC="immagini/mt23.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=RIGHT><FONT FACE="Verdana">
+</FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>In finale, si sacrifica per una patta
+sotto pezzo. <B>Diagramma 23</B>. Il Bianco muove: 27-23! (sacrifica per
+immettersi in un finale teorico di patta sotto pezzo. Se 27-22?, 24-20,
+22-19, 20-15, 9-5 ecc. la dama nera ha la mossa sulla bianca e Nv), 24-20,
+9-5, X, 5-2 la dama bianca ha la mossa sulla nera, blocca la pedina e patta.</FONT></FONT><BR CLEAR=BOTH>
+<IMG SRC="immagini/mt24.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Di norma il sacrificio si effettua
+in centro partita o in finale, quando, per il numero ridotto di pezzi in
+gioco, l'analisi della posizione &egrave; pi&ugrave; semplice. In apertura
+&egrave; molto rischioso ed &egrave; consigliabile solo se porta a posizioni
+conosciute e analizzate a fondo da esperti. Una partita teorica che si
+basa su un sacrificio in apertura, &egrave; la &quot;Fife&quot;, che riporto
+a titolo d'esempio:</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>1.23-19 11-15 2.21-18 10-13 3.25-21
+13-17 4.18-14 15-20 5.24x15 6-11 6.15x6 2x25 (<B>Diagramma 24</B>)<B> </B>Il
+Bianco ha una posizione solida ed &egrave; padrone del centro. Il Nero,
+con i pezzi separati e addossati a sponda, pur con una pedina in pi&ugrave;,
+deve subire l'iniziativa avversaria. </FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Pu&ograve; seguire: 7.19-14 5-10
+8.14x5 1x10 9.22-18 10-14 10.18x11 7x14 11.28-23 4-7 12.32-28 7-11 13.28-24
+12-16 14.27-22 3-6 15.22-19 6-10 16.24-20 8-12 17.31-28 9-13 18.28-24 (il
+Nero deve restiruire il pezzo) 17-21 19.26x17 ecc. Posizione di pari.</FONT></FONT><BR CLEAR=BOTH>
+
+<HR></P>
+
+<P><IMG SRC="immagini/mt25.gif" HSPACE=20 VSPACE=20 HEIGHT=169 WIDTH=148 ALIGN=LEFT>
+</P>
+
+<P><B><FONT FACE="Verdana"><FONT SIZE=+1>Combinazione</FONT></FONT></B></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>In gioco vivo gli elementi e i motivi
+tattici vengono composti secondo le capacit&agrave; e l'estro del giocatore.
+Le combinazioni pi&ugrave; brillanti sono quelle che attingono a una variet&agrave;
+di temi diversi.</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Nel <B>Diagramma 25</B> il Bianco
+sembra spacciato: l'unica mossa con cui non perde materiale &egrave; 21-17,
+ma il Nero risponde 13-18 e lo lega. Eppure si salva con una bella combinazione!</FONT></FONT></P>
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Il Bianco muove: 23-19 (sacrificio)
+15x22; 21-18 (forzatura) 13-17; 18-13 (forzatura) 10-14; 24-20 (tiro) 16x23;
+28x10 pari.<BR CLEAR=BOTH>
+<BR>
+<BR>
+<BR>
+<B><U><FONT COLOR="#0000FF"><A HREF="index.html">Indice</A></FONT></U></B></FONT></FONT></P>
+
+<P>
+<HR></P>
+
+<P><I><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio
+Bellini</A></FONT></FONT></FONT></U></I></P>
+
+</BODY>
+</HTML>
