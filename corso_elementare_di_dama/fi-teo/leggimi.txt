@@ -1,0 +1,17 @@
+Riepilogo dei files che compongono il volume "Finali teorici"
+
+Indice.htm = Introduzione e indice
+Amossa.htm = Teoria della mossa
+B-5.htm = Finali teorici semplici (meno di 5 pezzi)
+C32.htm = Finale 3/2 dame
+D212.htm = Finale 2 dame 1 pedina/2 dame
+E321.htm = Finale 3 dame/2dame 1 pedina
+F43 = Finale 4/3 dame
+G313 = Finale 3 dame 1 pedina/3dame
+Hvarie.htm = Posizioni teoriche
+Capire.htm = Capire il finale
+
+A0.gif = Diagramma numerato
+A,B,... .gif = i vari diagrammi relativi ai files .HTM
+
+Ultima revisione:  16.53 14/12/02
