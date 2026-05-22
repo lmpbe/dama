@@ -1,0 +1,2 @@
+
+Per leggere l'ipertesto scompatta il file compresso "Corso elementare di dama.zip" in una nuova cartella e apri il file "present.htm" nel bowser.
