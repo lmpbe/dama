@@ -717,15 +717,14 @@ function stepBy(d) { goTo(curStep + d); }
 // Usiamo pointerdown invece di click così funziona bene anche su touch
 function wireNavBtn(id, action) {
   const btn = document.getElementById(id);
-  // pointerdown con preventDefault blocca sia il focus che lo scroll
   btn.addEventListener('pointerdown', e => {
     e.preventDefault();
     e.stopPropagation();
   });
-  // click separato per eseguire l'azione (funziona anche da tastiera)
   btn.addEventListener('click', e => {
     e.preventDefault();
     e.stopPropagation();
+    keepAwakeStart();
     action();
   });
 }
@@ -969,7 +968,7 @@ async function keepAwakeStart() {
         }
       } catch(e) {}
     }
-  }, 14000);
+  }, 5000);
 }
 
 function keepAwakeStop() {
@@ -983,11 +982,8 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pagehide', saveSession);
 
-// Parte al primo tocco (richiesto dai browser mobile)
-document.addEventListener('pointerdown', function startOnFirstTouch() {
-  keepAwakeStart();
-  document.removeEventListener('pointerdown', startOnFirstTouch);
-}, {once: true});
+// Rinnova il wake lock ad ogni tocco sulla pagina
+document.addEventListener('pointerdown', () => keepAwakeStart());
 </script>
 </body>
 </html>
