@@ -92,7 +92,7 @@
   .btn-big:hover:not(:disabled) { background:#c8ddf0; }
 
   /* ── pulsanti navigazione partita ── */
-  .action-btns { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; }
+  .action-btns { display:grid; grid-template-columns:1fr; gap:10px; }
   .action-btns .btn-big { padding:12px 10px; font-size:1rem; }
   #ai-msg { font-size:.9rem; font-weight:bold; color:var(--accent2); min-height:1.3em; margin-top:10px; }
 
@@ -190,10 +190,9 @@
       <div class="card">
         <h3>Partita</h3>
         <div class="action-btns">
+          <button class="btn-big" id="btn-hint" tabindex="-1">💡 Suggerisci</button>
           <button class="btn-big" id="btn-undo" tabindex="-1">↩ Annulla mossa</button>
           <button class="btn-big" id="btn-new" tabindex="-1">↺ Nuova partita</button>
-          <button class="btn-big" id="btn-hint" tabindex="-1">💡 Suggerisci</button>
-          <button class="btn-big" id="btn-play" tabindex="-1">🤖 Mossa del computer</button>
         </div>
         <div id="ai-msg"></div>
       </div>
@@ -210,6 +209,8 @@
   </div>
 </main>
 
+<script src="libro-aperture.js"></script>
+<script src="libro-finali.js"></script><!-- facoltativo: se manca, i finali sono giocati dal solo motore -->
 <!-- Overlay fine partita -->
 <div id="overlay" class="overlay-bg">
   <div class="overlay-box">
@@ -847,6 +848,7 @@ function confirmNewGame(){
   document.getElementById('overlay-confirm').classList.remove('show');
   closeOverlay();
   cancelAI(); hintMove=null; setAiMsg('');
+  aiMode=false; humanColor='white'; aiLevel=2; applySettingsUI();   // dopo "Nuova partita": 2 giocatori
   board=makeInitBoard(); turn='white'; selected=null; partialPath=[];
   history=[]; halfMoves=[]; lastFrom=null; lastTo=null; gameOver=false;
   computeLegal(); updatePDN(); updateStatus(); drawAll();
@@ -956,11 +958,16 @@ function getCapturedFromSqs(b, sqs, piece){
 // ═══════════════════════════════════════════════════════════════════
 
 // <<AI-ENGINE-START>>
-function aiEngineFactory(){
+function aiEngineFactory(opt){
   const INF=1000000, MATE=100000, QLIM=8;
+  // pesi della valutazione e interruttori della ricerca (opt serve solo ai test)
+  const W=Object.assign({
+    man:100, adv:3, cen:2, back:5, edge:-4, prot:0, king:200, kcen:2, diag:4,
+    pvs:1, lmr:1, kill:1, advq:4, mob:3, trap:0, basePen:30
+  }, opt||{});
 
   // ── geometria: indice 0..31 = casella PDN 1..32 ──
-  const ROW=new Int8Array(32), COL=new Int8Array(32), IDX=new Int8Array(64).fill(-1), CEN=new Int8Array(32);
+  const ROW=new Int8Array(32), COL=new Int8Array(32), IDX=new Int8Array(64).fill(-1), CEN=new Int8Array(32), DIAG=new Int8Array(32);
   for(let i=0;i<32;i++){
     const r=i>>2, p=i&3;
     ROW[i]=r; COL[i]=(r&1)===0?p*2:p*2+1;
@@ -969,6 +976,7 @@ function aiEngineFactory(){
   for(let i=0;i<32;i++){
     const r=ROW[i], c=COL[i];
     CEN[i]=(c>=2&&c<=5)?((r>=2&&r<=5)?4:2):0;
+    DIAG[i]=r===c?1:0;
   }
   const DR=[-1,-1,1,1], DC=[-1,1,-1,1];
   const NB=new Int8Array(128).fill(-1), JP=new Int8Array(128).fill(-1);
@@ -1060,11 +1068,38 @@ function aiEngineFactory(){
     for(let i=0;i<32;i++){
       const v=b[i];
       if(v===0) continue;
-      const r=ROW[i];
-      if(v===1) sc+=100+(7-r)*3+CEN[i]+(r===7?5:0);
-      else if(v===-1) sc-=100+r*3+CEN[i]+(r===0?5:0);
-      else if(v===2) sc+=185+CEN[i]*2;
-      else sc-=185+CEN[i]*2;
+      const r=ROW[i], c=COL[i];
+      let x;
+      if(v===1||v===-1){
+        const adv=v===1?(7-r):r;
+        x=W.man+adv*W.adv+CEN[i]*W.cen;
+        if(adv===0) x+=W.back;
+        if(W.advq&&adv>=5) x+=(adv-4)*W.advq;
+        if(c===0||c===7) x+=W.edge;
+        if(W.prot){
+          const d0=v===1?2:0;
+          const n1=NB[i*4+d0], n2=NB[i*4+d0+1];
+          if(n1<0||b[n1]!==0) x+=W.prot;
+          if(n2<0||b[n2]!==0) x+=W.prot;
+        }
+      } else {
+        x=W.king+CEN[i]*W.kcen+(DIAG[i]?W.diag:0);
+      }
+      sc+=v>0?x:-x;
+    }
+    if(W.mob){
+      // mobilità: differenza di mosse semplici disponibili (solo posizioni senza prese)
+      let mw=0,mb=0;
+      for(let i=0;i<32;i++){
+        const v=b[i];
+        if(v===0) continue;
+        const king=(v===2||v===-2);
+        const dirs=king?ALL:(v>0?WD:BD);
+        let n=0;
+        for(let k=0;k<dirs.length;k++){ const t=NB[i*4+dirs[k]]; if(t>=0&&b[t]===0) n++; }
+        if(v>0) mw+=n; else mb+=n;
+      }
+      sc+=(mw-mb)*W.mob;
     }
     return s>0?sc:-sc;
   }
@@ -1085,7 +1120,7 @@ function aiEngineFactory(){
     if(s<0){ h1^=S1; h2^=S2; }
     H1=h1; H2=h2;
   }
-  const TTSIZE=1<<19, TTMASK=TTSIZE-1;
+  const TTSIZE=1<<20, TTMASK=TTSIZE-1;
   let tkey=null, tdepth=null, tflag=null, tscore=null, tmove=null;
   function allocTT(){
     if(tkey) return;
@@ -1095,15 +1130,115 @@ function aiEngineFactory(){
   function toTT(sc,ply){ return sc>MATE-1000?sc+ply:(sc<-MATE+1000?sc-ply:sc); }
   function fromTT(sc,ply){ return sc>MATE-1000?sc-ply:(sc<-MATE+1000?sc+ply:sc); }
 
+
+  // ── database dei finali (facoltativo, file libro-finali.js) ──
+  // Contiene, per tutte le posizioni fino a 4 pezzi, esito esatto (vince/perde/patta) e distanza alla
+  // conversione (presa o promozione) modulo DBM. Simbolo: 0 patta; 1..M vince (d=sym-1); M+1..2M perde (d=sym-1-M).
+  const DBWIN=30000, DBWIN5=20000;
+  let dbHits=0, DB=null, DB5=null, DBM=8, DBMAXP=4, DBCLS=null, DBC=null;
+  function setDB(arr,mod,arr5){
+    if(!arr){ DB=null; DB5=null; return; }
+    DBM=mod||8; DBMAXP=arr5?5:4;
+    const C=[]; for(let n=0;n<=32;n++){ C.push([1,0,0,0,0,0,0]); for(let k=1;k<=6;k++) C[n][k]= n===0?0:(C[n-1][k]+C[n-1][k-1]); }
+    // C[n][k] costruito con Pascal: C[n][k]=C[n-1][k]+C[n-1][k-1]
+    DBC=C; DBCLS=new Map(); let base=0, base5=0;
+    for(let tot=2;tot<=DBMAXP;tot++) for(let men=0;men<=tot;men++)
+      for(let bm=0;bm<=tot;bm++) for(let bk=0;bm+bk<=tot;bk++){
+        const bp=bm+bk; if(bp<1) continue; const wp=tot-bp; if(wp<1) continue;
+        for(let wm=0;wm<=wp;wm++){ const wk=wp-wm; if(bm+wm!==men) continue;
+          if(bp<wp||(bp===wp&&bk<wk)) continue;
+          const nbm=C[28][bm], nwm=C[28][wm], nbk=C[32][bk], nwk=C[32][wk];
+          const size=nbm*nwm*nbk*nwk, nstm=(bm===wm&&bk===wk)?1:2;
+          if(tot<=4){ DBCLS.set(bm*1000+bk*100+wm*10+wk,{base,size,nbm,nwm,nbk,nwk,p5:false}); base+=size*nstm; }
+          else { DBCLS.set(bm*1000+bk*100+wm*10+wk,{base:base5,size,nbm,nwm,nbk,nwk,p5:true}); base5+=size*nstm; } }
+      }
+    if(base!==arr.length||(arr5&&Math.ceil(base5/4)!==arr5.length)){ DB=null; DB5=null; return; }   // file non coerente: non usato
+    DB=arr; DB5=arr5||null;
+  }
+  // simbolo del database per (b,s) oppure -1 (fuori ambito). Da chiamare solo se chi muove non ha prese.
+  function dbSym(b,s){
+    let bm=0,bk=0,wm=0,wk=0;
+    for(let i=0;i<32;i++){ const v=b[i]; if(v===0) continue; if(v===-1) bm++; else if(v===-2) bk++; else if(v===1) wm++; else wk++; }
+    const tot=bm+bk+wm+wk;
+    if(tot>DBMAXP||bm+bk===0||wm+wk===0) return -1;
+    const bp=bm+bk, wp=wm+wk;
+    let rev=false;
+    if(wp>bp) rev=true; else if(wp===bp){ if(wk>bk) rev=true; else if(bm===wm&&bk===wk&&s>0) rev=true; }
+    let c0=bm,c1=bk,c2=wm,c3=wk, ss=s;
+    if(rev){ c0=wm;c1=wk;c2=bm;c3=bk; ss=-s; }
+    const cl=DBCLS.get(c0*1000+c1*100+c2*10+c3); if(!cl) return -1;
+    const C=DBC;
+    let rbm=0,rwm=0,rbk=0,rwk=0,nbm=0,nwm=0,nbk=0,nwk=0;
+    for(let j=0;j<32;j++){
+      let v=rev?-b[31-j]:b[j];
+      if(v===0) continue;
+      if(v===-1){ if(j>27) return -1; rbm+=C[j][++nbm]; }
+      else if(v===1){ if(j<4) return -1; rwm+=C[j-4][++nwm]; }
+      else if(v===-2) rbk+=C[j][++nbk];
+      else rwk+=C[j][++nwk];
+    }
+    const idx=((rbm*cl.nwm+rwm)*cl.nbk+rbk)*cl.nwk+rwk;
+    const cell=cl.base+(ss<0?0:cl.size)+idx;
+    if(cl.p5) return 100+((DB5[cell>>2]>>((cell&3)<<1))&3);   // 5 pezzi: solo esito (100 patta, 101 vince, 102 perde)
+    return DB[cell];
+  }
+  // esito esatto per chi muove: 0 patta, 1 vince, 2 perde, -1 sconosciuto (risolve le prese forzate con una ricerca)
+  function dbRes(b,s){
+    const g=genMoves(b,s);
+    if(g.moves.length===0) return 2;
+    if(!g.cap){ const y=dbSym(b,s); if(y<0) return -1; return y>=100?y-100:(y===0?0:(y<=DBM?1:2)); }
+    let anyL=false, allW=true;
+    for(const m of g.moves){
+      const r=dbRes(applyMove(b,m),-s);
+      if(r<0) return -1;
+      if(r===2) anyL=true;
+      if(r!==1) allW=false;
+    }
+    return anyL?1:(allW?2:0);
+  }
+  // scelta alla radice quando la posizione e' nel database: {pick:mossa} oppure {moves:[...]} (mosse da cercare) oppure {}
+  function dbRoot(b,s,moves){
+    const rs=[];
+    for(const m of moves){ const r=dbRes(applyMove(b,m),-s); if(r<0) return {}; rs.push(r); }
+    const win=[]; for(let i=0;i<moves.length;i++) if(rs[i]===2) win.push(i);
+    if(win.length){
+      const conv=[], quiet=[];
+      for(const i of win){
+        const m=moves[i], nb=applyMove(b,m);
+        const from=b[m.path[0]], to=nb[m.path[m.path.length-1]];
+        const promo=from!==to&&(from===1||from===-1);
+        const gc=genMoves(nb.slice(),-s);
+        if(m.capt.length>0||promo||gc.cap) conv.push(m);
+        else { const ys=dbSym(nb,-s); quiet.push({m,e:(ys>DBM&&ys<100)?ys-1-DBM:-1}); }
+      }
+      if(conv.length) return {pick:conv[0]};
+      const y=dbSym(b,s);
+      if(quiet.some(q=>q.e<0)||y>=100||y<0) return {moves:win.map(i=>moves[i])};   // 5 pezzi: niente distanza, la ricerca sceglie fra le sole mosse vincenti
+      if(y>=1&&y<=DBM){
+        const want=((y-1)-1+DBM*4)%DBM;
+        for(const q of quiet) if(q.e%DBM===want) return {pick:q.m};
+      }
+      return {pick:quiet[0].m};
+    }
+    const dr=[]; for(let i=0;i<moves.length;i++) if(rs[i]===0) dr.push(moves[i]);
+    if(dr.length>0&&dr.length<moves.length) return {moves:dr};
+    return {};
+  }
+
   // ── ricerca ──
   let nodes=0, abort=false, deadline=Infinity;
   const hist=new Int32Array(1024);
+  const killers=new Int16Array(256).fill(-1);
 
-  function orderMoves(moves,ttMove){
+  function orderMoves(moves,ttMove,ply){
+    const k1=W.kill?killers[ply*2]:-2, k2=W.kill?killers[ply*2+1]:-2;
     for(let i=0;i<moves.length;i++){
       const m=moves[i], p=m.path;
+      const id=(p[0]<<5)|p[1];
       let k=hist[p[0]*32+p[p.length-1]];
-      if(((p[0]<<5)|p[1])===ttMove) k+=1000000;
+      if(id===ttMove) k+=10000000;
+      else if(id===k1) k+=900000;
+      else if(id===k2) k+=800000;
       if(m.capt.length>0) k+=m.capt.length*1000+m.kc*500;
       m.k=k;
     }
@@ -1115,6 +1250,11 @@ function aiEngineFactory(){
     if(abort) return 0;
     const g=genMoves(b,s), moves=g.moves;
     if(moves.length===0) return -MATE+ply;
+    if(DB!==null&&!g.cap){
+      const y=dbSym(b,s);
+      if(y>=100){ if(depth<=0){ dbHits++; return y===100?0:(y===101?DBWIN5-ply:-DBWIN5+ply); } }   // 5 pezzi: valore solo alle foglie, cosi' la ricerca cerca la conversione
+      else if(y>=0){ dbHits++; return y===0?0:(y<=DBM?DBWIN-ply:-DBWIN+ply); }
+    }
     if(depth<=0){
       if(!g.cap||depth<-QLIM) return evaluate(b,s);   // continua solo se c'è una presa forzata
     }
@@ -1132,17 +1272,31 @@ function aiEngineFactory(){
         }
       }
     }
-    orderMoves(moves,ttMove);
+    orderMoves(moves,ttMove,ply);
     let best=-INF, bestId=-1;
     for(let i=0;i<moves.length;i++){
       const m=moves[i];
-      const sc=-negamax(applyMove(b,m),-s,depth-1,-beta,-alpha,ply+1);
+      const nb=applyMove(b,m);
+      let sc;
+      if(i===0||!W.pvs){
+        sc=-negamax(nb,-s,depth-1,-beta,-alpha,ply+1);
+      } else {
+        const red=(W.lmr&&depth>=3&&i>=3&&!g.cap)?1:0;
+        sc=-negamax(nb,-s,depth-1-red,-alpha-1,-alpha,ply+1);
+        if(!abort&&sc>alpha&&red>0) sc=-negamax(nb,-s,depth-1,-alpha-1,-alpha,ply+1);
+        if(!abort&&sc>alpha&&sc<beta) sc=-negamax(nb,-s,depth-1,-beta,-alpha,ply+1);
+      }
       if(abort) return 0;
       if(sc>best){ best=sc; bestId=(m.path[0]<<5)|m.path[1]; }
       if(sc>alpha){
         alpha=sc;
         if(alpha>=beta){
-          if(!g.cap){ const p=m.path; hist[p[0]*32+p[p.length-1]]+=depth*depth; }
+          if(!g.cap){
+            const p=m.path;
+            hist[p[0]*32+p[p.length-1]]+=depth*depth;
+            const id=(p[0]<<5)|p[1];
+            if(killers[ply*2]!==id){ killers[ply*2+1]=killers[ply*2]; killers[ply*2]=id; }
+          }
           break;
         }
       }
@@ -1162,42 +1316,45 @@ function aiEngineFactory(){
   }
 
   const LEVELS={
-    1:{iter:true,time:3000,maxDepth:30},          // Medio (fino a 3 s)
-    2:{iter:true,time:10000,maxDepth:40}          // Forte (fino a 10 s)
+    1:{iter:true,time:5000,maxDepth:30},          // Medio (fino a 5 s)
+    2:{iter:true,time:15000,maxDepth:40}          // Forte (fino a 15 s)
   };
 
   function shuffle(a){
     for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; }
   }
 
-  // o: {cells:[32], side:+1|-1, level:1..4, hist:[chiavi posizioni già viste], timeMs?}
+  // o: {cells:[32], side:+1|-1, level:1..2, hist:[chiavi posizioni già viste], timeMs?, evalOnly?}
   function think(o){
     const t0=Date.now();
     const b=Int8Array.from(o.cells), s=o.side;
-    const lv=LEVELS[o.level]||LEVELS[3];
-    const moves=genMoves(b,s).moves;
+    const lv=LEVELS[o.level]||LEVELS[2];
+    dbHits=0;
+    let moves=genMoves(b,s).moves;
     if(moves.length===0) return {none:true};
     if(moves.length===1&&!o.evalOnly) return {path:moves[0].path.map(x=>x+1),score:0,depth:0,nodes:0,ms:0,forced:true};
+    if(DB!==null&&!o.evalOnly){
+      const r=dbRoot(b,s,moves);
+      if(r.pick) return {path:r.pick.path.map(x=>x+1),score:DBWIN,depth:0,nodes:0,ms:Date.now()-t0,db:true,dbHits:1,stat:evaluate(b,s)};
+      if(r.moves){ moves=r.moves; dbHits++; }
+    }
     allocTT();
-    hist.fill(0);
+    hist.fill(0); killers.fill(-1);
     shuffle(moves);
     const seen={};
     (o.hist||[]).forEach(k=>{ seen[k]=(seen[k]||0)+1; });
     for(const m of moves) m.pen=15*(seen[posKey(applyMove(b,m),-s)]||0);   // piccolo malus alle ripetizioni
-    nodes=0; abort=false;
-
-    if(!lv.iter){
-      deadline=Infinity;
-      const res=[]; let bestSc=-INF;
-      for(const m of moves){
-        const sc=-negamax(applyMove(b,m),-s,lv.depth-1,-INF,INF,1)-m.pen;
-        res.push({m,sc});
-        if(sc>bestSc) bestSc=sc;
+    // difesa della base: le pedine di base (29,30,31 per il Bianco; 2,3,4 per il Rosso) si muovono solo se la mossa
+    // e' migliore delle alternative di almeno basePen centesimi di pedina (finche' l'avversario ha ancora pedine)
+    if(W.basePen&&!o.evalOnly){
+      let oppMen=false;
+      for(let i=0;i<32;i++) if(b[i]===-s){ oppMen=true; break; }
+      if(oppMen){
+        const bs=s>0?[28,29,30]:[1,2,3];
+        for(const m of moves) if(m.capt.length===0&&b[m.path[0]]===s&&bs.indexOf(m.path[0])>=0) m.pen+=W.basePen;
       }
-      const cand=res.filter(r=>r.sc>=bestSc-lv.margin);
-      const pick=cand[Math.floor(Math.random()*cand.length)];
-      return {path:pick.m.path.map(x=>x+1),score:pick.sc,depth:lv.depth,nodes,ms:Date.now()-t0};
     }
+    nodes=0; abort=false;
 
     const time=o.timeMs||lv.time;
     let order=moves.slice(), best=order[0], bestScore=0, doneDepth=0;
@@ -1218,12 +1375,46 @@ function aiEngineFactory(){
       if(Math.abs(bestScore)>MATE-1000) break;
       if(Date.now()-t0>time*0.6) break;
     }
-    return {path:best.path.map(x=>x+1),score:bestScore,depth:doneDepth,nodes,ms:Date.now()-t0};
+    return {path:best.path.map(x=>x+1),score:bestScore,depth:doneDepth,nodes,ms:Date.now()-t0,dbHits,stat:evaluate(b,s)};
   }
 
-  return {think,genMoves,applyMove,posKey,evaluate};
+  // Classifica le mosse indicate in o.only ([da,a] in base 0) con ricerca a finestra piena: serve al libro delle aperture
+  function rank(o){
+    const t0=Date.now();
+    const b=Int8Array.from(o.cells), s=o.side;
+    let moves=genMoves(b,s).moves;
+    if(o.only){
+      const ok=new Set(o.only.map(p=>p[0]*32+p[1]));
+      moves=moves.filter(m=>ok.has(m.path[0]*32+m.path[m.path.length-1]));
+    }
+    if(moves.length===0) return {none:true};
+    if(moves.length===1) return {ranked:[{path:moves[0].path.map(x=>x+1),score:0}],depth:0,nodes:0,ms:0};
+    allocTT(); hist.fill(0); killers.fill(-1);
+    nodes=0; abort=false;
+    const time=o.timeMs||3000;
+    let ranked=moves.map(m=>({m,score:0})), doneDepth=0;
+    for(let depth=1;depth<=16;depth++){
+      abort=false; deadline=depth<=2?Infinity:t0+time;
+      const cur=[];
+      for(const r of ranked){
+        const sc=-negamax(applyMove(b,r.m),-s,depth-1,-INF,INF,1);
+        if(abort) break;
+        cur.push({m:r.m,score:sc});
+      }
+      if(abort) break;
+      cur.sort((x,y)=>y.score-x.score);
+      ranked=cur; doneDepth=depth;
+      if(Date.now()-t0>time*0.6) break;
+    }
+    return {ranked:ranked.map(r=>({path:r.m.path.map(x=>x+1),score:r.score})),depth:doneDepth,nodes,ms:Date.now()-t0};
+  }
+
+  function run(o){ return o.rank?rank(o):think(o); }
+
+  return {think,rank,run,genMoves,applyMove,posKey,evaluate,setDB,dbRes};
 }
 // <<AI-ENGINE-END>>
+
 
 // ── Controllo partita contro il computer ───────────────────────────
 const AI_LEVEL_NAMES=['','Medio','Forte'];
@@ -1253,49 +1444,117 @@ function setAiMsg(t){
   if(el) el.textContent=t||'';
 }
 
+// ── Database dei finali (facoltativo: file libro-finali.js) ──
+// Se presente viene decompresso una sola volta e passato al motore (worker o motore nella pagina).
+let finaliDB=null, finaliDB5=null, finaliMod=8;
+let finaliVer=0;
+// Il database serve solo nei finali: viene decompresso e passato al worker solo quando in gioco
+// restano al massimo FINALI_MAX pezzi (cosi' fino ad allora non occupa memoria).
+const FINALI_MAX=10;
+let finaliStarted=false;
+function maybeLoadFinali(cells){
+  if(finaliStarted||!cells) return;
+  let n=0; for(let i=0;i<32;i++) if(cells[i]) n++;
+  if(n>FINALI_MAX) return;
+  finaliStarted=true; loadFinali();
+}
+function sendFinaliTo(w,cells){
+  if(!finaliDB||!w||!cells||w._finVer===finaliVer) return;
+  let n=0; for(let i=0;i<32;i++) if(cells[i]) n++;
+  if(n>FINALI_MAX) return;
+  try{ w.postMessage({cmd:'setDB',db:finaliDB,mod:finaliMod,db5:finaliDB5}); w._finVer=finaliVer; }catch(e){}
+}
+function inflateB64(txt){
+  const bin=atob(txt), n=bin.length, u=new Uint8Array(n);
+  for(let i=0;i<n;i++) u[i]=bin.charCodeAt(i);
+  const ds=new DecompressionStream('deflate-raw');
+  return new Response(new Blob([u]).stream().pipeThrough(ds)).arrayBuffer().then(b=>new Uint8Array(b));
+}
+function loadFinali(){
+  try{
+    if(typeof LIBRO_FINALI!=='object'||!LIBRO_FINALI||typeof DecompressionStream==='undefined') return;
+    const L=LIBRO_FINALI;
+    inflateB64(L.data).then(arr=>{
+      if(arr.length!==L.n) return;                    // file non coerente: ignorato
+      finaliDB=arr; finaliMod=L.mod||8;
+      const done=()=>{
+        finaliVer++;
+        if(aiWorker) sendFinaliTo(aiWorker,cellsFromBoard(board));
+        if(aiSyncEngine) aiSyncEngine.setDB(finaliDB,finaliMod,finaliDB5);
+        if(typeof scheduleEval==='function') scheduleEval();
+      };
+      done();                                          // intanto il database fino a 4 pezzi e' gia' utilizzabile
+      if(L.data5) inflateB64(L.data5).then(a5=>{ if(a5.length===L.n5){ finaliDB5=a5; done(); } }).catch(()=>{});
+    }).catch(()=>{});
+  }catch(e){}
+}
+
 let aiWorkerUrl=null;
 function workerUrl(){
   if(!aiWorkerUrl){
     const src='const E=('+aiEngineFactory.toString()+')();\n'+
-              'onmessage=function(e){postMessage(Object.assign({id:e.data.id},E.think(e.data)));};';
+              'onmessage=function(e){\n if(e.data&&e.data.cmd===\'setDB\'){ E.setDB(e.data.db,e.data.mod,e.data.db5); return; }\n postMessage(Object.assign({id:e.data.id},E.run(e.data)));\n};';
     aiWorkerUrl=URL.createObjectURL(new Blob([src],{type:'text/javascript'}));
   }
   return aiWorkerUrl;
 }
 
+// Strade per avviare il calcolo in background: 0 = worker creato dalla pagina stessa (blob),
+// 1 = file separato "motore_ia.js" accanto alla pagina, 2 = nessuna (calcolo nella pagina, ridotto)
+let workerMode=0, workerErr='';
+function newWorker(){
+  while(workerMode<2){
+    try{ return new Worker(workerMode===0?workerUrl():'motore_ia.js'); }
+    catch(e){ workerErr=String((e&&e.message)||e); workerMode++; }
+  }
+  workerBroken=true; return null;
+}
+function workerFailed(ev){
+  workerErr=(ev&&ev.message)||'caricamento non riuscito';
+  workerMode++;
+  if(workerMode>=2) workerBroken=true;
+}
+
 function getAIWorker(){
   if(aiWorker) return aiWorker;
-  if(workerBroken||typeof Worker==='undefined') return null;
-  try{
-    aiWorker=new Worker(workerUrl());
-    aiWorker.onmessage=function(e){
-      if(aiCb&&e.data&&e.data.id===aiToken){ const cb=aiCb; aiCb=null; cb(e.data); }
-    };
-    aiWorker.onerror=function(){
-      workerBroken=true;
-      try{ aiWorker.terminate(); }catch(err){}
-      aiWorker=null;
-      if(aiCb&&aiReq){ const cb=aiCb, rq=aiReq; aiCb=null; askSync(rq,cb); }
-    };
-  }catch(err){ aiWorker=null; workerBroken=true; }
-  return aiWorker;
+  if(typeof Worker==='undefined'){ workerBroken=true; workerErr='Web Worker non supportati'; return null; }
+  if(workerBroken) return null;
+  const w=newWorker();
+  if(!w) return null;
+  aiWorker=w;
+  w.onmessage=function(e){
+    if(aiCb&&e.data&&e.data.id===aiToken){ const cb=aiCb; aiCb=null; cb(e.data); }
+  };
+  w.onerror=function(ev){
+    if(ev&&ev.preventDefault) ev.preventDefault();
+    try{ w.terminate(); }catch(err){}
+    if(aiWorker===w) aiWorker=null;
+    workerFailed(ev);
+    if(aiCb&&aiReq){
+      const cb=aiCb, rq=aiReq; aiCb=null;
+      const w2=getAIWorker();
+      if(w2){ aiCb=cb; aiReq=rq; w2.postMessage(rq); } else askSync(rq,cb);
+    }
+  };
+  return w;
 }
 
 // Se i Web Worker non sono disponibili: stesso motore nel thread principale, con tempo ridotto
 function askSync(req,cb){
   setTimeout(()=>{
     if(req.id!==aiToken) return;
-    if(!aiSyncEngine) aiSyncEngine=aiEngineFactory();
-    const rq=Object.assign({},req,{timeMs:req.level>=2?4000:2000});
-    cb(Object.assign({id:req.id,sync:true},aiSyncEngine.think(rq)));
+    if(!aiSyncEngine){ aiSyncEngine=aiEngineFactory(); if(finaliDB) aiSyncEngine.setDB(finaliDB,finaliMod,finaliDB5); }
+    const rq=Object.assign({},req,{timeMs:req.rank?Math.min(req.timeMs||1500,1500):(req.level>=2?4000:2000)});
+    cb(Object.assign({id:req.id,sync:true,werr:workerErr},aiSyncEngine.run(rq)));
   },30);
 }
 
-function askEngine(level,cb){
+function askEngine(level,cb,extra){
+  maybeLoadFinali(cellsFromBoard(board));
   const id=++aiToken;
-  const req={id,cells:cellsFromBoard(board),side:sideNum(turn),level,hist:buildHistKeys()};
+  const req=Object.assign({id,cells:cellsFromBoard(board),side:sideNum(turn),level,hist:buildHistKeys()},extra||{});
   const w=getAIWorker();
-  if(w){ aiCb=cb; aiReq=req; w.postMessage(req); }
+  if(w){ aiCb=cb; aiReq=req; sendFinaliTo(w,req.cells); w.postMessage(req); }
   else askSync(req,cb);
   return id;
 }
@@ -1310,6 +1569,46 @@ function findLegal(path){
   return legalMoves.find(m=>m.sqs.length===path.length&&m.sqs.every((x,i)=>x===path[i]))||null;
 }
 
+// ── Libro delle aperture (derivato da Sbook2.bok, file libro-aperture.js) ──
+let bookMap=null;
+function loadBook(){
+  if(bookMap!==null) return bookMap;
+  bookMap=new Map();
+  try{
+    if(typeof LIBRO_B64==='string'){
+      const bin=atob(LIBRO_B64), n=bin.length, u=new Uint8Array(n);
+      for(let i=0;i<n;i++) u[i]=bin.charCodeAt(i);
+      let p=0;
+      while(p<n){
+        const key=(u[p]|(u[p+1]<<8)|(u[p+2]<<16)|(u[p+3]<<24))>>>0; p+=4;
+        const c=u[p++], list=[];
+        for(let i=0;i<c;i++){ list.push({f:u[p],t:u[p+1],w:u[p+2]}); p+=3; }
+        bookMap.set(key,list);
+      }
+    }
+  }catch(e){ bookMap=new Map(); }
+  return bookMap;
+}
+function bookKey(cells,side){
+  let h=0x811c9dc5|0;
+  for(let i=0;i<32;i++){ h^=(cells[i]+2); h=Math.imul(h,16777619); }
+  h^=(side>0?1:2); h=Math.imul(h,16777619);
+  return h>>>0;
+}
+// mosse di teoria disponibili nella posizione corrente, ridotte alle sole mosse legali
+function bookMoves(){
+  const bm=loadBook();
+  if(!bm.size) return [];
+  const list=bm.get(bookKey(cellsFromBoard(board),sideNum(turn)));
+  if(!list) return [];
+  const out=[];
+  for(const e of list){
+    const m=legalMoves.find(x=>x.sqs[0]===e.f+1&&x.sqs[x.sqs.length-1]===e.t+1);
+    if(m&&!out.some(o=>o.mv===m)) out.push({mv:m,w:e.w});
+  }
+  return out;
+}
+
 // purpose: 'move' = il computer gioca la mossa; 'hint' = la mostra soltanto
 function runAI(level,purpose){
   if(aiThinking||gameOver||legalMoves.length===0) return;
@@ -1319,35 +1618,81 @@ function runAI(level,purpose){
   updateStatus(); drawAll();
   const t0=Date.now();
   const stamp=halfMoves.length;
-  const id=askEngine(level,res=>{
+
+  // conclude: esegue o mostra la mossa scelta
+  function conclude(id,mv,info){
     const finish=()=>{
       if(id!==aiToken) return;            // annullata (annulla mossa, nuova partita, cambio impostazioni)
       aiThinking=false;
       if(stamp!==halfMoves.length||gameOver){ updateStatus(); return; }
-      let mv=(res&&!res.none)?findLegal(res.path):null;
       if(!mv) mv=legalMoves[Math.floor(Math.random()*legalMoves.length)];   // rete di sicurezza
       if(!mv){ updateStatus(); return; }
       if(purpose==='hint'){
         hintMove=mv.sqs.slice();
-        setAiMsg('Suggerimento: '+moveToPDN(mv)+' · '+infoText(res));
+        setAiMsg('Suggerimento: '+moveToPDN(mv)+' · '+info);
         updateStatus(); drawAll(); scheduleEval();
       } else {
         setAiMsg('');
         executeMove(mv);
-        setAiMsg('Computer: '+moveToPDN(mv)+' · '+infoText(res));
+        setAiMsg('Computer: '+moveToPDN(mv)+' · '+info);
       }
     };
     const wait=Math.max(0,400-(Date.now()-t0));   // pausa minima per vedere la mossa
     if(wait>0) setTimeout(finish,wait); else finish();
-  });
+  }
+
+  function normalSearch(){
+    const id=askEngine(level,res=>{
+      const mv=(res&&!res.none)?findLegal(res.path):null;
+      conclude(id,mv,infoText(res));
+    });
+  }
+
+  const bk=bookMoves();
+  if(bk.length===1){
+    conclude(++aiToken,bk[0].mv,'libro delle aperture (unica mossa di teoria)');
+    return;
+  }
+  if(bk.length>1){
+    const only=bk.map(b=>[b.mv.sqs[0]-1,b.mv.sqs[b.mv.sqs.length-1]-1]);
+    const id=askEngine(level,res=>{
+      let mv=null, info='';
+      if(res&&res.ranked&&res.ranked.length){
+        // le mosse di teoria vengono valutate dal motore; tra quelle equivalenti (entro 0,12 pedine
+        // dalla migliore) si preferisce la più analizzata nel libro, con un po' di varietà
+        const entries=res.ranked.map(r=>{
+          const b=bk.find(x=>x.mv.sqs[0]===r.path[0]&&x.mv.sqs[x.mv.sqs.length-1]===r.path[r.path.length-1]);
+          return b?{mv:b.mv,w:b.w,score:r.score}:null;
+        }).filter(Boolean);
+        if(entries.length){
+          const best=entries[0].score;
+          const near=entries.filter(e=>e.score>=best-12);
+          let tot=0; const ws=near.map(e=>{ const v=Math.pow(2,e.w/12); tot+=v; return v; });
+          let x=Math.random()*tot, k=0;
+          while(k<near.length-1&&x>=ws[k]){ x-=ws[k]; k++; }
+          mv=near[k].mv;
+          info='libro delle aperture ('+bk.length+' mosse di teoria, scelta con analisi a profondità '+res.depth+')';
+        }
+      }
+      if(mv) conclude(id,mv,info); else normalSearch();
+    },{rank:true,only,timeMs:level>=2?4000:1500});
+    return;
+  }
+  normalSearch();
 }
 
 // Riga informativa: quanto ha analizzato il computer per questa mossa
+function dbNote(res){
+  if(!res||!(res.dbHits>0)) return '';
+  if(Math.abs(res.score)>=15000&&Math.abs(res.score)<90000) return ' · database dei finali: '+(res.score>0?'vittoria certa':'sconfitta certa');
+  return ' · database dei finali in uso';
+}
 function infoText(res){
   if(!res||res.none) return '';
   if(res.forced) return 'mossa obbligata (una sola possibile)';
+  if(res.db) return 'database dei finali: vittoria certa, questa mossa la mantiene e fa progredire';
   const n=res.nodes>=1e6?(res.nodes/1e6).toFixed(1).replace('.',',')+' milioni':Math.round(res.nodes/1000)+' mila';
-  return 'profondità '+res.depth+' semimosse · '+n+' di posizioni · '+(res.ms/1000).toFixed(1).replace('.',',')+' s'+(res.sync?' · modalità ridotta':'');
+  return 'profondità '+res.depth+' semimosse · '+n+' di posizioni · '+(res.ms/1000).toFixed(1).replace('.',',')+' s'+(res.sync?' · modalità ridotta'+(res.werr?' ('+res.werr+')':''):'')+dbNote(res);
 }
 
 function maybeAIMove(){
@@ -1356,25 +1701,11 @@ function maybeAIMove(){
   runAI(aiLevel,'move');
 }
 function hintAction(){ if(aiThinking||gameOver||legalMoves.length===0) return; runAI(aiLevel,'hint'); }
-function playAction(){ if(aiThinking||gameOver||legalMoves.length===0) return; runAI(aiLevel,'move'); }
 
 // ── Impostazioni ───────────────────────────────────────────────────
-function loadSettings(){
-  try{
-    aiMode=localStorage.getItem('dg_mode')==='ai';
-    const h=localStorage.getItem('dg_human');
-    if(h==='white'||h==='black') humanColor=h;
-    const l=parseInt(localStorage.getItem('dg_level2'),10);
-    if(l>=1&&l<=2) aiLevel=l;
-  }catch(e){}
-}
-function saveSettings(){
-  try{
-    localStorage.setItem('dg_mode',aiMode?'ai':'pvp');
-    localStorage.setItem('dg_human',humanColor);
-    localStorage.setItem('dg_level2',String(aiLevel));
-  }catch(e){}
-}
+// Ad ogni apertura e a ogni "Nuova partita" si riparte da: 2 giocatori; contro il computer il livello è Forte
+function loadSettings(){ aiMode=false; humanColor='white'; aiLevel=2; }
+function saveSettings(){}
 function setOn(id,on){
   const el=document.getElementById(id);
   if(el) el.classList.toggle('on',!!on);
@@ -1395,7 +1726,14 @@ function changeSettings(fn){
   maybeAIMove();
   scheduleEval();
 }
-function setMode(m){ changeSettings(()=>{ aiMode=(m==='ai'); }); }
+function setMode(m){
+  changeSettings(()=>{
+    const was=aiMode;
+    aiMode=(m==='ai');
+    // passando da 2 giocatori al computer: il computer prende il colore che deve muovere in questa posizione
+    if(aiMode&&!was) humanColor=(turn==='white')?'black':'white';
+  });
+}
 function setHuman(c){ changeSettings(()=>{ humanColor=c; }); }
 function setLevel(l){ changeSettings(()=>{ aiLevel=l; }); }
 
@@ -1404,12 +1742,20 @@ function setLevel(l){ changeSettings(()=>{ aiLevel=l; }); }
 // -1,00 = una pedina di vantaggio al Rosso. Deriva da una breve ricerca (circa 1,5 s) sulle mosse
 // successive, quindi tiene conto anche di prese, scambi e promozioni imminenti.
 // Mentre si ricalcola resta visibile l'ultimo valore (più chiaro).
-function showEval(sw){
+function showEval(sw,r,side){
   const v=document.getElementById('eval-val');
   if(!v) return;
   v.style.opacity='1';
   if(sw>90000){ v.textContent='vince il Bianco'; return; }
   if(sw<-90000){ v.textContent='vince il Rosso'; return; }
+  // vittoria/sconfitta accertata dal database dei finali: si aggiungono 10 alla valutazione materiale
+  if(r&&r.dbHits>0&&Math.abs(r.score)>=15000){
+    const sg=r.score>0?1:-1;
+    sw=(r.stat||0)*side+1000*sg*side;
+    const y=Math.round(sw)/100;
+    v.textContent=(y>0?'+':'')+y.toFixed(2).replace('.',',')+' (database finali)';
+    return;
+  }
   const x=Math.round(sw)/100;
   v.textContent=(x>0?'+':'')+x.toFixed(2).replace('.',',');
 }
@@ -1425,12 +1771,13 @@ function cancelEval(){
 function evalSync(id,side,cells){
   setTimeout(()=>{
     if(id!==evalToken) return;
-    if(!aiSyncEngine) aiSyncEngine=aiEngineFactory();
+    if(!aiSyncEngine){ aiSyncEngine=aiEngineFactory(); if(finaliDB) aiSyncEngine.setDB(finaliDB,finaliMod,finaliDB5); }
     const r=aiSyncEngine.think({cells,side,level:1,hist:[],timeMs:500,evalOnly:true});
-    if(id===evalToken&&typeof r.score==='number') showEval(r.score*side);
+    if(id===evalToken&&typeof r.score==='number') showEval(r.score*side,r,side);
   },30);
 }
 function scheduleEval(){
+  maybeLoadFinali(cellsFromBoard(board));
   cancelEval();
   staleEval();
   if(aiThinking) return;
@@ -1441,19 +1788,23 @@ function scheduleEval(){
   evalTimer=setTimeout(()=>{
     if(id!==evalToken) return;
     if(workerBroken||typeof Worker==='undefined'){ evalSync(id,side,cells); return; }
-    try{
-      evalWorker=new Worker(workerUrl());
-      evalWorker.onmessage=e=>{
-        if(id!==evalToken) return;
-        const r=e.data;
-        if(r&&typeof r.score==='number') showEval(r.score*side);
-      };
-      evalWorker.onerror=()=>{
-        workerBroken=true;
-        if(id===evalToken) evalSync(id,side,cells);
-      };
-      evalWorker.postMessage({id,cells,side,level:1,hist:[],timeMs:1500,evalOnly:true});
-    }catch(e){ workerBroken=true; evalSync(id,side,cells); }
+    const w=newWorker();
+    if(!w){ evalSync(id,side,cells); return; }
+    evalWorker=w;
+    w.onmessage=e=>{
+      if(id!==evalToken) return;
+      const r=e.data;
+      if(r&&typeof r.score==='number') showEval(r.score*side,r,side);
+    };
+    w.onerror=ev=>{
+      if(ev&&ev.preventDefault) ev.preventDefault();
+      try{ w.terminate(); }catch(err){}
+      if(evalWorker===w) evalWorker=null;
+      workerFailed(ev);
+      if(id===evalToken) scheduleEval();
+    };
+    sendFinaliTo(w,cells);
+    w.postMessage({id,cells,side,level:1,hist:[],timeMs:1500,evalOnly:true});
   },250);
 }
 
@@ -1482,7 +1833,6 @@ function init(){
   wireBtn('btn-new',  askNewGame);
   wireBtn('overlay-new-btn', askNewGame);
   wireBtn('btn-hint', hintAction);
-  wireBtn('btn-play', playAction);
   wireBtn('mode-pvp', ()=>setMode('pvp'));
   wireBtn('mode-ai',  ()=>setMode('ai'));
   wireBtn('hum-white', ()=>setHuman('white'));
