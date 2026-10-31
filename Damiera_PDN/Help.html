@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Dama — Guida</title>
+<style>
+  :root{
+    --bg:#d0e0f0; --panel:#f4f8fc; --border:#8aaac0; --accent:#2060a0; --accent2:#1a4880;
+    --text:#1a2a3a; --muted:#4a6a88; --code:#e3edf7;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --bg:#10202e; --panel:#182c3d; --border:#35566f; --accent:#4a8fd0; --accent2:#7ab4ec;
+           --text:#e4eef8; --muted:#9db6cc; --code:#223a50; }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;font-size:17px}
+  header{background:#2060a0;color:#fff;text-align:center;padding:14px 16px}
+  header h1{font-size:1.35rem}
+  header p{font-size:.85rem;color:#cce0ff;margin-top:2px}
+  main{max-width:760px;margin:0 auto;padding:14px 14px 40px}
+  nav{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+  nav b{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+  nav a{display:inline-block;margin:3px 10px 3px 0;color:var(--accent2);font-size:.95rem}
+  section{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+  h2{font-size:1.1rem;color:var(--accent2);margin-bottom:8px}
+  h3{font-size:1rem;margin:12px 0 4px}
+  p{margin-bottom:9px}
+  ul{margin:0 0 9px 1.2em}
+  li{margin-bottom:5px}
+  code,.file{font-family:'Courier New',monospace;font-weight:bold;background:var(--code);border-radius:4px;padding:1px 5px;font-size:.92em}
+  dl{margin-bottom:6px}
+  dt{font-weight:bold;margin-top:10px}
+  dd{margin-left:0;margin-bottom:4px}
+  .note{border-left:4px solid var(--accent);background:var(--code);padding:8px 12px;border-radius:0 6px 6px 0;margin:10px 0;font-size:.95rem}
+  .back{display:block;text-align:center;background:var(--accent);color:#fff;text-decoration:none;font-weight:bold;
+        font-size:1.05rem;padding:14px;border-radius:8px;border:0;width:100%;cursor:pointer;font-family:inherit;margin-top:6px}
+  .back:hover{filter:brightness(1.1)}
+  .top{margin-bottom:14px}
+  @media (min-width:700px){ body{font-size:18px} main{padding-top:22px} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>♟ Claude Dama — Guida</h1>
+  <p>Dama italiana contro il computer o tra due giocatori</p>
+</header>
+
+<main>
+
+  <button class="back top" onclick="tornaAlGioco()">⮌ Torna alla partita</button>
+
+  <nav>
+    <b>In questa guida</b>
+    <a href="#presentazione">Presentazione</a>
+    <a href="#giocare">Come si gioca</a>
+    <a href="#pulsanti">Pulsanti e comandi</a>
+    <a href="#valutazione">Valutazione</a>
+    <a href="#pdn">Salvare la partita (PDN)</a>
+    <a href="#database">Aperture e finali</a>
+    <a href="#file">I file del programma</a>
+    <a href="#regole">Regole in breve</a>
+    <a href="#note">Note utili</a>
+  </nav>
+
+  <section id="presentazione">
+    <h2>Claude Dama</h2>
+    <p>Questo programma per giocare a dama italiana è stato creato da Claude, l'intelligenza artificiale di Anthropic. Si può giocare contro il computer, in due livelli di forza, oppure in due giocatori sullo stesso schermo.</p>
+    <p>Come ausili di gioco utilizza, se presenti:</p>
+    <ul>
+      <li>un <b>database delle aperture</b>, che contiene posizioni di apertura ritenute solide;</li>
+      <li>un <b>database dei finali</b>, che contiene le posizioni da 2 a 5 pezzi, catalogate come vincenti, perdenti o pari.</li>
+    </ul>
+    <p>Le partite si possono inoltre salvare in formato PDN, per archiviarle ed esportarle in programmi di dama italiana, come i programmi per computer CheckerBoard e KingsRow Italia.</p>
+  </section>
+
+  <section id="giocare">
+    <h2>Come si gioca</h2>
+    <ul>
+      <li><b>Muovere:</b> tocca (o clicca) la pedina da muovere e poi la casella di arrivo. Le mosse possibili vengono evidenziate sulla scacchiera.</li>
+      <li><b>Prese:</b> la presa è obbligatoria, come nelle regole ufficiali: il programma accetta solo le mosse consentite. In una presa multipla, se il percorso non è già determinato, tocca di seguito le caselle intermedie.</li>
+      <li><b>Chi muove:</b> in alto, sopra la scacchiera, si vede il colore a cui tocca muovere, insieme al numero dei pezzi di ciascun colore e delle loro dame (♛).</li>
+      <li><b>Numeri delle caselle:</b> le caselle sono numerate da 1 a 32 come nella notazione ufficiale (le stesse cifre che compaiono nel testo PDN).</li>
+      <li><b>Colori:</b> contro il computer puoi scegliere se giocare con i Bianchi o con i Neri (il Rosso nella grafica). Giocando con i Neri la scacchiera si gira, così che i tuoi pezzi stiano in basso.</li>
+    </ul>
+    <p>La partita termina quando un giocatore non ha più pezzi o non può muovere: in quel caso perde.</p>
+  </section>
+
+  <section id="pulsanti">
+    <h2>Pulsanti e comandi</h2>
+
+    <h3>Avversario</h3>
+    <dl>
+      <dt>👥 2 giocatori</dt>
+      <dd>Due persone giocano alternandosi sullo stesso dispositivo.</dd>
+      <dt>🤖 Computer</dt>
+      <dd>Giochi contro il programma. Compaiono altre due scelte: <b>Io gioco con</b> (Bianchi o Neri) e <b>Livello del computer</b>.</dd>
+      <dt>Medio / Forte</dt>
+      <dd>Il livello Medio riflette fino a circa 5 secondi per mossa, il livello Forte fino a circa 15. Tempi e profondità effettivi dipendono dalla potenza del dispositivo.</dd>
+    </dl>
+    <p>Cambiando avversario, colore o livello la partita in corso non viene cancellata: prosegue dalla posizione attuale con le nuove impostazioni. Passando da “2 giocatori” a “Computer”, il computer prende il colore a cui tocca muovere in quella posizione.</p>
+
+    <h3>Partita</h3>
+    <dl>
+      <dt>💡 Suggerisci</dt>
+      <dd>Mostra sulla scacchiera la mossa che il programma giocherebbe al tuo posto, senza eseguirla. Sotto i pulsanti compare un commento con la mossa in notazione PDN e con le informazioni sul calcolo (profondità raggiunta in semimosse, posizioni esaminate, tempo). Compare anche quando il programma ha usato il database delle aperture o quello dei finali.</dd>
+      <dt>↩ Annulla mossa</dt>
+      <dd>Torna indietro di una mossa. Contro il computer si torna indietro fino al tuo turno, cioè si annullano anche la risposta del computer e la tua mossa precedente. Si può ripetere più volte.</dd>
+      <dt>↺ Nuova partita</dt>
+      <dd>Inizia una nuova partita. Se quella in corso è ancora aperta, il programma chiede conferma prima di cancellarla.</dd>
+      <dt>❓ Help</dt>
+      <dd>Apre questa guida in una nuova scheda del browser. La partita resta aperta nella scheda precedente: quando hai finito di leggere, usa il pulsante “Torna alla partita” oppure chiudi la scheda, e riprendi a giocare da dove eri.</dd>
+    </dl>
+  </section>
+
+  <section id="valutazione">
+    <h2>La valutazione</h2>
+    <p>Accanto al conteggio dei pezzi compare la <b>Valutazione</b>: un numero, dal punto di vista del Bianco, espresso in pedine. +1,00 significa una pedina di vantaggio per il Bianco, −1,00 una pedina di vantaggio per il Rosso. Una dama vale due pedine. Il valore viene ricalcolato dopo ogni mossa con una breve ricerca (circa un secondo e mezzo) e tiene conto anche di prese, scambi e promozioni imminenti. Mentre si ricalcola, l'ultimo valore resta visibile in tono più chiaro.</p>
+    <p>Quando il programma accerta una vittoria forzata, compare “vince il Bianco” o “vince il Rosso”.</p>
+    <div class="note"><b>Database dei finali:</b> quando il programma accerta, grazie al database dei finali, che da quella posizione si arriva con certezza a una posizione vinta, alla valutazione materiale vengono sommate (o sottratte) 10 pedine e compare la dicitura “(database finali)”. Un valore come +14,30 (database finali) significa quindi: vittoria certa del Bianco, con 4,30 pedine di vantaggio materiale.</div>
+  </section>
+
+  <section id="pdn">
+    <h2>Salvare la partita (PDN)</h2>
+    <p>In fondo alla pagina del gioco, nel riquadro <b>Testo PDN della partita</b>, le mosse vengono scritte man mano che si gioca. Il formato PDN è lo standard per archiviare le partite di dama.</p>
+    <ul>
+      <li>Premi <b>📋 Copia PDN</b> per copiare il testo negli appunti.</li>
+      <li>Incollalo poi in un documento o in una e-mail per conservarlo, oppure importalo in un programma di dama italiana come CheckerBoard o KingsRow Italia.</li>
+    </ul>
+  </section>
+
+  <section id="database">
+    <h2>Database delle aperture e dei finali</h2>
+
+    <h3>Aperture</h3>
+    <p>Se è presente il file <span class="file">libro-aperture.js</span>, nelle prime mosse il programma sceglie tra le mosse di teoria contenute nel libro, valutandole con il motore e con un po' di varietà tra mosse equivalenti. Il commento sotto i pulsanti segnala quando una mossa viene dal libro. Terminata la teoria, o se il file manca, il programma gioca calcolando le mosse migliori.</p>
+
+    <h3>Finali</h3>
+    <p>Se è presente il file <span class="file">libro-finali.js</span>, il programma conosce con certezza l'esito di tutte le posizioni da 2 a 5 pezzi: vincente, perdente o pari. Fino a 4 pezzi conosce anche la distanza dalla prossima presa o promozione, quindi sa portare a termine le vittorie anche lunghe, le cosiddette “finali di manovra” che il solo calcolo non riuscirebbe a vedere. A 5 pezzi conosce l'esito e lo usa per orientare la ricerca verso le posizioni vinte.</p>
+    <p>Il database dei finali è stato generato applicando esattamente le regole di gioco del programma. Viene caricato in memoria solo quando in gioco restano 10 pezzi o meno, per non appesantire il dispositivo durante il mediogioco: in quel momento il programma può impiegare qualche secondo in più per prepararlo. Se il file manca, i finali vengono giocati dal solo motore di calcolo.</p>
+  </section>
+
+  <section id="file">
+    <h2>I file del programma</h2>
+    <p>Per funzionare al meglio, tutti i file devono trovarsi nella <b>stessa cartella</b> (o nello stesso indirizzo web) di <span class="file">index.html</span>.</p>
+    <dl>
+      <dt><span class="file">index.html</span></dt>
+      <dd>Il programma per giocare a dama. È l'unico file indispensabile.</dd>
+      <dt><span class="file">libro-aperture.js</span></dt>
+      <dd>Il database delle aperture. Se non è presente, nelle aperture il programma gioca solo calcolando le posizioni migliori.</dd>
+      <dt><span class="file">libro-finali.js</span></dt>
+      <dd>Il database dei finali. Se non è presente, nei finali il programma gioca solo calcolando le posizioni migliori. È il file più grande, circa 5 MB.</dd>
+      <dt><span class="file">motore_ia.js</span></dt>
+      <dd>Un motore di gioco ausiliario, necessario con alcuni browser per garantire la piena potenza di calcolo. Se non è presente, su alcuni browser il programma potrebbe valutare un numero inferiore di mosse.</dd>
+      <dt><span class="file">Help.html</span></dt>
+      <dd>Questa guida. Se manca, il pulsante Help non mostra nulla.</dd>
+    </dl>
+  </section>
+
+  <section id="regole">
+    <h2>Le regole della dama italiana in breve</h2>
+    <ul>
+      <li>Si gioca sulle 32 caselle scure di una scacchiera 8×8. Il Bianco muove per primo; ciascun giocatore ha 12 pedine.</li>
+      <li>La <b>pedina</b> muove e cattura solo in avanti, in diagonale, di una casella. La <b>dama</b> (la pedina che raggiunge l'ultima riga) muove e cattura in avanti e indietro, sempre di una casella per volta.</li>
+      <li>La <b>presa è obbligatoria</b>. Se sono possibili più prese, si deve scegliere quella che cattura più pezzi; a parità, quella che cattura più dame; a parità ancora, la presa con una dama ha la precedenza su quella con una pedina.</li>
+      <li>La <b>pedina non può catturare la dama</b>.</li>
+      <li>Quando una pedina raggiunge l'ultima riga in una presa, la presa termina e la pedina diventa dama.</li>
+      <li>Perde chi resta senza pezzi o non può più muovere.</li>
+    </ul>
+    <div class="note">Nelle prese multiple il programma toglie ogni pezzo catturato subito, e non alla fine della presa. È una piccola differenza rispetto al regolamento ufficiale, che si nota solo in rarissime sequenze con dame.</div>
+  </section>
+
+  <section id="note">
+    <h2>Note utili</h2>
+    <ul>
+      <li><b>La partita si salva da sola.</b> Il browser ricorda la posizione sul tuo dispositivo: se chiudi la pagina e la riapri, puoi riprendere da dove eri. Usa comunque Copia PDN per conservare le partite importanti, perché cancellare i dati del browser le elimina.</li>
+      <li><b>Schermo acceso.</b> Mentre giochi, il programma chiede al telefono di non spegnere lo schermo, se il browser lo permette.</li>
+      <li><b>Telefono.</b> Il calcolo è più lento su dispositivi datati. Se il browser non consente il motore ausiliario, il programma passa a una modalità ridotta (tempo di riflessione più breve), indicata nel commento sotto i pulsanti.</li>
+      <li><b>Dubbi sulla forza di gioco?</b> Il programma può sbagliare, come qualsiasi motore. Se trovi errori ricorrenti, salva il PDN della partita e segnalali: servono a migliorarlo.</li>
+    </ul>
+  </section>
+
+  <button class="back" onclick="tornaAlGioco()">⮌ Torna alla partita</button>
+
+</main>
+
+<script>
+// Chiude questa scheda e riporta alla pagina del gioco, rimasta aperta; se il browser non permette di chiuderla,
+// si riapre il gioco (la partita in corso viene ripresa dal browser).
+function tornaAlGioco(){
+  window.close();
+  setTimeout(function(){ location.href='index.html'; },400);
+}
+</script>
+</body>
+</html>
