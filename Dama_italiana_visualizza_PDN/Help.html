@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Visualizzatore Dama — Guida</title>
+<style>
+  :root{
+    --bg:#d0e0f0; --panel:#f4f8fc; --border:#8aaac0; --accent:#2060a0; --accent2:#1a4880;
+    --text:#1a2a3a; --muted:#4a6a88; --code:#e3edf7;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --bg:#10202e; --panel:#182c3d; --border:#35566f; --accent:#4a8fd0; --accent2:#7ab4ec;
+           --text:#e4eef8; --muted:#9db6cc; --code:#223a50; }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;font-size:17px}
+  header{background:#2060a0;color:#fff;text-align:center;padding:14px 16px}
+  header h1{font-size:1.35rem}
+  header p{font-size:.85rem;color:#cce0ff;margin-top:2px}
+  main{max-width:760px;margin:0 auto;padding:14px 14px 40px}
+  nav{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+  nav b{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+  nav a{display:inline-block;margin:3px 10px 3px 0;color:var(--accent2);font-size:.95rem}
+  section{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+  h2{font-size:1.1rem;color:var(--accent2);margin-bottom:8px}
+  h3{font-size:1rem;margin:12px 0 4px}
+  p{margin-bottom:9px}
+  ul{margin:0 0 9px 1.2em}
+  li{margin-bottom:5px}
+  code,.file{font-family:'Courier New',monospace;font-weight:bold;background:var(--code);border-radius:4px;padding:1px 5px;font-size:.92em}
+  dl{margin-bottom:6px}
+  dt{font-weight:bold;margin-top:10px}
+  dd{margin-left:0;margin-bottom:4px}
+  .note{border-left:4px solid var(--accent);background:var(--code);padding:8px 12px;border-radius:0 6px 6px 0;margin:10px 0;font-size:.95rem}
+  .back{display:block;text-align:center;background:var(--accent);color:#fff;text-decoration:none;font-weight:bold;
+        font-size:1.05rem;padding:14px;border-radius:8px;border:0;width:100%;cursor:pointer;font-family:inherit;margin-top:6px}
+  .back:hover{filter:brightness(1.1)}
+  .top{margin-bottom:14px}
+  @media (min-width:700px){ body{font-size:18px} main{padding-top:22px} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>♟ Visualizzatore di Dama Italiana — Guida</h1>
+  <p>Rivedere e studiare partite salvate, con valutazione e suggerimento del computer</p>
+</header>
+
+<main>
+
+  <button class="back top" onclick="tornaAlVisualizzatore()">⮌ Torna al visualizzatore</button>
+
+  <nav>
+    <b>In questa guida</b>
+    <a href="#presentazione">Presentazione</a>
+    <a href="#caricare">Caricare una partita</a>
+    <a href="#scorrere">Scorrere la partita</a>
+    <a href="#valutazione">Valutazione</a>
+    <a href="#suggerimento">Suggerimento</a>
+    <a href="#studiare">Come studiare una partita</a>
+    <a href="#file">File</a>
+    <a href="#note">Note utili</a>
+  </nav>
+
+  <section id="presentazione">
+    <h2>Visualizzatore di Dama Italiana</h2>
+    <p>Questo programma serve a rivedere e studiare partite di dama italiana già giocate, salvate in formato PDN: per esempio quelle giocate con il programma Claude Dama, con CheckerBoard o con KingsRow Italia, oppure contro altri avversari. Il programma e la sua analisi sono opera di Claude, l'intelligenza artificiale di Anthropic.</p>
+    <p>Non si gioca: si scorre la partita mossa per mossa. Oltre alla scacchiera, il programma mostra la <b>valutazione della posizione</b> e può <b>suggerire la mossa migliore</b>, così da scoprire subito dove è stato commesso un errore e quale mossa sarebbe stata corretta.</p>
+  </section>
+
+  <section id="caricare">
+    <h2>Caricare una partita</h2>
+    <ul>
+      <li>In fondo alla pagina c'è il riquadro <b>Testo PDN della partita</b>. Incolla qui il testo della partita (per esempio copiato da un messaggio, da un file di testo o dal pulsante “Copia PDN” del programma per giocare).</li>
+      <li>Premi <b>▶ Carica partita</b>. La scacchiera si prepara con la posizione iniziale e puoi cominciare a scorrere le mosse.</li>
+      <li>Le <b>annotazioni</b> tra parentesi graffe { } presenti nel PDN vengono mostrate in rosso nel testo.</li>
+      <li>Se il PDN parte da una posizione particolare (campo FEN), il programma la riconosce e parte da quella.</li>
+      <li><b>↺ Azzera</b> cancella la partita caricata, dopo una richiesta di conferma, per caricarne un'altra.</li>
+    </ul>
+    <p>Le partite salvate in precedenza si possono quindi caricare in qualsiasi momento, per essere riviste e studiate. Il programma ricorda anche l'ultima partita caricata e la mossa a cui eri arrivato: se chiudi la pagina e la riapri, riprendi da lì.</p>
+  </section>
+
+  <section id="scorrere">
+    <h2>Scorrere la partita</h2>
+    <ul>
+      <li>I pulsanti <b>⏮ ◀ ▶ ⏭</b> portano all'inizio, alla mossa precedente, alla mossa successiva e alla fine.</li>
+      <li>Il <b>cursore</b> sotto i pulsanti permette di saltare a una mossa qualsiasi. Il numero accanto ai pulsanti indica a che punto sei (per esempio 22 / 28).</li>
+      <li>Con la tastiera, sul computer, valgono le frecce sinistra e destra, e i tasti Home e Fine.</li>
+      <li>L'ultima mossa giocata è evidenziata sulla scacchiera in giallo; le caselle sono numerate da 1 a 32 come nel PDN.</li>
+    </ul>
+  </section>
+
+  <section id="valutazione">
+    <h2>La valutazione della posizione</h2>
+    <p>Nel riquadro <b>Analisi del computer</b> compare, per la posizione che stai guardando, chi deve muovere e la <b>Valutazione</b>: un numero espresso in pedine, sempre dal punto di vista del Bianco.</p>
+    <ul>
+      <li><b>+1,36</b> significa un vantaggio del Bianco di 1,36 pedine.</li>
+      <li><b>−0,82</b> significa un vantaggio del Rosso di 0,82 pedine.</li>
+      <li>Una dama vale due pedine. Valori vicini a zero indicano una posizione equilibrata.</li>
+      <li>Se una vittoria forzata è già in vista, compare “vince il Bianco” o “vince il Rosso”.</li>
+    </ul>
+    <p>Quando ti fermi su una posizione, il computer la analizza per circa <b>5 secondi</b>. Durante il calcolo il numero resta visibile ma più chiaro; scorrendo velocemente tra le mosse, il calcolo parte solo sulla posizione in cui ti fermi. Le posizioni già analizzate vengono ricordate, e tornandoci il valore compare subito.</p>
+    <h3>Trovare gli errori</h3>
+    <p>Se la valutazione cambia molto in seguito a una mossa, quella mossa è probabilmente un errore. Quando sono state analizzate sia la posizione prima della mossa sia quella dopo, sotto la valutazione compare l'effetto della mossa, per esempio “Mossa 23-20 del Bianco: −1,20 per chi ha mosso”. Se la mossa peggiora la posizione di chi ha mosso di mezza pedina o più, compare l'avviso rosso <b>“possibile errore”</b>.</p>
+    <div class="note">Per vedere l'effetto di una mossa, guarda quindi le due posizioni, prima e dopo. Basta fermarsi 5 secondi su ciascuna.</div>
+  </section>
+
+  <section id="suggerimento">
+    <h2>Il suggerimento della mossa</h2>
+    <p>Il pulsante <b>💡 Suggerisci</b> chiede al computer la mossa che giocherebbe nella posizione che stai guardando. La mossa viene evidenziata in arancione sulla scacchiera (caselle colorate e freccia dalla casella di partenza a quella di arrivo) e descritta sotto i pulsanti, con la profondità raggiunta dal calcolo (in semimosse). Se nella partita fu giocata una mossa diversa, il messaggio la riporta: “nella partita fu giocata: …”. Se è la stessa, lo dice.</p>
+    <div class="note"><b>Attenzione:</b> il suggerimento si riferisce alla posizione in cui sei. Per sapere quale mossa sarebbe stata corretta al posto di una mossa sbagliata, torna alla posizione <b>prima</b> di quella mossa (premendo ◀) e poi premi Suggerisci.</div>
+    <p>Il calcolo del suggerimento dura circa 5 secondi, come quello della valutazione. Se cambi posizione mentre il computer sta pensando, il calcolo viene annullato.</p>
+  </section>
+
+  <section id="studiare">
+    <h2>Come studiare una partita</h2>
+    <ol style="margin:0 0 9px 1.3em">
+      <li>Carica il PDN e scorri la partita osservando come cambia la valutazione: dopo ogni mossa fermati qualche secondo per farla calcolare.</li>
+      <li>Quando noti un brusco peggioramento per un giocatore (o l'avviso “possibile errore”), torna alla posizione precedente.</li>
+      <li>Premi <b>Suggerisci</b> e confronta la mossa consigliata con quella giocata.</li>
+      <li>Riprova più volte: analizzando di nuovo la stessa posizione il computer può dare un parere un po' diverso, perché il calcolo dipende dal tempo e dalla potenza del dispositivo. Dai più peso alle differenze grandi che alle piccole.</li>
+    </ol>
+  </section>
+
+  <section id="file">
+    <h2>File del programma</h2>
+    <dl>
+      <dt><span class="file">index.html</span></dt>
+      <dd>Il visualizzatore. È l'unico file indispensabile: contiene anche il motore di calcolo.</dd>
+      <dt><span class="file">Help.html</span></dt>
+      <dd>Questa guida. Va nella stessa cartella di <span class="file">index.html</span>. Se manca, il pulsante Help non mostra nulla.</dd>
+    </dl>
+    <p>Il visualizzatore non usa i database delle aperture e dei finali del programma per giocare: l'analisi si basa solo sul calcolo del motore, che per questo, nei finali con pochi pezzi, può essere meno preciso del programma per giocare.</p>
+  </section>
+
+  <section id="note">
+    <h2>Note utili</h2>
+    <ul>
+      <li>La valutazione è un'indicazione, non un verdetto: il computer può sbagliare, soprattutto nelle posizioni molto tattiche o con pochi pezzi.</li>
+      <li>Sul telefono il calcolo può essere più lento. Se il browser non permette il calcolo in background, il programma passa a una modalità ridotta (circa un secondo e mezzo per posizione) e i valori sono meno affidabili.</li>
+      <li>Mentre usi il programma, il telefono evita di spegnere lo schermo, se il browser lo permette.</li>
+    </ul>
+  </section>
+
+  <button class="back" onclick="tornaAlVisualizzatore()">⮌ Torna al visualizzatore</button>
+
+</main>
+
+<script>
+// Chiude questa scheda e riporta al visualizzatore, rimasto aperto; se il browser non permette di chiuderla,
+// si riapre il visualizzatore (la partita caricata viene ripresa dal browser).
+function tornaAlVisualizzatore(){
+  window.close();
+  setTimeout(function(){ location.href='index.html'; },400);
+}
+</script>
+</body>
+</html>
