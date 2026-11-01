@@ -4,7 +4,7 @@ function aiEngineFactory(opt){
   // pesi della valutazione e interruttori della ricerca (opt serve solo ai test)
   const W=Object.assign({
     man:100, adv:3, cen:2, back:5, edge:-4, prot:0, king:200, kcen:2, diag:4,
-    pvs:1, lmr:1, kill:1, advq:4, mob:3, trap:0, basePen:30
+    pvs:1, lmr:1, kill:1, advq:4, mob:3, trap:0, basePen:30, baseNear:30, baseNearPly:6
   }, opt||{});
 
   // ── geometria: indice 0..31 = casella PDN 1..32 ──
@@ -168,6 +168,7 @@ function aiEngineFactory(opt){
     tkey=new Int32Array(TTSIZE); tdepth=new Int8Array(TTSIZE); tflag=new Uint8Array(TTSIZE);
     tscore=new Int32Array(TTSIZE); tmove=new Int16Array(TTSIZE);
   }
+  function setPen(on){ if(on!==penOn){ penOn=on; if(tflag) tflag.fill(0); } }   // la tabella di trasposizione dipende dalla modalita'
   function toTT(sc,ply){ return sc>MATE-1000?sc+ply:(sc<-MATE+1000?sc-ply:sc); }
   function fromTT(sc,ply){ return sc>MATE-1000?sc-ply:(sc<-MATE+1000?sc+ply:sc); }
 
@@ -268,6 +269,7 @@ function aiEngineFactory(opt){
 
   // ── ricerca ──
   let nodes=0, abort=false, deadline=Infinity;
+  let penOn=false;   // difesa della base attiva (non nella valutazione numerica ne' nel libro delle aperture)
   const hist=new Int32Array(1024);
   const killers=new Int16Array(256).fill(-1);
 
@@ -314,18 +316,27 @@ function aiEngineFactory(opt){
       }
     }
     orderMoves(moves,ttMove,ply);
-    let best=-INF, bestId=-1;
+    let best=-INF, bestId=-1, oppMen=-1;
     for(let i=0;i<moves.length;i++){
       const m=moves[i];
       const nb=applyMove(b,m);
+      // difesa della base: ogni mossa di una pedina di base (29,30,31 Bianco; 2,3,4 Rosso) costa basePen, a qualunque profondita'
+      let pm=0;
+      if(penOn){
+        const f=m.path[0];
+        if(b[f]===s&&(s>0?(f>=28&&f<=30):(f>=1&&f<=3))){
+          if(oppMen<0){ oppMen=0; for(let q=0;q<32;q++) if(b[q]===-s){ oppMen=1; break; } }
+          if(oppMen===1) pm=W.basePen+(W.baseNear&&ply<=W.baseNearPly?Math.round(W.baseNear*(W.baseNearPly+1-ply)/W.baseNearPly):0);
+        }
+      }
       let sc;
       if(i===0||!W.pvs){
-        sc=-negamax(nb,-s,depth-1,-beta,-alpha,ply+1);
+        sc=-negamax(nb,-s,depth-1,-beta-pm,-alpha-pm,ply+1)-pm;
       } else {
         const red=(W.lmr&&depth>=3&&i>=3&&!g.cap)?1:0;
-        sc=-negamax(nb,-s,depth-1-red,-alpha-1,-alpha,ply+1);
-        if(!abort&&sc>alpha&&red>0) sc=-negamax(nb,-s,depth-1,-alpha-1,-alpha,ply+1);
-        if(!abort&&sc>alpha&&sc<beta) sc=-negamax(nb,-s,depth-1,-beta,-alpha,ply+1);
+        sc=-negamax(nb,-s,depth-1-red,-alpha-1-pm,-alpha-pm,ply+1)-pm;
+        if(!abort&&sc>alpha&&red>0) sc=-negamax(nb,-s,depth-1,-alpha-1-pm,-alpha-pm,ply+1)-pm;
+        if(!abort&&sc>alpha&&sc<beta) sc=-negamax(nb,-s,depth-1,-beta-pm,-alpha-pm,ply+1)-pm;
       }
       if(abort) return 0;
       if(sc>best){ best=sc; bestId=(m.path[0]<<5)|m.path[1]; }
@@ -380,6 +391,7 @@ function aiEngineFactory(opt){
       if(r.moves){ moves=r.moves; dbHits++; }
     }
     allocTT();
+    setPen(W.basePen>0&&!o.evalOnly);
     hist.fill(0); killers.fill(-1);
     shuffle(moves);
     const seen={};
@@ -392,7 +404,7 @@ function aiEngineFactory(opt){
       for(let i=0;i<32;i++) if(b[i]===-s){ oppMen=true; break; }
       if(oppMen){
         const bs=s>0?[28,29,30]:[1,2,3];
-        for(const m of moves) if(m.capt.length===0&&b[m.path[0]]===s&&bs.indexOf(m.path[0])>=0) m.pen+=W.basePen;
+        for(const m of moves) if(b[m.path[0]]===s&&bs.indexOf(m.path[0])>=0) m.pen+=W.basePen;
       }
     }
     nodes=0; abort=false;
@@ -430,7 +442,7 @@ function aiEngineFactory(opt){
     }
     if(moves.length===0) return {none:true};
     if(moves.length===1) return {ranked:[{path:moves[0].path.map(x=>x+1),score:0}],depth:0,nodes:0,ms:0};
-    allocTT(); hist.fill(0); killers.fill(-1);
+    allocTT(); setPen(false); hist.fill(0); killers.fill(-1);
     nodes=0; abort=false;
     const time=o.timeMs||3000;
     let ranked=moves.map(m=>({m,score:0})), doneDepth=0;
