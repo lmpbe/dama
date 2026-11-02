@@ -965,7 +965,7 @@ function aiEngineFactory(opt){
   // pesi della valutazione e interruttori della ricerca (opt serve solo ai test)
   const W=Object.assign({
     man:100, adv:3, cen:2, back:5, edge:-4, prot:0, king:200, kcen:2, diag:4,
-    pvs:1, lmr:1, kill:1, advq:4, mob:3, trap:0, basePen:30, baseNear:30, baseNearPly:6
+    pvs:1, lmr:1, kill:1, advq:4, mob:3, trap:0, basePen:30, baseNear:0, baseNearPly:6, cornerPen:20
   }, opt||{});
 
   // ── geometria: indice 0..31 = casella PDN 1..32 ──
@@ -1249,6 +1249,23 @@ function aiEngineFactory(opt){
     moves.sort((a,b)=>b.k-a.k);
   }
 
+  // penalita' (centesimi di pedina) per la mossa/presa di una pedina che parte dalla propria base
+  //  - pedine di base (29,30,31 Bianco; 2,3,4 Rosso): basePen, maggiorata nelle prime semimosse del calcolo
+  //  - pedina d'angolo (32 Bianco; 1 Rosso): cornerPen, ma solo se la pedina 31 (Bianco) / 2 (Rosso) non c'e' piu'
+  // maggiorazione per le prime semimosse del calcolo: baseNear alla 1a, scende linearmente fino a baseNear/6 alla 6a, poi 0
+  function near(ply){ return (W.baseNear&&ply>=1&&ply<=W.baseNearPly)?Math.round(W.baseNear*(W.baseNearPly+1-ply)/W.baseNearPly):0; }
+  function basePenalty(b,s,f,ply){
+    if(b[f]!==s) return 0;
+    if(s>0){
+      if(f>=28&&f<=30) return W.basePen+near(ply);
+      if(f===31&&b[30]!==1) return W.cornerPen>0?W.cornerPen+near(ply):0;
+    } else {
+      if(f>=1&&f<=3) return W.basePen+near(ply);
+      if(f===0&&b[1]!==-1) return W.cornerPen>0?W.cornerPen+near(ply):0;
+    }
+    return 0;
+  }
+
   function negamax(b,s,depth,alpha,beta,ply){
     if((++nodes&2047)===0&&Date.now()>deadline) abort=true;
     if(abort) return 0;
@@ -1285,9 +1302,12 @@ function aiEngineFactory(opt){
       let pm=0;
       if(penOn){
         const f=m.path[0];
-        if(b[f]===s&&(s>0?(f>=28&&f<=30):(f>=1&&f<=3))){
-          if(oppMen<0){ oppMen=0; for(let q=0;q<32;q++) if(b[q]===-s){ oppMen=1; break; } }
-          if(oppMen===1) pm=W.basePen+(W.baseNear&&ply<=W.baseNearPly?Math.round(W.baseNear*(W.baseNearPly+1-ply)/W.baseNearPly):0);
+        if(b[f]===s&&(s>0?f>=28:f<=3)){
+          pm=basePenalty(b,s,f,ply);
+          if(pm>0){
+            if(oppMen<0){ oppMen=0; for(let q=0;q<32;q++) if(b[q]===-s){ oppMen=1; break; } }
+            if(oppMen!==1) pm=0;
+          }
         }
       }
       let sc;
@@ -1364,8 +1384,7 @@ function aiEngineFactory(opt){
       let oppMen=false;
       for(let i=0;i<32;i++) if(b[i]===-s){ oppMen=true; break; }
       if(oppMen){
-        const bs=s>0?[28,29,30]:[1,2,3];
-        for(const m of moves) if(b[m.path[0]]===s&&bs.indexOf(m.path[0])>=0) m.pen+=W.basePen;
+        for(const m of moves) m.pen+=basePenalty(b,s,m.path[0],99);
       }
     }
     nodes=0; abort=false;
@@ -1425,7 +1444,7 @@ function aiEngineFactory(opt){
 
   function run(o){ return o.rank?rank(o):think(o); }
 
-  return {think,rank,run,genMoves,applyMove,posKey,evaluate,setDB,dbRes};
+  return {think,rank,run,genMoves,applyMove,posKey,evaluate,setDB,dbRes,basePenalty};
 }
 // <<AI-ENGINE-END>>
 
