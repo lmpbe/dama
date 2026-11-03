@@ -72,7 +72,7 @@
   /* ── layout ── */
   #game-area { display:flex; flex-direction:row; gap:14px; flex-wrap:wrap; align-items:flex-start; }
   #board-wrap { flex:0 0 auto; display:flex; flex-direction:column; align-items:center; gap:4px; }
-  canvas { display:block; border:2px solid #5a8aaa; touch-action:none; }
+  canvas { display:block; border:2px solid #5a8aaa; touch-action:pan-y; -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; }
   #side { flex:1; min-width:190px; display:flex; flex-direction:column; gap:14px; }
 
   .card { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; }
@@ -679,7 +679,21 @@ function getSquareFromEvent(e){
   return rcToSq(r,c);
 }
 
+// Il tocco sulla damiera conta come "mossa" solo se il dito si stacca quasi nello stesso punto
+// in cui si e' appoggiato. Se il dito scorre in verticale, la pagina scorre (touch-action:pan-y)
+// e il browser annulla il tocco: nessuna casella viene selezionata.
+let tapStart=null;
 canvas.addEventListener('pointerdown',e=>{
+  tapStart={id:e.pointerId,x:e.clientX,y:e.clientY,moved:false};
+});
+canvas.addEventListener('pointermove',e=>{
+  if(!tapStart||tapStart.id!==e.pointerId) return;
+  if(Math.abs(e.clientX-tapStart.x)>10||Math.abs(e.clientY-tapStart.y)>10) tapStart.moved=true;
+});
+canvas.addEventListener('pointercancel',()=>{ tapStart=null; });
+canvas.addEventListener('pointerup',e=>{
+  const t=tapStart; tapStart=null;
+  if(!t||t.id!==e.pointerId||t.moved) return;
   e.preventDefault();
   if(gameOver||aiThinking||(aiMode&&turn!==humanColor)) return;
   const sq=getSquareFromEvent(e);
