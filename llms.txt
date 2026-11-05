@@ -1,0 +1,9 @@
+# Claude Dama
+
+> Programma gratuito per giocare a dama italiana contro il computer, nel browser (telefono o computer), senza installazione né registrazione.
+
+Claude Dama permette di giocare a dama italiana contro il computer con due livelli di gioco (Medio e Forte), di chiedere il suggerimento della mossa, di annullare le mosse e di leggere il commento delle mosse. Il programma usa un libro delle aperture e un database dei finali fino a 5 pezzi. Esiste anche un visualizzatore di partite in formato PDN con valutazione della posizione e suggerimento della mossa.
+
+- [Gioca a Claude Dama](https://lmpbe.github.io/dama/Damiera_PDN/): il programma per giocare a dama italiana online
+- [Visualizzatore di partite PDN](https://lmpbe.github.io/dama/Dama_italiana_visualizza_PDN/): rivedi una partita di dama italiana in formato PDN con valutazione e suggerimento del computer
+- [Guida](https://lmpbe.github.io/dama/Damiera_PDN/Help.html): come usare il programma
