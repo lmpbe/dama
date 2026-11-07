@@ -209,6 +209,7 @@
         <div class="action-btns">
           <button class="btn-big" id="btn-hint" tabindex="-1">💡 Suggerisci</button>
           <button class="btn-big" id="btn-undo" tabindex="-1">↩ Annulla mossa</button>
+          <button class="btn-big" id="btn-eval" tabindex="-1">📊 Valutazione: SÌ</button>
           <button class="btn-big" id="btn-new" tabindex="-1">↺ Nuova partita</button>
           <a class="btn-big" id="btn-help" href="Help.html" target="_blank" tabindex="-1">❓ Help</a>
         </div>
@@ -886,6 +887,7 @@ function confirmNewGame(){
   closeOverlay();
   cancelAI(); hintMove=null; setAiMsg('');
   aiMode=false; humanColor='white'; aiLevel=2; applySettingsUI();   // dopo "Nuova partita": 2 giocatori
+  evalOn=true; try{ localStorage.removeItem('dg_eval'); }catch(e){} updateEvalUI();   // e valutazione visibile
   board=makeInitBoard(); turn='white'; selected=null; partialPath=[];
   history=[]; halfMoves=[]; lastFrom=null; lastTo=null; gameOver=false;
   computeLegal(); updatePDN(); updateStatus(); drawAll();
@@ -1812,7 +1814,7 @@ function setLevel(l){ changeSettings(()=>{ aiLevel=l; }); }
 // Mentre si ricalcola resta visibile l'ultimo valore (più chiaro).
 function showEval(sw,r,side){
   const v=document.getElementById('eval-val');
-  if(!v) return;
+  if(!v||!evalOn) return;
   v.style.opacity='1';
   if(sw>90000){ v.textContent='vince il Bianco'; return; }
   if(sw<-90000){ v.textContent='vince il Rosso'; return; }
@@ -1826,6 +1828,23 @@ function showEval(sw,r,side){
   }
   const x=Math.round(sw)/100;
   v.textContent=(x>0?'+':'')+x.toFixed(2).replace('.',',');
+}
+// Valutazione visibile (SÌ) o nascosta (NO): si cambia con il pulsante "Valutazione".
+// Predefinito: SÌ. Con NO la valutazione non viene nemmeno calcolata. La scelta resta finché non si inizia una nuova partita.
+let evalOn=true;
+function updateEvalUI(){
+  const b=document.getElementById('btn-eval');
+  if(b) b.textContent='📊 Valutazione: '+(evalOn?'SÌ':'NO');
+  const v=document.getElementById('eval-val');
+  if(v&&!evalOn){ v.style.opacity='1'; v.textContent='nascosta'; }
+}
+function toggleEval(){
+  evalOn=!evalOn;
+  try{ if(evalOn) localStorage.removeItem('dg_eval'); else localStorage.setItem('dg_eval','0'); }catch(e){}
+  if(!evalOn){ cancelEval(); }
+  else{ const v=document.getElementById('eval-val'); if(v) v.textContent='…'; }
+  updateEvalUI();
+  if(evalOn) scheduleEval();
 }
 function staleEval(){
   const v=document.getElementById('eval-val');
@@ -1847,6 +1866,7 @@ function evalSync(id,side,cells){
 function scheduleEval(){
   maybeLoadFinali(cellsFromBoard(board));
   cancelEval();
+  if(!evalOn){ updateEvalUI(); return; }
   staleEval();
   if(aiThinking) return;
   const side=sideNum(turn);
@@ -1898,6 +1918,7 @@ ioObs.observe(canvas);
 function init(){
   resizeCanvas();
   wireBtn('btn-undo', undoMove);
+  wireBtn('btn-eval', toggleEval);
   wireBtn('btn-new',  askNewGame);
   wireBtn('overlay-new-btn', askNewGame);
   wireBtn('btn-hint', hintAction);
@@ -1915,6 +1936,9 @@ function init(){
     computeLegal(); updatePDN(); updateStatus();
   }
   applySettingsUI();
+  // partita ripresa: se prima la valutazione era nascosta, resta nascosta
+  try{ if(localStorage.getItem('dg_board')&&localStorage.getItem('dg_eval')==='0') evalOn=false; }catch(e){}
+  updateEvalUI();
   updateStatus();
   drawAll();
   maybeAIMove();

@@ -108,6 +108,8 @@
       <dd>Mostra sulla scacchiera la mossa che il programma giocherebbe al tuo posto, senza eseguirla. Sotto i pulsanti compare un commento con la mossa in notazione PDN e con le informazioni sul calcolo (profondità raggiunta in semimosse, posizioni esaminate, tempo). Compare anche quando il programma ha usato il database delle aperture o quello dei finali.</dd>
       <dt>↩ Annulla mossa</dt>
       <dd>Torna indietro di una mossa. Contro il computer si torna indietro fino al tuo turno, cioè si annullano anche la risposta del computer e la tua mossa precedente. Si può ripetere più volte.</dd>
+      <dt>📊 Valutazione: SÌ / NO</dt>
+      <dd>Mostra o nasconde la valutazione della posizione. All'inizio è visibile (SÌ). Premendo il pulsante passa a NO: la valutazione sparisce dallo schermo, al suo posto compare “nascosta”, e il programma non la calcola più. Premendolo di nuovo torna subito visibile (SÌ), in qualsiasi momento della partita. È utile quando due persone giocano tra loro e non vogliono essere influenzate dal numero: possono nasconderlo durante la partita e mostrarlo alla fine, o quando vogliono. Con “Nuova partita” la valutazione torna visibile.</dd>
       <dt>↺ Nuova partita</dt>
       <dd>Inizia una nuova partita. Se quella in corso è ancora aperta, il programma chiede conferma prima di cancellarla.</dd>
       <dt>❓ Help</dt>
@@ -118,6 +120,7 @@
   <section id="valutazione">
     <h2>La valutazione</h2>
     <p>Accanto al conteggio dei pezzi compare la <b>Valutazione</b>: un numero, dal punto di vista del Bianco, espresso in pedine. +1,00 significa una pedina di vantaggio per il Bianco, −1,00 una pedina di vantaggio per il Rosso. Una dama vale due pedine. Il valore viene ricalcolato dopo ogni mossa con una breve ricerca (circa un secondo e mezzo) e tiene conto anche di prese, scambi e promozioni imminenti. Mentre si ricalcola, l'ultimo valore resta visibile in tono più chiaro.</p>
+    <p>La valutazione si può nascondere e rimostrare con il pulsante <b>📊 Valutazione: SÌ / NO</b> (vedi “Pulsanti e comandi”).</p>
     <p>Quando il programma accerta una vittoria forzata, compare “vince il Bianco” o “vince il Rosso”.</p>
     <div class="note"><b>Database dei finali:</b> quando il programma accerta, grazie al database dei finali, che da quella posizione si arriva con certezza a una posizione vinta, alla valutazione materiale vengono sommate (o sottratte) 10 pedine e compare la dicitura “(database finali)”. Un valore come +14,30 (database finali) significa quindi: vittoria certa del Bianco, con 4,30 pedine di vantaggio materiale.</div>
   </section>
@@ -136,6 +139,7 @@
 
     <h3>Aperture</h3>
     <p>Se è presente il file <span class="file">libro-aperture.js</span>, nelle prime mosse il programma sceglie tra le mosse di teoria contenute nel libro, valutandole con il motore e con un po' di varietà tra mosse equivalenti. Il commento sotto i pulsanti segnala quando una mossa viene dal libro. Terminata la teoria, o se il file manca, il programma gioca calcolando le mosse migliori.</p>
+    <p>Il libro contiene oltre 75.500 posizioni, con oltre 145.500 mosse.</p>
 
     <h3>Finali</h3>
     <p>Se è presente il file <span class="file">libro-finali.js</span>, il programma conosce con certezza l'esito di tutte le posizioni da 2 a 5 pezzi: vincente, perdente o pari. Fino a 4 pezzi conosce anche la distanza dalla prossima presa o promozione, quindi sa portare a termine le vittorie anche lunghe, le cosiddette “finali di manovra” che il solo calcolo non riuscirebbe a vedere. A 5 pezzi conosce l'esito e lo usa per orientare la ricerca verso le posizioni vinte.</p>
