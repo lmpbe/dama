@@ -4,7 +4,7 @@ function aiEngineFactory(opt){
   // pesi della valutazione e interruttori della ricerca (opt serve solo ai test)
   const W=Object.assign({
     man:100, adv:3, cen:2, back:5, edge:-4, prot:0, king:200, kcen:2, diag:4,
-    pvs:1, lmr:1, kill:1, advq:4, mob:3, trap:0, basePen:30, baseNear:0, baseNearPly:6, cornerPen:20,
+    pvs:1, lmr:1, kill:1, advq:4, mob:3, trap:0, basePen:30, baseNear:0, baseNearPly:6, cornerPen:20, edgePen:30,
     kingBig:300, kingN1:16, kingN0:12   // valore della dama: kingBig con >=kingN1 pezzi, scende linearmente fino a W.king con <=kingN0 pezzi (kingBig=0: spento)
   }, opt||{});
 
@@ -296,6 +296,7 @@ function aiEngineFactory(opt){
 
   // penalita' (centesimi di pedina) per la mossa/presa di una pedina che parte dalla propria base
   //  - pedine di base (29,30,31 Bianco; 2,3,4 Rosso): basePen, maggiorata nelle prime semimosse del calcolo
+  //  - pedina 25 (Bianco) / 8 (Rosso): edgePen, solo se manca la pedina 29 (Bianco) / 4 (Rosso)
   //  - pedina d'angolo (32 Bianco; 1 Rosso): cornerPen, ma solo se la pedina 31 (Bianco) / 2 (Rosso) non c'e' piu'
   // maggiorazione per le prime semimosse del calcolo: baseNear alla 1a, scende linearmente fino a baseNear/6 alla 6a, poi 0
   function near(ply){ return (W.baseNear&&ply>=1&&ply<=W.baseNearPly)?Math.round(W.baseNear*(W.baseNearPly+1-ply)/W.baseNearPly):0; }
@@ -304,9 +305,11 @@ function aiEngineFactory(opt){
     if(s>0){
       if(f>=28&&f<=30) return W.basePen+near(ply);
       if(f===31&&b[30]!==1) return W.cornerPen>0?W.cornerPen+near(ply):0;
+      if(f===24&&b[28]!==1) return W.edgePen>0?W.edgePen+near(ply):0;
     } else {
       if(f>=1&&f<=3) return W.basePen+near(ply);
       if(f===0&&b[1]!==-1) return W.cornerPen>0?W.cornerPen+near(ply):0;
+      if(f===7&&b[3]!==-1) return W.edgePen>0?W.edgePen+near(ply):0;
     }
     return 0;
   }
