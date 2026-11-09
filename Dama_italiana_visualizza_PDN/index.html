@@ -1421,10 +1421,25 @@ function drawBoard(state) {
 // ═══════════════════════════════════════════════════════════
 //  UI
 // ═══════════════════════════════════════════════════════════
+// Indicatore di avanzamento: numero di mossa e colore che muove, come nel file PDN (p. es. "4 R / 18")
+function moveNumOf(i) {            // numero di mossa della semimossa i (indice in allMoves)
+  const m = allMoves[i];
+  if (m.num) return m.num;
+  let n = 0;                       // senza numeri nel file: conta le mosse dello stesso colore
+  for (let k = 0; k <= i; k++) if (allMoves[k].color === m.color) n++;
+  return n;
+}
+function progressText() {
+  if (!allMoves.length) return '0 / 0';
+  const tot = moveNumOf(allMoves.length - 1);
+  if (curStep <= 0) return `0 / ${tot}`;
+  const m = allMoves[curStep - 1];
+  return `${moveNumOf(curStep - 1)} ${m.color === 'white' ? 'B' : 'R'} / ${tot}`;
+}
 function updateUI() {
   if (!states.length) return;
   drawBoard(states[curStep]);
-  document.getElementById('progress').textContent = `${curStep} / ${allMoves.length}`;
+  document.getElementById('progress').textContent = progressText();
   document.getElementById('slider').value = curStep;
   document.getElementById('btn-prev').disabled  = curStep <= 0;
   document.getElementById('btn-first').disabled = curStep <= 0;
@@ -1519,15 +1534,16 @@ function parsePDN(text, firstColor) {
   const tokens = [];
   let mt;
   while ((mt = tokenRe.exec(body)) !== null) {
-    if (mt[1]) tokens.push({type:'num'});
+    if (mt[1]) tokens.push({type:'num', n:parseInt(mt[1],10)});
     else if (mt[2]) tokens.push({type:'move', val:mt[2]});
   }
   const hms = [];
   // Se FEN indica che muovono i neri per primi, partiamo da black
   let white = (firstColor !== 'black');
+  let curNum = 0;   // numero di mossa scritto nel file PDN
   for (const tok of tokens) {
-    if (tok.type === 'num') white = (firstColor !== 'black'); // reset al primo colore ad ogni numero di mossa
-    else { hms.push({raw: tok.val, color: white ? 'white' : 'black'}); white = !white; }
+    if (tok.type === 'num') { white = (firstColor !== 'black'); curNum = tok.n; } // reset al primo colore ad ogni numero di mossa
+    else { hms.push({raw: tok.val, color: white ? 'white' : 'black', num: curNum || undefined}); white = !white; }
   }
   return hms;
 }
