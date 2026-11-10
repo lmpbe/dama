@@ -5,7 +5,9 @@ function aiEngineFactory(opt){
   const W=Object.assign({
     man:100, adv:3, cen:2, back:5, edge:-4, prot:0, king:200, kcen:2, diag:4,
     pvs:1, lmr:1, kill:1, advq:4, mob:3, trap:0, basePen:30, baseNear:0, baseNearPly:6, cornerPen:20, edgePen:30, centerPen:20, bookPen:1,
-    kingBig:300, kingN1:16, kingN0:12   // valore della dama: kingBig con >=kingN1 pezzi, scende linearmente fino a W.king con <=kingN0 pezzi (kingBig=0: spento)
+    // valore della dama in funzione del numero totale di pezzi in tavola: punti [pezzi, valore], interpolati linearmente
+    // (16 o piu' pezzi: 3,50 pedine; 12: 2,50; 10: 2,25; 8 o meno: 2,00); kingTab:null = valore fisso W.king
+    kingTab:[[8,200],[10,225],[12,250],[13,275],[14,300],[15,325],[16,350]]
   }, opt||{});
 
   // ── geometria: indice 0..31 = casella PDN 1..32 ──
@@ -107,10 +109,12 @@ function aiEngineFactory(opt){
   // ── valutazione (dal punto di vista di s) ──
   function evaluate(b,s){
     let sc=0, kv=W.king;
-    if(W.kingBig>0){
+    if(W.kingTab){
       let n=0; for(let i=0;i<32;i++) if(b[i]!==0) n++;
-      if(n>=W.kingN1) kv=W.kingBig;
-      else if(n>W.kingN0) kv=W.king+(W.kingBig-W.king)*(n-W.kingN0)/(W.kingN1-W.kingN0);
+      const T=W.kingTab, L=T.length;
+      if(n>=T[L-1][0]) kv=T[L-1][1];
+      else if(n<=T[0][0]) kv=T[0][1];
+      else for(let j=1;j<L;j++) if(n<=T[j][0]){ kv=T[j-1][1]+(T[j][1]-T[j-1][1])*(n-T[j-1][0])/(T[j][0]-T[j-1][0]); break; }
     }
     for(let i=0;i<32;i++){
       const v=b[i];
