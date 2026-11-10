@@ -7,7 +7,11 @@ function aiEngineFactory(opt){
     pvs:1, lmr:1, kill:1, advq:4, mob:3, trap:0, basePen:30, baseNear:0, baseNearPly:6, cornerPen:20, edgePen:30, centerPen:20, bookPen:1,
     // valore della dama in funzione del numero totale di pezzi in tavola: punti [pezzi, valore], interpolati linearmente
     // (16 o piu' pezzi: 3,50 pedine; 12: 2,50; 10: 2,25; 8 o meno: 2,00); kingTab:null = valore fisso W.king
-    kingTab:[[8,200],[10,225],[12,250],[13,275],[14,300],[15,325],[16,350]]
+    kingTab:[[8,200],[10,225],[12,250],[13,275],[14,300],[15,325],[16,350]],
+    // dama "debole" (appena promossa nell'angolo, ancora lontana dal centro): dama Bianca in 1 o in 5 con la 2 occupata da una
+    // pedina Rossa, dama Rossa in 32 o in 28 con la 31 occupata da una pedina Bianca. Vale kingWeak centesimi in meno della tabella
+    // normale (3,00 con 16 o piu' pezzi, 1,50 con 8 o meno); appena esce da quelle case torna al valore normale (0 = spenta)
+    kingWeak:50
   }, opt||{});
 
   // ── geometria: indice 0..31 = casella PDN 1..32 ──
@@ -134,7 +138,8 @@ function aiEngineFactory(opt){
           if(n2<0||b[n2]!==0) x+=W.prot;
         }
       } else {
-        x=kv+CEN[i]*W.kcen+(DIAG[i]?W.diag:0);
+        const weak=(v===2&&(i===0||i===4)&&b[1]===-1)||(v===-2&&(i===31||i===27)&&b[30]===1);
+        x=(weak?kv-W.kingWeak:kv)+CEN[i]*W.kcen+(DIAG[i]?W.diag:0);
       }
       sc+=v>0?x:-x;
     }
