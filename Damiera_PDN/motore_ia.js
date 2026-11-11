@@ -14,7 +14,7 @@ function aiEngineFactory(opt){
     kingWeak:50,
     // penalita' "zeppa": con zeppaMin o piu' pezzi in tavola, zeppaPen centesimi se il Bianco muove 24-20 con una pedina nera in 16
     // e una pedina bianca in 23, o se il Nero muove 9-13 con una pedina bianca in 17 e una pedina nera in 10 (0 = spenta)
-    zeppaPen:20, zeppaMin:14,
+    zeppaPen:20, zeppaMin:14, zeppa2:1,   // zeppa2: seconda penalita' (28-23 / 5-10), stessi valori; 0 = spenta
     // penalita' "zeppone": con zepponeMax o meno pezzi in tavola, tutte le pedine della base (29,30,31 e la 32 se manca la 31 per il
     // Bianco; 2,3,4 e la 1 se manca la 2 per il Nero) hanno la stessa penalita' zepponePen se il Bianco ha pedine in 16,20,24 e il Nero in
     // 4,7,11,12,15 (per il Nero la situazione speculare: sue pedine in 9,13,17 e pedine bianche in 18,21,22,26,29). 0 = spenta
@@ -345,8 +345,15 @@ function aiEngineFactory(opt){
   function zeppaPenalty(b,s,m){
     if(!(W.zeppaPen>0)||m.capt.length>0||m.path.length!==2) return 0;
     const f=m.path[0], t=m.path[1];
-    if(s>0){ if(!(f===23&&t===19&&b[23]===1&&b[15]===-1&&b[22]===1)) return 0; }
-    else   { if(!(f===8&&t===12&&b[8]===-1&&b[16]===1&&b[9]===-1)) return 0; }
+    if(s>0){
+      const z1=f===23&&t===19&&b[23]===1&&b[15]===-1&&b[22]===1;                         // 24-20 con nera in 16 e bianca in 23
+      const z2=W.zeppa2&&f===27&&t===22&&b[27]===1&&b[15]===-1&&b[19]===1;                // 28-23 con nera in 16 e bianca in 20
+      if(!(z1||z2)) return 0;
+    } else {
+      const z1=f===8&&t===12&&b[8]===-1&&b[16]===1&&b[9]===-1;                           // 9-13 con bianca in 17 e nera in 10
+      const z2=W.zeppa2&&f===4&&t===9&&b[4]===-1&&b[16]===1&&b[12]===-1;                  // 5-10 con bianca in 17 e nera in 13
+      if(!(z1||z2)) return 0;
+    }
     let n=0; for(let i=0;i<32;i++) if(b[i]!==0) n++;
     return n>=W.zeppaMin?W.zeppaPen:0;
   }
