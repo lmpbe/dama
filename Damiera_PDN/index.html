@@ -1012,7 +1012,10 @@ function aiEngineFactory(opt){
     // dama "debole" (appena promossa nell'angolo, ancora lontana dal centro): dama Bianca in 1 o in 5 con la 2 occupata da una
     // pedina Rossa, dama Rossa in 32 o in 28 con la 31 occupata da una pedina Bianca. Vale kingWeak centesimi in meno della tabella
     // normale (3,00 con 16 o piu' pezzi, 1,50 con 8 o meno); appena esce da quelle case torna al valore normale (0 = spenta)
-    kingWeak:50
+    kingWeak:50,
+    // penalita' "zeppa": con zeppaMin o piu' pezzi in tavola, zeppaPen centesimi se il Bianco muove 24-20 con una pedina nera in 16
+    // e una pedina bianca in 23, o se il Nero muove 9-13 con una pedina bianca in 17 e una pedina nera in 10 (0 = spenta)
+    zeppaPen:20, zeppaMin:14
   }, opt||{});
 
   // ── geometria: indice 0..31 = casella PDN 1..32 ──
@@ -1325,6 +1328,15 @@ function aiEngineFactory(opt){
     return 0;
   }
 
+  function zeppaPenalty(b,s,m){
+    if(!(W.zeppaPen>0)||m.capt.length>0||m.path.length!==2) return 0;
+    const f=m.path[0], t=m.path[1];
+    if(s>0){ if(!(f===23&&t===19&&b[23]===1&&b[15]===-1&&b[22]===1)) return 0; }
+    else   { if(!(f===8&&t===12&&b[8]===-1&&b[16]===1&&b[9]===-1)) return 0; }
+    let n=0; for(let i=0;i<32;i++) if(b[i]!==0) n++;
+    return n>=W.zeppaMin?W.zeppaPen:0;
+  }
+
   function negamax(b,s,depth,alpha,beta,ply){
     if((++nodes&2047)===0&&Date.now()>deadline) abort=true;
     if(abort) return 0;
@@ -1369,6 +1381,7 @@ function aiEngineFactory(opt){
           }
         }
       }
+      if(penOn&&W.zeppaPen>0) pm+=zeppaPenalty(b,s,m);
       let sc;
       if(i===0||!W.pvs){
         sc=-negamax(nb,-s,depth-1,-beta-pm,-alpha-pm,ply+1)-pm;
@@ -1446,6 +1459,7 @@ function aiEngineFactory(opt){
         for(const m of moves) m.pen+=basePenalty(b,s,m.path[0],99);
       }
     }
+    if(W.zeppaPen>0&&!o.evalOnly){ for(const m of moves) m.pen+=zeppaPenalty(b,s,m); }
     nodes=0; abort=false;
 
     const time=o.timeMs||lv.time;
@@ -1492,7 +1506,7 @@ function aiEngineFactory(opt){
       abort=false; deadline=depth<=2?Infinity:t0+time;
       const cur=[];
       for(const r of ranked){
-        const sc=-negamax(applyMove(b,r.m),-s,depth-1,-INF,INF,1)-(usePen?basePenalty(b,s,r.m.path[0],99):0);
+        const sc=-negamax(applyMove(b,r.m),-s,depth-1,-INF,INF,1)-(usePen?basePenalty(b,s,r.m.path[0],99)+zeppaPenalty(b,s,r.m):0);
         if(abort) break;
         cur.push({m:r.m,score:sc});
       }
