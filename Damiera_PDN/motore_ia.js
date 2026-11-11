@@ -14,7 +14,11 @@ function aiEngineFactory(opt){
     kingWeak:50,
     // penalita' "zeppa": con zeppaMin o piu' pezzi in tavola, zeppaPen centesimi se il Bianco muove 24-20 con una pedina nera in 16
     // e una pedina bianca in 23, o se il Nero muove 9-13 con una pedina bianca in 17 e una pedina nera in 10 (0 = spenta)
-    zeppaPen:20, zeppaMin:14
+    zeppaPen:20, zeppaMin:14,
+    // penalita' "zeppone": con zepponeMax o meno pezzi in tavola, tutte le pedine della base (29,30,31 e la 32 se manca la 31 per il
+    // Bianco; 2,3,4 e la 1 se manca la 2 per il Nero) hanno la stessa penalita' zepponePen se il Bianco ha pedine in 16,20,24 e il Nero in
+    // 4,7,11,12,15 (per il Nero la situazione speculare: sue pedine in 9,13,17 e pedine bianche in 18,21,22,26,29). 0 = spenta
+    zepponePen:20, zepponeMax:16
   }, opt||{});
 
   // ── geometria: indice 0..31 = casella PDN 1..32 ──
@@ -312,8 +316,18 @@ function aiEngineFactory(opt){
   //  - pedina d'angolo (32 Bianco; 1 Rosso): cornerPen, ma solo se la pedina 31 (Bianco) / 2 (Rosso) non c'e' piu'
   // maggiorazione per le prime semimosse del calcolo: baseNear alla 1a, scende linearmente fino a baseNear/6 alla 6a, poi 0
   function near(ply){ return (W.baseNear&&ply>=1&&ply<=W.baseNearPly)?Math.round(W.baseNear*(W.baseNearPly+1-ply)/W.baseNearPly):0; }
+  function zepponeCond(b,s){
+    let n=0; for(let i=0;i<32;i++) if(b[i]!==0) n++;
+    if(n>W.zepponeMax) return false;
+    if(s>0) return b[15]===1&&b[19]===1&&b[23]===1&&b[3]===-1&&b[6]===-1&&b[10]===-1&&b[11]===-1&&b[14]===-1;
+    return b[8]===-1&&b[12]===-1&&b[16]===-1&&b[17]===1&&b[20]===1&&b[21]===1&&b[25]===1&&b[28]===1;
+  }
   function basePenalty(b,s,f,ply){
     if(b[f]!==s) return 0;
+    if(W.zepponePen>0&&(s>0?(f>=28&&f<=31):(f<=3))&&zepponeCond(b,s)){
+      if(s>0?(f<31||b[30]!==1):(f>0||b[1]!==-1)) return W.zepponePen+near(ply);   // 29,30,31 / 2,3,4 e la 32 (1) solo se manca la 31 (2)
+      return 0;
+    }
     if(s>0){
       if(f===29) return (b[28]===1&&b[30]===1?W.centerPen:W.basePen)+near(ply);   // pedina 30: centerPen se ci sono ancora la 29 e la 31
       if(f===28||f===30) return W.basePen+near(ply);
