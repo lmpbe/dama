@@ -14,7 +14,7 @@ function aiEngineFactory(opt){
     kingWeak:50,
     // penalita' "zeppa": con zeppaMin o piu' pezzi in tavola, zeppaPen centesimi se il Bianco muove 24-20 con una pedina nera in 16
     // e una pedina bianca in 23, o se il Nero muove 9-13 con una pedina bianca in 17 e una pedina nera in 10 (0 = spenta)
-    zeppaPen:20, zeppaMin:14, zeppa2:1,   // zeppa2: seconda penalita' (28-23 / 5-10), stessi valori; 0 = spenta
+    zeppaPen:20, zeppaMin:14, zeppa2:0, baseEarly:20, baseEarlyMin:18,   // zeppa2: seconda penalita' (28-23 / 5-10), stessi valori; 0 = spenta
     // penalita' "zeppone": con zepponeMax o meno pezzi in tavola, tutte le pedine della base (29,30,31 e la 32 se manca la 31 per il
     // Bianco; 2,3,4 e la 1 se manca la 2 per il Nero) hanno la stessa penalita' zepponePen se il Bianco ha pedine in 16,20,24 e il Nero in
     // 4,7,11,12,15 (per il Nero la situazione speculare: sue pedine in 9,13,17 e pedine bianche in 18,21,22,26,29). 0 = spenta
@@ -316,6 +316,7 @@ function aiEngineFactory(opt){
   //  - pedina d'angolo (32 Bianco; 1 Rosso): cornerPen, ma solo se la pedina 31 (Bianco) / 2 (Rosso) non c'e' piu'
   // maggiorazione per le prime semimosse del calcolo: baseNear alla 1a, scende linearmente fino a baseNear/6 alla 6a, poi 0
   function near(ply){ return (W.baseNear&&ply>=1&&ply<=W.baseNearPly)?Math.round(W.baseNear*(W.baseNearPly+1-ply)/W.baseNearPly):0; }
+  function early(b){ let n=0; for(let i=0;i<32;i++) if(b[i]!==0) n++; return n>=W.baseEarlyMin; }   // proxy delle prime 10 mosse: ancora almeno baseEarlyMin pezzi
   function zepponeCond(b,s){
     let n=0; for(let i=0;i<32;i++) if(b[i]!==0) n++;
     if(n>W.zepponeMax) return false;
@@ -330,11 +331,13 @@ function aiEngineFactory(opt){
     }
     if(s>0){
       if(f===29) return (b[28]===1&&b[30]===1?W.centerPen:W.basePen)+near(ply);   // pedina 30: centerPen se ci sono ancora la 29 e la 31
+      if(f===30&&b[31]===1&&b[29]===1&&early(b)) return W.baseEarly+near(ply);   // 31-28/31-27 con 32 e 30 presenti, nelle prime mosse
       if(f===28||f===30) return W.basePen+near(ply);
       if(f===31&&b[30]!==1) return W.cornerPen>0?W.cornerPen+near(ply):0;
       if(f===24&&b[28]!==1) return W.edgePen>0?W.edgePen+near(ply):0;
     } else {
       if(f===2) return (b[1]===-1&&b[3]===-1?W.centerPen:W.basePen)+near(ply);    // pedina 3: centerPen se ci sono ancora la 2 e la 4
+      if(f===1&&b[0]===-1&&b[2]===-1&&early(b)) return W.baseEarly+near(ply);
       if(f===1||f===3) return W.basePen+near(ply);
       if(f===0&&b[1]!==-1) return W.cornerPen>0?W.cornerPen+near(ply):0;
       if(f===7&&b[3]!==-1) return W.edgePen>0?W.edgePen+near(ply):0;
