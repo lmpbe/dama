@@ -894,7 +894,7 @@ function confirmNewGame(){
   board=makeInitBoard(); turn='white'; selected=null; partialPath=[];
   history=[]; halfMoves=[]; lastFrom=null; lastTo=null; gameOver=false;
   computeLegal(); updatePDN(); updateStatus(); drawAll();
-  try { localStorage.removeItem('dg_board'); } catch(e) {}
+  try { localStorage.removeItem('dg_board'); localStorage.removeItem('dg_aiMode'); localStorage.removeItem('dg_human'); localStorage.removeItem('dg_level'); } catch(e) {}
   maybeAIMove();
   scheduleEval();
 }
@@ -909,6 +909,9 @@ function saveSession(){
     localStorage.setItem('dg_lastFrom', lastFrom===null?'':lastFrom);
     localStorage.setItem('dg_lastTo', lastTo===null?'':lastTo);
     localStorage.setItem('dg_gameOver', gameOver?'1':'0');
+    localStorage.setItem('dg_aiMode', aiMode?'1':'0');
+    localStorage.setItem('dg_human', humanColor);
+    localStorage.setItem('dg_level', String(aiLevel));
   } catch(e) {}
 }
 
@@ -1846,8 +1849,24 @@ function hintAction(){ if(aiThinking||gameOver||legalMoves.length===0) return; r
 
 // ── Impostazioni ───────────────────────────────────────────────────
 // Ad ogni apertura e a ogni "Nuova partita" si riparte da: 2 giocatori; contro il computer il livello è Forte
-function loadSettings(){ aiMode=false; humanColor='white'; aiLevel=2; }
-function saveSettings(){}
+function loadSettings(){
+  aiMode=false; humanColor='white'; aiLevel=2;
+  // se c'è una partita salvata, ripristina anche la modalità (2 giocatori / computer, colore, livello)
+  try{
+    if(localStorage.getItem('dg_board') && localStorage.getItem('dg_aiMode')==='1'){
+      aiMode=true;
+      humanColor=(localStorage.getItem('dg_human')==='black')?'black':'white';
+      aiLevel=(localStorage.getItem('dg_level')==='1')?1:2;
+    }
+  }catch(e){}
+}
+function saveSettings(){
+  try{
+    localStorage.setItem('dg_aiMode',aiMode?'1':'0');
+    localStorage.setItem('dg_human',humanColor);
+    localStorage.setItem('dg_level',String(aiLevel));
+  }catch(e){}
+}
 function setOn(id,on){
   const el=document.getElementById(id);
   if(el) el.classList.toggle('on',!!on);
@@ -2053,7 +2072,7 @@ function keepAwakeStop() {
 // Salva quando la pagina va in background o viene chiusa
 document.addEventListener('visibilitychange',()=>{
   if(document.hidden){ saveSession(); keepAwakeStop(); }
-  else{ drawAll(); keepAwakeStart(); }
+  else{ drawAll(); keepAwakeStart(); maybeAIMove(); }
 });
 window.addEventListener('pagehide', saveSession);
 
