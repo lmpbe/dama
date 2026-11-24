@@ -155,7 +155,7 @@ function today(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return `${
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 
 function newState(){
-  return { v:1, phase:'setup', draft:{name:'',mode:'partial',turns:null,players:''}, name:'', date:'', groups:[] };
+  return { v:1, phase:'setup', draft:{name:'',mode:'partial',turns:null,players:'',v2:true}, name:'', date:'', groups:[] };
 }
 // Il torneo ha un elenco di gruppi: per ora uno solo (in futuro fino a 3 gruppi autonomi)
 function G(){ return S.groups[0]; }
@@ -164,7 +164,7 @@ function pname(i){ return G().players[i].name; }
 
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
 function load(){
-  try{ const t=localStorage.getItem(KEY); if(t){ const o=JSON.parse(t); if(o&&o.v===1&&o.phase){ S=o; return true; } } }catch(e){}
+  try{ const t=localStorage.getItem(KEY); if(t){ const o=JSON.parse(t); if(o&&o.v===1&&o.phase){ S=o; if(S.draft&&!S.draft.v2){ S.draft.turns=null; S.draft.v2=true; } return true; } } }catch(e){}
   return false;
 }
 
