@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Dama – Tornei</title>
+<meta name="description" content="Claude Dama – Tornei: gestione di tornei di dama da telefono, con abbinamenti completi (girone all'italiana) o parziali, classifica con spareggi e condivisione dei risultati.">
+<style>
+  :root {
+    --bg:      #d0e0f0;
+    --panel:   #b8cfe0;
+    --border:  #8aaac0;
+    --accent:  #2060a0;
+    --accent2: #1a4880;
+    --text:    #1a2a3a;
+    --muted:   #4a6a88;
+    --radius:  8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { min-height: 100%; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg); color: var(--text);
+    min-height: 100%;   /* la pagina scorre insieme al browser: cosi' su telefono la barra degli indirizzi si nasconde */
+    display: flex; flex-direction: column; align-items: center;
+  }
+  header { width:100%; background:var(--accent); padding:10px 16px; text-align:center; flex-shrink:0; }
+  header h1 { font-size:clamp(1rem,3.5vw,1.5rem); color:#fff; font-weight:bold; }
+  header h1 { display:flex; align-items:center; justify-content:center; gap:10px; }
+  .logo { width:34px; height:34px; border-radius:6px; border:2px solid #fff; flex-shrink:0; }
+  header p  { font-size:.8rem; color:#cce0ff; margin-top:2px; word-break:break-word; }
+  main { width:100%; max-width:640px; padding:12px 12px 36px; display:flex; flex-direction:column; gap:12px; flex:1; }
+
+  .card { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; }
+  .card h3 { font-size:.72rem; text-transform:uppercase; color:var(--muted); font-weight:bold; margin-bottom:10px; letter-spacing:.06em; }
+
+  button {
+    cursor:pointer; font-family:Arial,sans-serif;
+    border-radius:6px; border:1px solid var(--border);
+    transition:background .12s;
+    user-select:none; -webkit-user-select:none; touch-action:manipulation;
+  }
+  button:disabled { opacity:.35; cursor:default; }
+  .btn-primary { background:var(--accent); color:#fff; font-weight:bold; border-color:var(--accent2); font-size:1.05rem; padding:12px 20px; }
+  .btn-primary:hover:not(:disabled) { background:var(--accent2); }
+  .btn-big { background:#e0ecf8; color:var(--text); font-size:1rem; font-weight:bold; padding:12px 16px; border-color:var(--border); }
+  .btn-big:hover:not(:disabled) { background:#c8ddf0; }
+  .btns { display:grid; grid-template-columns:1fr; gap:10px; margin-top:14px; }
+
+  .seg { display:flex; gap:6px; }
+  .seg button { flex:1; min-width:0; padding:11px 4px; font-size:1rem; font-weight:bold; background:#e0ecf8; color:var(--text); }
+  .seg button.on { background:var(--accent); color:#fff; border-color:var(--accent2); }
+
+  .fl { display:block; font-size:.8rem; color:var(--muted); font-weight:bold; margin:14px 0 6px; }
+  input[type=text], input[type=number] {
+    width:100%; font-size:1.1rem; padding:10px; font-family:Arial,sans-serif;
+    border:2px solid #5a8aaa; border-radius:6px; background:#fff; color:var(--text);
+  }
+  .hint { color:var(--accent2); font-weight:bold; font-size:.92rem; margin-top:10px; }
+  .err  { color:#b00020; font-weight:bold; font-size:.92rem; margin-top:8px; min-height:1.1em; }
+  .okmsg{ color:#2a7a2a; font-weight:bold; font-size:.92rem; margin-top:8px; min-height:1.1em; }
+  .note { font-size:.8rem; color:var(--muted); margin-top:8px; line-height:1.4; }
+
+  .tab { width:100%; border-collapse:collapse; background:#fff; font-size:.95rem; }
+  .tab th, .tab td { border:1px solid var(--border); padding:6px 5px; text-align:center; }
+  .tab th { background:#e0ecf8; font-size:.74rem; color:var(--text); }
+  .tab tr.sel td { background:#fff3b0; font-weight:bold; }
+  .rank { font-size:.9rem; }
+  .rank td.nm { text-align:left; word-break:break-word; }
+  .rank .wd { color:#b00020; font-size:.75rem; font-weight:bold; }
+
+  .nlist { background:#fff; border:2px solid #5a8aaa; border-radius:6px; max-height:48vh; overflow-y:auto; margin-top:12px; }
+  .nitem { display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid #dde6ee; font-size:1.15rem; }
+  .nitem:last-child { border-bottom:none; }
+  .nitem .n { width:2.4em; color:var(--muted); font-weight:bold; flex-shrink:0; }
+  .nitem .nm { flex:1; word-break:break-word; font-weight:bold; }
+  .nitem button { padding:6px 12px; font-size:.95rem; }
+  .empty { padding:12px; color:var(--muted); font-style:italic; }
+
+  .rtitle { font-size:1.3rem; font-weight:bold; text-align:center; }
+  .last { background:#c0392b; color:#fff; font-weight:bold; text-align:center; padding:10px; border-radius:6px; font-size:1.1rem; margin-top:10px; letter-spacing:.03em; }
+  .game { background:#fff; border:1px solid var(--border); border-radius:6px; padding:10px; margin-bottom:10px; }
+  .game.miss { border:2px solid #b00020; }
+  .gnames { font-size:1.1rem; font-weight:bold; margin-bottom:8px; word-break:break-word; }
+  .gnum { color:var(--muted); margin-right:4px; }
+  .fo { color:#b00020; font-weight:bold; font-size:.85rem; margin-top:6px; }
+  .bye { background:#eef4fa; border:1px dashed var(--border); border-radius:6px; padding:9px 10px; margin-bottom:8px; font-weight:bold; }
+
+  .tinfo { font-size:.88rem; margin-bottom:10px; line-height:1.4; }
+  .rd { background:#fff; border:1px solid var(--border); border-radius:6px; padding:8px 10px; margin-bottom:10px; }
+  .rdt { font-weight:bold; color:var(--accent2); margin-bottom:6px; }
+  .rg { display:flex; justify-content:space-between; gap:10px; padding:4px 0; border-bottom:1px solid #eef2f6; }
+  .rg:last-child { border-bottom:none; }
+  .rg span { word-break:break-word; }
+  .rg b { white-space:nowrap; }
+
+  .overlay-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:100; align-items:center; justify-content:center; }
+  .overlay-bg.show { display:flex; }
+  .overlay-box { background:#fff; border-radius:12px; padding:22px 20px; text-align:center; max-width:520px; width:94%; max-height:88vh; overflow-y:auto; box-shadow:0 8px 32px rgba(0,0,0,.4); }
+  .overlay-title { font-size:1.3rem; font-weight:bold; margin-bottom:10px; }
+  .overlay-sub   { font-size:.98rem; color:#333; margin-bottom:18px; line-height:1.45; }
+  .overlay-btns  { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  .pick { display:grid; gap:8px; margin-top:12px; }
+  .pick button { font-size:1.05rem; padding:11px; }
+</style>
+<link rel="icon" type="image/png" sizes="192x192" href="icona-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icona-180.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Cdefs%3E%3CclipPath%20id=%22c%22%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2210%22/%3E%3C/clipPath%3E%3C/defs%3E%3Cg%20clip-path=%22url%28%23c%29%22%3E%3Crect%20width=%2264%22%20height=%2264%22%20fill=%22%233aa0e0%22/%3E%3Crect%20width=%2232%22%20height=%2232%22%20fill=%22%23ffffff%22/%3E%3Crect%20x=%2232%22%20y=%2232%22%20width=%2232%22%20height=%2232%22%20fill=%22%23ffffff%22/%3E%3C/g%3E%3Crect%20x=%221%22%20y=%221%22%20width=%2262%22%20height=%2262%22%20rx=%229%22%20fill=%22none%22%20stroke=%22%236b7a86%22%20stroke-width=%222%22/%3E%3C/svg%3E">
+</head>
+<body>
+
+<header>
+  <h1><img src="icona-192.png" alt="" class="logo">Claude Dama – Tornei</h1>
+  <p id="subtitle"></p>
+</header>
+
+<main id="main"></main>
+
+<div id="dlg" class="overlay-bg">
+  <div class="overlay-box">
+    <div id="dlg-title" class="overlay-title"></div>
+    <div id="dlg-body" class="overlay-sub"></div>
+    <div id="dlg-btns" class="overlay-btns"></div>
+  </div>
+</div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════════════════════
+//  CLAUDE DAMA – TORNEI
+//
+//  Abbinamenti COMPLETI: girone all'italiana (tabella di Berger) con ordine
+//    dei giocatori sorteggiato. Turni dispari; giocatori = turni o turni+1.
+//    Chi resta senza avversario (riposo o avversario ritirato) prende 1 punto.
+//  Abbinamenti PARZIALI: 1° turno casuale, poi dall'alto della classifica
+//    ciascuno incontra il primo giocatore con punteggio uguale o inferiore
+//    che non ha ancora incontrato (a parità di punti: sorteggio). La regola
+//    "mai due volte lo stesso avversario" prevale: se serve si torna indietro
+//    e si prova l'avversario successivo. Giocatori da 2·turni−1 a 2^turni.
+//    Con giocatori dispari riposa (1 punto) l'ultimo in classifica che non
+//    ha ancora riposato; nessuno riposa due volte.
+//  Classifica: punti (2 vittoria, 1 patta, 0 sconfitta); spareggi:
+//    scontro diretto (solo fra 2), vittorie, somma punti avversari, pari merito.
+//    Quando un criterio divide un gruppo, ogni sottogruppo riparte dal primo.
+//  Il torneo e' salvato nel browser (localStorage) a ogni modifica.
+// ═══════════════════════════════════════════════════════════════════
+
+const KEY='claude_dama_tornei_v1';
+let S=null;
+
+const $=id=>document.getElementById(id);
+function on(id,ev,fn){ const el=$(id); if(el) el.addEventListener(ev,fn); }
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function today(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()}`; }
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+function newState(){
+  return { v:1, phase:'setup', draft:{name:'',mode:'partial',turns:5,players:''}, name:'', date:'', groups:[] };
+}
+// Il torneo ha un elenco di gruppi: per ora uno solo (in futuro fino a 3 gruppi autonomi)
+function G(){ return S.groups[0]; }
+function cur(){ const g=G(); return g.rounds[g.rounds.length-1]; }
+function pname(i){ return G().players[i].name; }
+
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
+function load(){
+  try{ const t=localStorage.getItem(KEY); if(t){ const o=JSON.parse(t); if(o&&o.v===1&&o.phase){ S=o; return true; } } }catch(e){}
+  return false;
+}
+
+// ── Combinazioni turni / giocatori consentite ──────────────────────
+function rangeOf(mode,t){
+  if(mode==='complete') return (t%2===1)?{min:t,max:t+1}:null;
+  return {min:2*t-1,max:Math.pow(2,t)};
+}
+
+// ── Finestre di dialogo ────────────────────────────────────────────
+function showDlg(title,html,buttons){
+  $('dlg-title').textContent=title;
+  $('dlg-body').innerHTML=html;
+  const bx=$('dlg-btns'); bx.innerHTML='';
+  buttons.forEach(b=>{
+    const el=document.createElement('button');
+    el.className=b.cls||'btn-big'; el.textContent=b.label;
+    el.addEventListener('click',()=>{ closeDlg(); if(b.fn) b.fn(); });
+    bx.appendChild(el);
+  });
+  $('dlg').classList.add('show');
+}
+function closeDlg(){ $('dlg').classList.remove('show'); }
+function confirmDlg(title,html,okLabel,fn,cancelLabel){
+  showDlg(title,html,[{label:okLabel,cls:'btn-primary',fn},{label:cancelLabel||'✕ Annulla'}]);
+}
+function infoDlg(title,html){ showDlg(title,html,[{label:'✓ OK',cls:'btn-primary'}]); }
+function help(){ showDlg('Help','Help, lavori in corso…',[{label:'✕ Chiudi',cls:'btn-primary'}]); }
+
+function askNew(){
+  const msg=S.phase==='final'
+    ? 'Il torneo concluso verrà cancellato.<br>Hai già condiviso o salvato la classifica?'
+    : 'Il torneo in corso andrà perso.';
+  confirmDlg('Nuovo torneo?',msg,'✓ Sì, nuovo torneo',()=>{ S=newState(); save(); render(true); });
+}
+
+// ── Punteggi, spareggi, classifica ─────────────────────────────────
+function stats(g){
+  const s=g.players.map(()=>({pts:0,w:0,d:0,l:0,r:0,opp:[],b:0}));
+  for(const rd of g.rounds){
+    if(!rd.done) continue;
+    for(const x of rd.games){
+      const A=s[x.a], B=s[x.b];
+      A.opp.push(x.b); B.opp.push(x.a);
+      if(x.res==='2-0'){ A.pts+=2; A.w++; B.l++; }
+      else if(x.res==='0-2'){ B.pts+=2; B.w++; A.l++; }
+      else { A.pts++; B.pts++; A.d++; B.d++; }
+    }
+    for(const y of rd.byes){ s[y.p].pts+=1; s[y.p].r++; }
+  }
+  // somma dei punti in classifica degli avversari incontrati (un ritirato conta con i punti che ha)
+  s.forEach(o=>{ o.b=o.opp.reduce((t,j)=>t+s[j].pts,0); });
+  return s;
+}
+
+function splitBy(grp,f){
+  const m=new Map();
+  grp.forEach(i=>{ const k=f(i); if(!m.has(k)) m.set(k,[]); m.get(k).push(i); });
+  return [...m.keys()].sort((x,y)=>y-x).map(k=>m.get(k));
+}
+
+// tiers: elenco ordinato di gruppi; ogni gruppo con piu' giocatori = pari merito
+function ranking(g){
+  const s=stats(g);
+  const direct=(a,b)=>{
+    for(const rd of g.rounds){
+      if(!rd.done) continue;
+      for(const x of rd.games){
+        if((x.a===a&&x.b===b)||(x.a===b&&x.b===a)){
+          if(x.res==='1-1') return null;
+          return x.res==='2-0'?x.a:x.b;
+        }
+      }
+    }
+    return null;
+  };
+  const resolve=grp=>{
+    if(grp.length<2) return [grp];
+    if(grp.length===2){                                   // 1) scontro diretto, solo fra 2
+      const w=direct(grp[0],grp[1]);
+      if(w!==null) return [[w],[w===grp[0]?grp[1]:grp[0]]];
+    }
+    for(const f of [i=>s[i].w, i=>s[i].b]){                // 2) vittorie  3) somma punti avversari
+      const parts=splitBy(grp,f);
+      if(parts.length>1) return parts.flatMap(resolve);   // ogni sottogruppo riparte dal criterio 1
+    }
+    return [grp];                                          // 4) pari merito
+  };
+  const tiers=splitBy(g.players.map((_,i)=>i),i=>s[i].pts).flatMap(resolve);
+  return {tiers,s};
+}
+
+function rankRows(){
+  const g=G(), R=ranking(g), rows=[];
+  let pos=1;
+  for(const tier of R.tiers){
+    const lab=tier.length===1?`${pos}°`:`${pos}°–${pos+tier.length-1}°`;
+    tier.slice().sort((a,b)=>pname(a).localeCompare(pname(b),'it')).forEach(i=>{
+      const o=R.s[i];
+      rows.push({pos:lab,name:pname(i),wd:g.players[i].withdrawn,pts:o.pts,w:o.w,d:o.d,l:o.l,r:o.r,b:o.b});
+    });
+    pos+=tier.length;
+  }
+  return rows;
+}
+
+function rankingTable(){
+  const rows=rankRows();
+  return `<table class="tab rank"><tr><th>Pos.</th><th>Giocatore</th><th>Pt</th><th>V</th><th>N</th><th>P</th><th>R</th><th>Avv.</th></tr>`+
+    rows.map(r=>`<tr><td>${r.pos}</td><td class="nm">${esc(r.name)}${r.wd?' <span class="wd">(ritirato)</span>':''}</td><td><b>${r.pts}</b></td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.r}</td><td>${r.b}</td></tr>`).join('')+
+    `</table><div class="note">Pt = punti · V = vinte · N = nulle (patte) · P = perse · R = riposi (1 punto) · Avv. = somma dei punti degli avversari incontrati</div>`;
+}
+
+// ── Abbinamenti ────────────────────────────────────────────────────
+// Girone all'italiana (metodo del cerchio / tabella di Berger). ids di lunghezza pari, null = riposo
+function berger(ids){
+  const M=ids.length, rounds=[];
+  let arr=ids.slice();
+  for(let r=0;r<M-1;r++){
+    const pairs=[];
+    for(let i=0;i<M/2;i++){
+      const a=arr[i], b=arr[M-1-i];
+      pairs.push((i===0&&r%2===1)?[b,a]:[a,b]);
+    }
+    rounds.push(pairs);
+    arr=[arr[0],arr[M-1],...arr.slice(1,M-1)];
+  }
+  return rounds;
+}
+
+function roundComplete(g,r){
+  const games=[], byes=[];
+  for(const [a,b] of g.schedule[r]){
+    const A=a!==null&&!g.players[a].withdrawn;
+    const B=b!==null&&!g.players[b].withdrawn;
+    if(A&&B) games.push({a,b,res:null,forfeit:null});
+    else if(A) byes.push({p:a,why:b===null?'riposo':'ritiro'});
+    else if(B) byes.push({p:b,why:a===null?'riposo':'ritiro'});
+  }
+  return {games,byes};
+}
+
+// Abbinamento con ritorno indietro: ognuno, dall'alto, prende il primo avversario non ancora incontrato
+function pairDFS(pool,met){
+  const n=pool.length, used=new Array(n).fill(false), out=[];
+  let steps=0;
+  function rec(){
+    if(++steps>2000000) throw new Error('limite');
+    const i=used.indexOf(false);
+    if(i<0) return true;
+    used[i]=true;
+    for(let j=i+1;j<n;j++){
+      if(used[j]||met[pool[i]].has(pool[j])) continue;
+      used[j]=true; out.push([pool[i],pool[j]]);
+      if(rec()) return true;
+      out.pop(); used[j]=false;
+    }
+    used[i]=false;
+    return false;
+  }
+  try{ return rec()?out:null; }catch(e){ return null; }
+}
+
+function roundPartial(g){
+  const act=g.players.map((_,i)=>i).filter(i=>!g.players[i].withdrawn);
+  if(act.length<2) return null;
+  const {tiers,s}=ranking(g);
+  const actSet=new Set(act);
+  const met=g.players.map(()=>new Set()), rested=new Set();
+  for(const rd of g.rounds){
+    for(const x of rd.games){ met[x.a].add(x.b); met[x.b].add(x.a); }
+    for(const y of rd.byes) rested.add(y.p);
+  }
+  let byeC=[null];
+  if(act.length%2===1){
+    // dal fondo della classifica completa (sorteggio fra i pari merito), solo chi non ha mai riposato
+    const order=[];
+    tiers.forEach(t=>order.push(...shuffle(t.filter(i=>actSet.has(i)))));
+    byeC=order.reverse().filter(i=>!rested.has(i));
+    if(!byeC.length) return null;
+  }
+  for(const bye of byeC){
+    const pool=shuffle(act.filter(i=>i!==bye));
+    pool.sort((x,y)=>s[y].pts-s[x].pts);       // punteggio decrescente, casuale a parita' di punti
+    const pr=pairDFS(pool,met);
+    if(pr) return {
+      games:pr.map(([a,b])=>({a,b,res:null,forfeit:null})),
+      byes:bye===null?[]:[{p:bye,why:'riposo'}]
+    };
+  }
+  return null;
+}
+
+function newRound(){
+  const g=G();
+  const rd=g.mode==='complete'?roundComplete(g,g.rounds.length):roundPartial(g);
+  if(!rd) return false;
+  rd.done=false;
+  g.rounds.push(rd);
+  return true;
+}
+
+function startTournament(){
+  const g=G();
+  if(g.mode==='complete'){
+    const ids=shuffle(g.players.map((_,i)=>i));
+    if(ids.length%2===1) ids.push(null);
+    g.schedule=berger(ids);
+  }
+  newRound();
+  S.phase='round';
+  save(); render(true);
+}
+
+// ── Pagina 1: impostazione ─────────────────────────────────────────
+function renderSetup(m){
+  const d=S.draft;
+  let rows='';
+  for(let t=3;t<=8;t++){
+    const c=rangeOf('complete',t), p=rangeOf('partial',t);
+    rows+=`<tr data-t="${t}"><td>${t}</td><td>${c?c.min+', '+c.max:'–'}</td><td>${p.min} – ${p.max}</td></tr>`;
+  }
+  m.innerHTML=`
+  <div class="card"><h3>Tabella promemoria</h3>
+    <table class="tab" id="memo"><tr><th>Turni</th><th>Giocatori<br>abbinamenti completi</th><th>Giocatori (min – max)<br>abbinamenti parziali</th></tr>${rows}</table>
+    <div class="note">Completi: tutti incontrano tutti una sola volta. Parziali: si incontrano i giocatori a punteggio più alto; con il numero massimo, due giocatori sempre vincenti si incontrano per forza all'ultimo turno.</div>
+  </div>
+  <div class="card"><h3>Impostazione del torneo</h3>
+    <label class="fl" for="f-name">Nome del torneo</label>
+    <input type="text" id="f-name" maxlength="60" placeholder="Torneo del ${today()}" value="${esc(d.name)}">
+    <div class="fl">Abbinamenti</div>
+    <div class="seg"><button id="m-complete">Completi</button><button id="m-partial">Parziali</button></div>
+    <div class="fl">Numero di turni</div>
+    <div class="seg" id="turns-seg">${[3,4,5,6,7,8].map(t=>`<button data-t="${t}">${t}</button>`).join('')}</div>
+    <label class="fl" for="f-players">Numero di giocatori</label>
+    <input type="number" id="f-players" inputmode="numeric" min="3" max="256" value="${esc(d.players)}">
+    <div id="f-hint" class="hint"></div>
+    <div id="f-err" class="err"></div>
+    <div class="btns">
+      <button class="btn-primary" id="b-ok">✓ Fine inserimento dati</button>
+      <button class="btn-big" id="b-help">❓ Help</button>
+    </div>
+  </div>`;
+  on('f-name','input',e=>{ d.name=e.target.value; save(); });
+  on('f-players','input',e=>{ d.players=e.target.value; save(); $('f-err').textContent=''; });
+  on('m-complete','click',()=>{ d.mode='complete'; if(d.turns%2===0) d.turns--; save(); updSetup(); });
+  on('m-partial','click',()=>{ d.mode='partial'; save(); updSetup(); });
+  document.querySelectorAll('#turns-seg button').forEach(b=>b.addEventListener('click',()=>{
+    const t=+b.dataset.t; if(d.mode==='complete'&&t%2===0) return;
+    d.turns=t; save(); updSetup();
+  }));
+  on('b-ok','click',setupOk);
+  on('b-help','click',help);
+  updSetup();
+}
+function updSetup(){
+  const d=S.draft;
+  $('m-complete').classList.toggle('on',d.mode==='complete');
+  $('m-partial').classList.toggle('on',d.mode==='partial');
+  document.querySelectorAll('#turns-seg button').forEach(b=>{
+    const t=+b.dataset.t;
+    b.classList.toggle('on',t===d.turns);
+    b.disabled=(d.mode==='complete'&&t%2===0);
+  });
+  document.querySelectorAll('#memo tr[data-t]').forEach(tr=>tr.classList.toggle('sel',+tr.dataset.t===d.turns));
+  const r=rangeOf(d.mode,d.turns);
+  $('f-hint').textContent=d.mode==='complete'
+    ? `Con ${d.turns} turni e abbinamenti completi: ${r.min} oppure ${r.max} giocatori.`
+    : `Con ${d.turns} turni e abbinamenti parziali: da ${r.min} a ${r.max} giocatori.`;
+  $('f-err').textContent='';
+}
+function setupOk(){
+  const d=S.draft, r=rangeOf(d.mode,d.turns), n=Number(d.players);
+  if(!r){ $('f-err').textContent='Con gli abbinamenti completi i turni possono essere solo 3, 5 o 7.'; return; }
+  if(!Number.isInteger(n)||n<r.min||n>r.max){
+    $('f-err').textContent=d.mode==='complete'
+      ? `Numero di giocatori non consentito: con ${d.turns} turni completi i giocatori devono essere ${r.min} o ${r.max}.`
+      : `Numero di giocatori non consentito: con ${d.turns} turni parziali i giocatori devono essere da ${r.min} a ${r.max}.`;
+    return;
+  }
+  const name=d.name.trim()||('Torneo del '+today());
+  confirmDlg('Confermi le impostazioni?',
+    `<b>${esc(name)}</b><br>Abbinamenti ${d.mode==='complete'?'completi':'parziali'}<br>${d.turns} turni · ${n} giocatori<br><br>Dopo la conferma le impostazioni non potranno più essere modificate.`,
+    '✓ Conferma',()=>{
+      S.name=name; S.date=today();
+      S.groups=[{mode:d.mode,nTurns:d.turns,nPlayers:n,players:[],rounds:[],schedule:null}];
+      S.phase='names'; save(); render(true);
+    },'✕ Controlla ancora');
+}
+
+// ── Pagina 2: nomi dei giocatori ───────────────────────────────────
+function renderNames(m){
+  m.innerHTML=`
+  <div class="card"><h3 id="n-title"></h3>
+    <label class="fl" for="n-in">Nome del giocatore</label>
+    <input type="text" id="n-in" maxlength="40" autocomplete="off" enterkeyhint="done">
+    <div class="btns"><button class="btn-big" id="b-add">➕ Inserisci giocatore</button></div>
+    <div id="n-err" class="err"></div>
+    <div id="nlist" class="nlist"></div>
+    <div class="btns">
+      <button class="btn-primary" id="b-ok">✓ Fine inserimento dati</button>
+      <button class="btn-big" id="b-help">❓ Help</button>
+      <button class="btn-big" id="b-new">↺ Nuovo torneo</button>
+    </div>
+  </div>`;
+  on('b-add','click',addName);
+  on('n-in','keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); addName(); } });
+  on('b-ok','click',namesOk);
+  on('b-help','click',help);
+  on('b-new','click',askNew);
+  updNames(true);
+}
+function updNames(toEnd){
+  const g=G();
+  $('n-title').textContent=`Giocatori inseriti: ${g.players.length} di ${g.nPlayers}`;
+  const nl=$('nlist');
+  nl.innerHTML=g.players.length
+    ? g.players.map((p,i)=>`<div class="nitem"><span class="n">${i+1}.</span><span class="nm">${esc(p.name)}</span><button class="btn-big" data-i="${i}" aria-label="Elimina">✕</button></div>`).join('')
+    : '<div class="empty">Nessun giocatore inserito</div>';
+  nl.querySelectorAll('button[data-i]').forEach(b=>b.addEventListener('click',()=>{
+    g.players.splice(+b.dataset.i,1); save(); $('n-err').textContent=''; updNames(false);
+  }));
+  if(toEnd) nl.scrollTop=nl.scrollHeight;
+  const full=g.players.length>=g.nPlayers;
+  $('b-add').disabled=full; $('n-in').disabled=full;
+  if(full) $('n-err').innerHTML='<span style="color:#2a7a2a">Tutti i giocatori sono stati inseriti: premi «Fine inserimento dati».</span>';
+}
+function addName(){
+  const g=G(), inp=$('n-in'), err=$('n-err');
+  const v=inp.value.trim().replace(/\s+/g,' ');
+  if(!v){ err.textContent='Scrivi il nome del giocatore.'; inp.focus(); return; }
+  if(g.players.length>=g.nPlayers){ err.textContent=`Hai già inserito tutti i ${g.nPlayers} giocatori.`; return; }
+  if(g.players.some(p=>p.name.toLowerCase()===v.toLowerCase())){ err.textContent=`«${v}» è già nell'elenco: usa un nome diverso (per esempio con l'iniziale del cognome).`; inp.focus(); return; }
+  g.players.push({name:v,withdrawn:false,wRound:null});
+  save(); err.textContent=''; inp.value='';
+  updNames(true);
+  if(!inp.disabled) inp.focus();
+}
+function namesOk(){
+  const g=G();
+  if(g.players.length!==g.nPlayers){
+    $('n-err').textContent=`Hai inserito ${g.players.length} giocatori su ${g.nPlayers}: ne mancano ${g.nPlayers-g.players.length}.`;
+    return;
+  }
+  confirmDlg('Confermi l\'elenco dei giocatori?',
+    `${g.nPlayers} giocatori.<br><br>Dopo la conferma verrà sorteggiato il primo turno e l'elenco non potrà più essere modificato.`,
+    '✓ Conferma',startTournament,'✕ Controlla ancora');
+}
+
+// ── Pagina 3: turno di gioco ───────────────────────────────────────
+function renderRound(m){
+  const g=G(), k=g.rounds.length, rd=cur(), last=k===g.nTurns;
+  const gh=rd.games.map((x,i)=>{
+    const fo=x.forfeit!=null?`<div class="fo">Ritiro di ${esc(pname(x.forfeit))}: partita persa per abbandono</div>`:'';
+    return `<div class="game" id="game-${i}">
+      <div class="gnames"><span class="gnum">${i+1}.</span>${esc(pname(x.a))} – ${esc(pname(x.b))}</div>
+      <div class="seg">${['2-0','1-1','0-2'].map(r=>`<button data-g="${i}" data-r="${r}" class="${x.res===r?'on':''}"${x.forfeit!=null?' disabled':''}>${r}</button>`).join('')}</div>${fo}</div>`;
+  }).join('');
+  const bh=rd.byes.map(y=>`<div class="bye">💤 ${esc(pname(y.p))} — ${y.why==='riposo'?'riposa':'senza avversario (ritirato)'}: 1 punto</div>`).join('');
+  m.innerHTML=`
+  <div class="card">
+    <div class="rtitle">Turno ${k} di ${g.nTurns}</div>
+    ${last?'<div class="last">⚠ ULTIMO TURNO DI GIOCO</div>':''}
+    <div class="note" style="text-align:center">2-0 vince il primo nome · 1-1 patta · 0-2 vince il secondo nome</div>
+  </div>
+  <div class="card"><h3>Partite da disputare</h3>${gh||'<div class="empty">Nessuna partita in questo turno</div>'}${bh}</div>
+  <div class="card">
+    <div class="btns" style="margin-top:0">
+      <button class="btn-primary" id="b-send">✓ Fine inserimento risultati</button>
+      <button class="btn-big" id="b-prov">📊 Classifica provvisoria</button>
+      <button class="btn-big" id="b-wd">🚪 Ritira giocatore</button>
+      <button class="btn-big" id="b-help">❓ Help</button>
+      <button class="btn-big" id="b-new">↺ Nuovo torneo</button>
+    </div>
+    <div id="r-err" class="err"></div>
+  </div>`;
+  m.querySelectorAll('.game .seg button').forEach(b=>b.addEventListener('click',()=>{
+    const i=+b.dataset.g, x=cur().games[i];
+    if(x.forfeit!=null) return;
+    x.res=b.dataset.r; save();
+    b.parentNode.querySelectorAll('button').forEach(o=>o.classList.toggle('on',o.dataset.r===x.res));
+    $('game-'+i).classList.remove('miss');
+    $('r-err').textContent='';
+  }));
+  on('b-send','click',sendResults);
+  on('b-prov','click',provisional);
+  on('b-wd','click',withdrawDlg);
+  on('b-help','click',help);
+  on('b-new','click',askNew);
+}
+
+function sendResults(){
+  const g=G(), rd=cur(), k=g.rounds.length, last=k>=g.nTurns;
+  const miss=[];
+  rd.games.forEach((x,i)=>{ if(!x.res){ miss.push(i); $('game-'+i).classList.add('miss'); } });
+  if(miss.length){
+    $('r-err').textContent=`Manca il risultato ${miss.length===1?'della partita':'delle partite'} n. ${miss.map(i=>i+1).join(', ')}.`;
+    $('game-'+miss[0]).scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  confirmDlg('Hai controllato i risultati?',
+    `Dopo l'invio i risultati del turno ${k} non potranno più essere modificati.<br><br>`+
+    (last?'<b>È l\'ultimo turno:</b> verrà elaborata la classifica finale.':'Verrà elaborato il turno successivo.'),
+    '✓ Invia risultati',()=>{
+      rd.done=true;
+      if(last){ S.phase='final'; save(); render(true); return; }
+      if(!newRound()){
+        S.phase='final'; save(); render(true);
+        infoDlg('Torneo concluso in anticipo',
+          'Dopo i ritiri non è possibile formare il turno successivo senza far incontrare di nuovo giocatori che si sono già affrontati.<br><br>È stata elaborata la classifica finale.');
+        return;
+      }
+      save(); render(true);
+    },'✕ Controlla ancora');
+}
+
+function provisional(){
+  const g=G(), done=g.rounds.filter(r=>r.done).length;
+  if(!done){ infoDlg('Classifica provvisoria','Nessun turno ancora concluso.'); return; }
+  showDlg('Classifica provvisoria',`<div class="tinfo">dopo il turno ${done} di ${g.nTurns}</div>${rankingTable()}`,[{label:'✕ Chiudi',cls:'btn-primary'}]);
+}
+
+function withdrawDlg(){
+  const g=G();
+  const act=g.players.map((_,i)=>i).filter(i=>!g.players[i].withdrawn).sort((a,b)=>pname(a).localeCompare(pname(b),'it'));
+  showDlg('Ritira giocatore',
+    `Scegli il giocatore che si ritira dal torneo:<div class="pick">${act.map(i=>`<button class="btn-big" data-p="${i}">${esc(pname(i))}</button>`).join('')}</div>`,
+    [{label:'✕ Annulla'}]);
+  $('dlg-body').querySelectorAll('button[data-p]').forEach(b=>b.addEventListener('click',()=>{ closeDlg(); confirmWithdraw(+b.dataset.p); }));
+}
+function confirmWithdraw(i){
+  const g=G(), rd=cur(), p=g.players[i];
+  const game=rd.games.find(x=>(x.a===i||x.b===i)&&x.forfeit==null);
+  const opp=game?pname(game.a===i?game.b:game.a):'';
+  confirmDlg('Confermi il ritiro?',
+    `<b>${esc(p.name)}</b> si ritira dal torneo.<br><br>`+
+    (game?`La partita di questo turno contro <b>${esc(opp)}</b> è persa per abbandono (0-2): 2 punti a ${esc(opp)}.<br><br>`:'')+
+    `Non verrà più abbinato nei turni successivi; i punti già ottenuti restano in classifica.<br><br>L'operazione non si può annullare.`,
+    '✓ Ritira',()=>{
+      p.withdrawn=true; p.wRound=g.rounds.length;
+      if(game){ game.res=game.a===i?'0-2':'2-0'; game.forfeit=i; }
+      save(); render(false);
+    });
+}
+
+// ── Pagina 4: classifica finale ────────────────────────────────────
+function roundsHtml(){
+  const g=G();
+  return g.rounds.filter(r=>r.done).map((rd,k)=>`<div class="rd"><div class="rdt">Turno ${k+1}</div>`+
+    rd.games.map(x=>`<div class="rg"><span>${esc(pname(x.a))} – ${esc(pname(x.b))}${x.forfeit!=null?` <span class="wd" style="color:#b00020">(ritiro di ${esc(pname(x.forfeit))})</span>`:''}</span><b>${x.res}</b></div>`).join('')+
+    rd.byes.map(y=>`<div class="rg"><span>💤 ${esc(pname(y.p))} — ${y.why==='riposo'?'riposo':'senza avversario (ritirato)'}</span><b>1 pt</b></div>`).join('')+
+    `</div>`).join('');
+}
+function infoLine(){
+  const g=G(), done=g.rounds.filter(r=>r.done).length;
+  return `Abbinamenti ${g.mode==='complete'?'completi':'parziali'} · ${g.nTurns} turni · ${g.nPlayers} giocatori`+
+    (done<g.nTurns?` · turni giocati: ${done}`:'');
+}
+function renderFinal(m){
+  m.innerHTML=`
+  <div class="card"><h3>Classifica finale</h3>
+    <div class="tinfo"><b>${esc(S.name)}</b> · ${esc(S.date)}<br>${infoLine()}</div>
+    ${rankingTable()}
+  </div>
+  <div class="card"><h3>Partite disputate</h3>${roundsHtml()}</div>
+  <div class="card">
+    <div class="btns" style="margin-top:0">
+      <button class="btn-primary" id="b-share">📤 Condividi (WhatsApp, mail…)</button>
+      <button class="btn-big" id="b-copy">📋 Copia testo</button>
+      <button class="btn-big" id="b-txt">💾 Salva file di testo</button>
+      <button class="btn-big" id="b-help">❓ Help</button>
+      <button class="btn-big" id="b-new">↺ Nuovo torneo</button>
+    </div>
+    <div id="f-msg" class="okmsg"></div>
+  </div>`;
+  on('b-share','click',shareRes);
+  on('b-copy','click',()=>copyText(buildText()).then(()=>fmsg('✓ Testo copiato: puoi incollarlo dove vuoi.')));
+  on('b-txt','click',saveTxt);
+  on('b-help','click',help);
+  on('b-new','click',askNew);
+}
+
+// ── Testo della classifica (condivisione, copia, file) ────────────
+function buildText(){
+  const g=G(), done=g.rounds.filter(r=>r.done).length, L=[];
+  L.push('TORNEO DI DAMA: '+S.name);
+  L.push('Data: '+S.date);
+  L.push(`Abbinamenti ${g.mode==='complete'?'completi':'parziali'} - ${g.nTurns} turni - ${g.nPlayers} giocatori`);
+  if(done<g.nTurns) L.push(`Turni giocati: ${done} (torneo concluso in anticipo)`);
+  L.push('');
+  L.push('CLASSIFICA FINALE');
+  const rows=rankRows();
+  const nw=Math.max(8,...rows.map(r=>r.name.length)), pw=Math.max(...rows.map(r=>r.pos.length));
+  rows.forEach(r=>L.push(`${r.pos.padEnd(pw)}  ${r.name.padEnd(nw)}  ${String(r.pts).padStart(3)} pt  V${r.w} N${r.d} P${r.l} R${r.r}  Avv.${r.b}${r.wd?'  (ritirato)':''}`));
+  L.push('');
+  L.push('Pt = punti, V = vinte, N = nulle, P = perse, R = riposi, Avv. = somma dei punti degli avversari');
+  L.push('');
+  L.push('PARTITE DISPUTATE');
+  g.rounds.filter(r=>r.done).forEach((rd,k)=>{
+    L.push('');
+    L.push('Turno '+(k+1));
+    rd.games.forEach(x=>L.push(`  ${pname(x.a)} - ${pname(x.b)}   ${x.res}${x.forfeit!=null?'  (ritiro di '+pname(x.forfeit)+')':''}`));
+    rd.byes.forEach(y=>L.push(`  ${y.why==='riposo'?'Riposa':'Senza avversario (ritirato)'}: ${pname(y.p)} (1 punto)`));
+  });
+  L.push('');
+  L.push('Claude Dama - Tornei');
+  return L.join('\n');
+}
+function fmsg(t){ const el=$('f-msg'); if(el) el.textContent=t; }
+function copyFallback(t){
+  const ta=document.createElement('textarea');
+  ta.value=t; ta.style.position='fixed'; ta.style.opacity='0';
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  document.body.removeChild(ta);
+}
+function copyText(t){
+  if(navigator.clipboard&&navigator.clipboard.writeText) return navigator.clipboard.writeText(t).catch(()=>copyFallback(t));
+  copyFallback(t); return Promise.resolve();
+}
+async function shareRes(){
+  const t=buildText();
+  if(navigator.share){
+    try{ await navigator.share({title:S.name,text:t}); return; }
+    catch(e){ if(e&&e.name==='AbortError') return; }
+  }
+  await copyText(t);
+  fmsg('Condivisione non disponibile in questo browser: il testo è stato copiato, incollalo in WhatsApp o nella mail.');
+}
+function fileName(){
+  const base=S.name.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9\-]+/g,'_').replace(/^_+|_+$/g,'')||'Torneo';
+  return base+'.txt';
+}
+function saveTxt(){
+  const t=buildText().replace(/\n/g,'\r\n');
+  const blob=new Blob(['﻿'+t],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=fileName();
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500);
+  fmsg('✓ File salvato: '+fileName());
+}
+
+// ── Disegno della pagina ───────────────────────────────────────────
+function render(top){
+  const m=$('main'), sub=$('subtitle');
+  if(S.phase==='setup'){ sub.textContent='Impostazione del torneo'; renderSetup(m); }
+  else if(S.phase==='names'){ sub.textContent=S.name+' · inserimento giocatori'; renderNames(m); }
+  else if(S.phase==='round'){ sub.textContent=`${S.name} · turno ${G().rounds.length} di ${G().nTurns}`; renderRound(m); }
+  else { sub.textContent=S.name+' · classifica finale'; renderFinal(m); }
+  if(top) window.scrollTo(0,0);
+}
+
+// ── Schermo acceso (Wake Lock), come in Claude Dama ────────────────
+let _wakeLock=null;
+async function keepAwakeStart(){
+  try{
+    if('wakeLock' in navigator && !document.hidden && (!_wakeLock||_wakeLock.released)){
+      _wakeLock=await navigator.wakeLock.request('screen');
+    }
+  }catch(e){}
+}
+function keepAwakeStop(){ try{ if(_wakeLock){ _wakeLock.release(); _wakeLock=null; } }catch(e){} }
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){ save(); keepAwakeStop(); }
+  else keepAwakeStart();
+});
+window.addEventListener('pagehide',save);
+document.addEventListener('pointerdown',()=>keepAwakeStart());
+
+// ── Avvio: se c'e' un torneo salvato riparte da li' ───────────────
+function init(){
+  if(!load()) S=newState();
+  render(true);
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
+else init();
+</script>
+</body>
+</html>
