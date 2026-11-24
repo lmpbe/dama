@@ -15,7 +15,12 @@
     --text:    #1a2a3a;
     --muted:   #4a6a88;
     --radius:  8px;
+    --btn:     #e0ecf8;
+    --btnh:    #c8ddf0;
   }
+  /* colori dei gruppi 2 e 3 (il gruppo 1 usa i colori normali) */
+  body.g2 { --bg:#d8eed3; --panel:#bfe0b6; --border:#86b27c; --accent:#2e7d32; --accent2:#1b5e20; --muted:#46723f; --btn:#e9f6e5; --btnh:#d3ecca; }
+  body.g3 { --bg:#fde5cc; --panel:#f8cda2; --border:#d79c63; --accent:#c4570f; --accent2:#9c4209; --muted:#84542a; --btn:#fff1e2; --btnh:#fbe0c4; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html { min-height: 100%; }
   body {
@@ -28,7 +33,7 @@
   header h1 { font-size:clamp(1rem,3.5vw,1.5rem); color:#fff; font-weight:bold; }
   header h1 { display:flex; align-items:center; justify-content:center; gap:10px; }
   .logo { width:34px; height:34px; border-radius:6px; border:2px solid #fff; flex-shrink:0; }
-  header p  { font-size:.8rem; color:#cce0ff; margin-top:2px; word-break:break-word; }
+  header p  { font-size:.8rem; color:rgba(255,255,255,.85); margin-top:2px; word-break:break-word; }
   main { width:100%; max-width:640px; padding:12px 12px 36px; display:flex; flex-direction:column; gap:12px; flex:1; }
 
   .card { background:var(--panel); border:1px solid var(--border); border-radius:var(--radius); padding:12px 14px; }
@@ -43,12 +48,12 @@
   button:disabled { opacity:.35; cursor:default; }
   .btn-primary { background:var(--accent); color:#fff; font-weight:bold; border-color:var(--accent2); font-size:1.05rem; padding:12px 20px; }
   .btn-primary:hover:not(:disabled) { background:var(--accent2); }
-  .btn-big { background:#e0ecf8; color:var(--text); font-size:1rem; font-weight:bold; padding:12px 16px; border-color:var(--border); }
-  .btn-big:hover:not(:disabled) { background:#c8ddf0; }
+  .btn-big { background:var(--btn); color:var(--text); font-size:1rem; font-weight:bold; padding:12px 16px; border-color:var(--border); }
+  .btn-big:hover:not(:disabled) { background:var(--btnh); }
   .btns { display:grid; grid-template-columns:1fr; gap:10px; margin-top:14px; }
 
   .seg { display:flex; gap:6px; }
-  .seg button { flex:1; min-width:0; padding:11px 4px; font-size:1rem; font-weight:bold; background:#e0ecf8; color:var(--text); }
+  .seg button { flex:1; min-width:0; padding:11px 4px; font-size:1rem; font-weight:bold; background:var(--btn); color:var(--text); }
   .seg button.on { background:var(--accent); color:#fff; border-color:var(--accent2); }
 
   .fl { display:block; font-size:.8rem; color:var(--muted); font-weight:bold; margin:14px 0 6px; }
@@ -63,7 +68,7 @@
 
   .tab { width:100%; border-collapse:collapse; background:#fff; font-size:.95rem; }
   .tab th, .tab td { border:1px solid var(--border); padding:6px 5px; text-align:center; }
-  .tab th { background:#e0ecf8; font-size:.74rem; color:var(--text); }
+  .tab th { background:var(--btn); font-size:.74rem; color:var(--text); }
   .tab tr.sel td { background:#fff3b0; font-weight:bold; }
   .rank { font-size:.9rem; }
   .rank td.nm { text-align:left; word-break:break-word; }
@@ -102,6 +107,13 @@
   .overlay-btns  { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
   .pick { display:grid; gap:8px; margin-top:12px; }
   .pick button { font-size:1.05rem; padding:11px; }
+
+  .gbar { display:flex; align-items:center; gap:10px; }
+  .gbar button { flex:0 0 auto; }
+  .glabel { flex:1; text-align:center; font-size:1.35rem; font-weight:bold; color:#fff; background:var(--accent); border-radius:6px; padding:9px 6px; letter-spacing:.08em; }
+  .gbtn { display:block; width:100%; text-align:left; padding:14px; border-radius:8px; border:1px solid; border-left-width:12px; font-size:1.2rem; font-weight:bold; color:var(--text); margin-bottom:10px; }
+  .gbtn small { display:block; font-weight:normal; font-size:.92rem; margin-top:4px; }
+  .overlay-btns.col { flex-direction:column; }
 </style>
 <link rel="icon" type="image/png" sizes="192x192" href="icona-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icona-180.png">
@@ -129,12 +141,16 @@
 // ═══════════════════════════════════════════════════════════════════
 //  CLAUDE DAMA – TORNEI
 //
+//  Un torneo puo' essere diviso in 1, 2 o 3 gruppi. Ogni gruppo e' un
+//  torneo autonomo (abbinamenti, turni, giocatori, risultati propri).
+//  Con un solo gruppo il programma si comporta come un torneo unico.
+//
 //  Abbinamenti COMPLETI: girone all'italiana (tabella di Berger) con ordine
 //    dei giocatori sorteggiato. Turni dispari; giocatori = turni o turni+1.
 //    Chi resta senza avversario (riposo o avversario ritirato) prende 1 punto.
 //  Abbinamenti PARZIALI: 1° turno casuale, poi dall'alto della classifica
 //    ciascuno incontra il primo giocatore con punteggio uguale o inferiore
-//    che non ha ancora incontrato (a parità di punti: sorteggio). La regola
+//    che non ha ancora incontrato (a parita' di punti: sorteggio). La regola
 //    "mai due volte lo stesso avversario" prevale: se serve si torna indietro
 //    e si prova l'avversario successivo. Giocatori da 2·turni−1 a 2^turni.
 //    Con giocatori dispari riposa (1 punto) l'ultimo in classifica che non
@@ -146,6 +162,7 @@
 // ═══════════════════════════════════════════════════════════════════
 
 const KEY='claude_dama_tornei_v1';
+const TH=[{bg:'#b8cfe0',ac:'#2060a0'},{bg:'#bfe0b6',ac:'#2e7d32'},{bg:'#f8cda2',ac:'#c4570f'}];
 let S=null;
 
 const $=id=>document.getElementById(id);
@@ -154,17 +171,38 @@ function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;'
 function today(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()}`; }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 
+function newDraft(){ return {mode:'partial',turns:null,players:'',v2:true}; }
 function newState(){
-  return { v:1, phase:'setup', draft:{name:'',mode:'partial',turns:null,players:'',v2:true}, name:'', date:'', groups:[] };
+  return { v:2, phase:'setup', draft:Object.assign({name:'',ngroups:1},newDraft()), name:'', date:'', nGroups:1, cg:null, groups:[] };
 }
-// Il torneo ha un elenco di gruppi: per ora uno solo (in futuro fino a 3 gruppi autonomi)
-function G(){ return S.groups[0]; }
+function newGroup(){
+  return { phase:'setup', draft:newDraft(), mode:null, nTurns:0, nPlayers:0, players:[], rounds:[], schedule:null };
+}
+function multi(){ return S.nGroups>1; }
+function G(){ return S.groups[S.cg]; }                 // gruppo su cui si sta lavorando
 function cur(){ const g=G(); return g.rounds[g.rounds.length-1]; }
 function pname(i){ return G().players[i].name; }
+function gLabel(){ return 'Gruppo '+(S.cg+1); }
 
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(S)); }catch(e){} }
 function load(){
-  try{ const t=localStorage.getItem(KEY); if(t){ const o=JSON.parse(t); if(o&&o.v===1&&o.phase){ S=o; if(S.draft&&!S.draft.v2){ S.draft.turns=null; S.draft.v2=true; } return true; } } }catch(e){}
+  try{
+    const t=localStorage.getItem(KEY);
+    if(!t) return false;
+    let o=JSON.parse(t);
+    if(o&&o.v===1&&o.phase){                            // torneo salvato dalla versione precedente (senza gruppi)
+      const n=newState();
+      Object.assign(n.draft,o.draft||{});
+      if(!o.draft||!o.draft.v2){ n.draft.turns=null; n.draft.v2=true; }
+      n.draft.ngroups=1;
+      if(o.phase!=='setup'&&o.groups&&o.groups[0]){
+        n.groups=[Object.assign(newGroup(),o.groups[0],{phase:o.phase})];
+        n.phase='run'; n.nGroups=1; n.cg=0; n.name=o.name; n.date=o.date;
+      }
+      o=n;
+    }
+    if(o&&o.v===2&&o.phase){ S=o; return true; }
+  }catch(e){}
   return false;
 }
 
@@ -175,10 +213,11 @@ function rangeOf(mode,t){
 }
 
 // ── Finestre di dialogo ────────────────────────────────────────────
-function showDlg(title,html,buttons){
+function showDlg(title,html,buttons,column){
   $('dlg-title').textContent=title;
   $('dlg-body').innerHTML=html;
   const bx=$('dlg-btns'); bx.innerHTML='';
+  bx.classList.toggle('col',!!column);
   buttons.forEach(b=>{
     const el=document.createElement('button');
     el.className=b.cls||'btn-big'; el.textContent=b.label;
@@ -194,11 +233,30 @@ function confirmDlg(title,html,okLabel,fn,cancelLabel){
 function infoDlg(title,html){ showDlg(title,html,[{label:'✓ OK',cls:'btn-primary'}]); }
 function help(){ showDlg('Help','Help, lavori in corso…',[{label:'✕ Chiudi',cls:'btn-primary'}]); }
 
+// ── Nuovo torneo / nuovo gruppo ────────────────────────────────────
+function newLabel(){ return multi()&&S.phase==='run'?'↺ Nuovo torneo / gruppo':'↺ Nuovo torneo'; }
+function askNewAll(){
+  const done=S.phase==='run'&&S.groups.length&&S.groups.every(g=>g.phase==='final');
+  const msg=done
+    ? 'Il torneo concluso verrà cancellato'+(multi()?' (tutti i gruppi)':'')+'.<br>Hai già condiviso o salvato la classifica?'
+    : 'Il torneo in corso'+(multi()?', con tutti i gruppi,':'')+' andrà perso.';
+  confirmDlg(multi()?'Cancellare tutto il torneo?':'Nuovo torneo?',msg,'✓ Sì, nuovo torneo',()=>{ S=newState(); save(); render(true); });
+}
+function askResetGroup(i){
+  const g=S.groups[i];
+  confirmDlg(`Ricominciare il Gruppo ${i+1}?`,
+    `Impostazioni, giocatori, turni e risultati del Gruppo ${i+1} verranno cancellati e il gruppo ripartirà dall'impostazione.<br>Gli altri gruppi non cambiano.`+
+    (g.phase==='final'?'<br><br>Hai già condiviso o salvato la sua classifica?':''),
+    '✓ Sì, ricomincia',()=>{ S.groups[i]=newGroup(); save(); render(true); });
+}
 function askNew(){
-  const msg=S.phase==='final'
-    ? 'Il torneo concluso verrà cancellato.<br>Hai già condiviso o salvato la classifica?'
-    : 'Il torneo in corso andrà perso.';
-  confirmDlg('Nuovo torneo?',msg,'✓ Sì, nuovo torneo',()=>{ S=newState(); save(); render(true); });
+  if(!(multi()&&S.phase==='run')){ askNewAll(); return; }
+  const btns=[];
+  if(S.cg!=null) btns.push({label:`Ricomincia solo il Gruppo ${S.cg+1}`,fn:()=>askResetGroup(S.cg)});
+  else S.groups.forEach((g,i)=>btns.push({label:`Ricomincia solo il Gruppo ${i+1}`,fn:()=>askResetGroup(i)}));
+  btns.push({label:'Cancella tutto il torneo',fn:askNewAll});
+  btns.push({label:'✕ Annulla',cls:'btn-primary'});
+  showDlg('Nuovo torneo / gruppo','Cosa vuoi cancellare?',btns,true);
 }
 
 // ── Punteggi, spareggi, classifica ─────────────────────────────────
@@ -257,22 +315,22 @@ function ranking(g){
   return {tiers,s};
 }
 
-function rankRows(){
-  const g=G(), R=ranking(g), rows=[];
+function rankRows(g){
+  const R=ranking(g), rows=[], nm=i=>g.players[i].name;
   let pos=1;
   for(const tier of R.tiers){
     const lab=tier.length===1?`${pos}°`:`${pos}°–${pos+tier.length-1}°`;
-    tier.slice().sort((a,b)=>pname(a).localeCompare(pname(b),'it')).forEach(i=>{
+    tier.slice().sort((a,b)=>nm(a).localeCompare(nm(b),'it')).forEach(i=>{
       const o=R.s[i];
-      rows.push({pos:lab,name:pname(i),wd:g.players[i].withdrawn,pts:o.pts,w:o.w,d:o.d,l:o.l,r:o.r,b:o.b});
+      rows.push({pos:lab,name:nm(i),wd:g.players[i].withdrawn,pts:o.pts,w:o.w,d:o.d,l:o.l,r:o.r,b:o.b});
     });
     pos+=tier.length;
   }
   return rows;
 }
 
-function rankingTable(){
-  const rows=rankRows();
+function rankingTable(g){
+  const rows=rankRows(g);
   return `<table class="tab rank"><tr><th>Pos.</th><th>Giocatore</th><th>Pt</th><th>V</th><th>N</th><th>P</th><th>R</th><th>Avv.</th></tr>`+
     rows.map(r=>`<tr><td>${r.pos}</td><td class="nm">${esc(r.name)}${r.wd?' <span class="wd">(ritirato)</span>':''}</td><td><b>${r.pts}</b></td><td>${r.w}</td><td>${r.d}</td><td>${r.l}</td><td>${r.r}</td><td>${r.b}</td></tr>`).join('')+
     `</table><div class="note">Pt = punti · V = vinte · N = nulle (patte) · P = perse · R = riposi (1 punto) · Avv. = somma dei punti degli avversari incontrati</div>`;
@@ -375,53 +433,55 @@ function startTournament(){
     g.schedule=berger(ids);
   }
   newRound();
-  S.phase='round';
+  g.phase='round';
   save(); render(true);
 }
 
-// ── Pagina 1: impostazione ─────────────────────────────────────────
-function renderSetup(m){
-  const d=S.draft;
+// ── Parti comuni delle pagine ──────────────────────────────────────
+function memoHTML(){
   let rows='';
   for(let t=3;t<=8;t++){
     const c=rangeOf('complete',t), p=rangeOf('partial',t);
     rows+=`<tr data-t="${t}"><td>${t}</td><td>${c?c.min+', '+c.max:'–'}</td><td>${p.min} – ${p.max}</td></tr>`;
   }
-  m.innerHTML=`
-  <div class="card"><h3>Tabella promemoria</h3>
+  return `<div class="card"><h3>Tabella promemoria</h3>
     <table class="tab" id="memo"><tr><th>Turni</th><th>Giocatori<br>abbinamenti completi</th><th>Giocatori (min – max)<br>abbinamenti parziali</th></tr>${rows}</table>
     <div class="note">Completi: tutti incontrano tutti una sola volta. Parziali: si incontrano i giocatori a punteggio più alto; con il numero massimo, due giocatori sempre vincenti si incontrano per forza all'ultimo turno.</div>
-  </div>
-  <div class="card"><h3>Impostazione del torneo</h3>
-    <label class="fl" for="f-name">Nome del torneo</label>
-    <input type="text" id="f-name" maxlength="60" placeholder="Torneo del ${today()}" value="${esc(d.name)}">
+  </div>`;
+}
+// barra in cima alle pagine di un gruppo (solo con piu' gruppi)
+function gbarHTML(){
+  if(!multi()) return '';
+  return `<div class="card gbar"><button class="btn-big" id="b-groups">◀ Gruppi</button><div class="glabel">${gLabel().toUpperCase()}</div></div>`;
+}
+function bindCommon(){
+  on('b-groups','click',()=>{ S.cg=null; save(); render(true); });
+  on('b-help','click',help);
+  const bn=$('b-new');
+  if(bn){ bn.textContent=newLabel(); bn.addEventListener('click',askNew); }
+}
+
+// campi abbinamenti / turni / giocatori (pagina iniziale con 1 gruppo, oppure pagina del gruppo)
+function formHTML(d){
+  return `
     <div class="fl">Abbinamenti</div>
     <div class="seg"><button id="m-complete">Completi</button><button id="m-partial">Parziali</button></div>
     <div class="fl">Numero di turni</div>
     <div class="seg" id="turns-seg">${[3,4,5,6,7,8].map(t=>`<button data-t="${t}">${t}</button>`).join('')}</div>
     <label class="fl" for="f-players">Numero di giocatori</label>
     <input type="number" id="f-players" inputmode="numeric" min="3" max="256" value="${esc(d.players)}">
-    <div id="f-hint" class="hint"></div>
-    <div id="f-err" class="err"></div>
-    <div class="btns">
-      <button class="btn-primary" id="b-ok">✓ Fine inserimento dati</button>
-      <button class="btn-big" id="b-help">❓ Help</button>
-    </div>
-  </div>`;
-  on('f-name','input',e=>{ d.name=e.target.value; save(); });
+    <div id="f-hint" class="hint"></div>`;
+}
+function bindForm(d){
   on('f-players','input',e=>{ d.players=e.target.value; save(); $('f-err').textContent=''; });
-  on('m-complete','click',()=>{ d.mode='complete'; if(d.turns&&d.turns%2===0) d.turns--; save(); updSetup(); });
-  on('m-partial','click',()=>{ d.mode='partial'; save(); updSetup(); });
+  on('m-complete','click',()=>{ d.mode='complete'; if(d.turns&&d.turns%2===0) d.turns--; save(); updForm(d); });
+  on('m-partial','click',()=>{ d.mode='partial'; save(); updForm(d); });
   document.querySelectorAll('#turns-seg button').forEach(b=>b.addEventListener('click',()=>{
     const t=+b.dataset.t; if(d.mode==='complete'&&t%2===0) return;
-    d.turns=t; save(); updSetup();
+    d.turns=t; save(); updForm(d);
   }));
-  on('b-ok','click',setupOk);
-  on('b-help','click',help);
-  updSetup();
 }
-function updSetup(){
-  const d=S.draft;
+function updForm(d){
   $('m-complete').classList.toggle('on',d.mode==='complete');
   $('m-partial').classList.toggle('on',d.mode==='partial');
   document.querySelectorAll('#turns-seg button').forEach(b=>{
@@ -434,34 +494,140 @@ function updSetup(){
   $('f-hint').textContent=!d.turns
     ? (d.mode==='complete'?'Scegli il numero di turni (con gli abbinamenti completi: 3, 5 o 7).':'Scegli il numero di turni.')
     : d.mode==='complete'
-    ? `Con ${d.turns} turni e abbinamenti completi: ${r.min} oppure ${r.max} giocatori.`
-    : `Con ${d.turns} turni e abbinamenti parziali: da ${r.min} a ${r.max} giocatori.`;
+      ? `Con ${d.turns} turni e abbinamenti completi: ${r.min} oppure ${r.max} giocatori.`
+      : `Con ${d.turns} turni e abbinamenti parziali: da ${r.min} a ${r.max} giocatori.`;
   $('f-err').textContent='';
 }
-function setupOk(){
-  const d=S.draft, n=Number(d.players);
-  if(!d.turns){ $('f-err').textContent='Scegli il numero di turni.'; return; }
-  const r=rangeOf(d.mode,d.turns);
-  if(!r){ $('f-err').textContent='Con gli abbinamenti completi i turni possono essere solo 3, 5 o 7.'; return; }
-  if(!Number.isInteger(n)||n<r.min||n>r.max){
-    $('f-err').textContent=d.mode==='complete'
-      ? `Numero di giocatori non consentito: con ${d.turns} turni completi i giocatori devono essere ${r.min} o ${r.max}.`
-      : `Numero di giocatori non consentito: con ${d.turns} turni parziali i giocatori devono essere da ${r.min} a ${r.max}.`;
-    return;
+// controlla i dati: {err:'...'} oppure {mode,turns,n}
+function checkForm(d){
+  if(!d.turns) return {err:'Scegli il numero di turni.'};
+  const r=rangeOf(d.mode,d.turns), n=Number(d.players);
+  if(!r) return {err:'Con gli abbinamenti completi i turni possono essere solo 3, 5 o 7.'};
+  if(!Number.isInteger(n)||n<r.min||n>r.max) return {err:d.mode==='complete'
+    ? `Numero di giocatori non consentito: con ${d.turns} turni completi i giocatori devono essere ${r.min} o ${r.max}.`
+    : `Numero di giocatori non consentito: con ${d.turns} turni parziali i giocatori devono essere da ${r.min} a ${r.max}.`};
+  return {mode:d.mode,turns:d.turns,n};
+}
+function applyForm(g,c){
+  g.mode=c.mode; g.nTurns=c.turns; g.nPlayers=c.n;
+  g.players=[]; g.rounds=[]; g.schedule=null; g.phase='names';
+}
+function modeName(m){ return m==='complete'?'completi':'parziali'; }
+
+// ── Pagina iniziale del torneo ─────────────────────────────────────
+function renderStart(m){
+  const d=S.draft;
+  m.innerHTML=memoHTML()+`
+  <div class="card"><h3>Impostazione del torneo</h3>
+    <label class="fl" for="f-name">Nome del torneo</label>
+    <input type="text" id="f-name" maxlength="60" placeholder="Torneo del ${today()}" value="${esc(d.name)}">
+    <div class="fl">Numero di gruppi</div>
+    <div class="seg" id="ng-seg">${[1,2,3].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
+    <div id="single">${formHTML(d)}</div>
+    <div id="multi-hint" class="hint"></div>
+    <div id="f-err" class="err"></div>
+    <div class="btns">
+      <button class="btn-primary" id="b-ok">✓ Fine inserimento dati</button>
+      <button class="btn-big" id="b-help">❓ Help</button>
+    </div>
+  </div>`;
+  on('f-name','input',e=>{ d.name=e.target.value; save(); });
+  document.querySelectorAll('#ng-seg button').forEach(b=>b.addEventListener('click',()=>{ d.ngroups=+b.dataset.k; save(); updStart(); }));
+  bindForm(d);
+  on('b-ok','click',startOk);
+  updStart();
+}
+function updStart(){
+  const d=S.draft, k=d.ngroups||1;
+  document.querySelectorAll('#ng-seg button').forEach(b=>b.classList.toggle('on',+b.dataset.k===k));
+  $('single').style.display=k===1?'':'none';
+  if(k===1){ $('multi-hint').textContent=''; updForm(d); }
+  else{
+    document.querySelectorAll('#memo tr').forEach(tr=>tr.classList.remove('sel'));
+    $('multi-hint').textContent=`Il torneo sarà diviso in ${k} gruppi autonomi. Per ogni gruppo sceglierai poi abbinamenti, turni e giocatori.`;
+    $('f-err').textContent='';
   }
+}
+function startOk(){
+  const d=S.draft, k=d.ngroups||1;
   const name=d.name.trim()||('Torneo del '+today());
-  confirmDlg('Confermi le impostazioni?',
-    `<b>${esc(name)}</b><br>Abbinamenti ${d.mode==='complete'?'completi':'parziali'}<br>${d.turns} turni · ${n} giocatori<br><br>Dopo la conferma le impostazioni non potranno più essere modificate.`,
-    '✓ Conferma',()=>{
-      S.name=name; S.date=today();
-      S.groups=[{mode:d.mode,nTurns:d.turns,nPlayers:n,players:[],rounds:[],schedule:null}];
-      S.phase='names'; save(); render(true);
-    },'✕ Controlla ancora');
+  if(k===1){
+    const c=checkForm(d);
+    if(c.err){ $('f-err').textContent=c.err; return; }
+    confirmDlg('Confermi le impostazioni?',
+      `<b>${esc(name)}</b><br>Abbinamenti ${modeName(c.mode)}<br>${c.turns} turni · ${c.n} giocatori<br><br>Dopo la conferma le impostazioni non potranno più essere modificate.`,
+      '✓ Conferma',()=>{
+        S.name=name; S.date=today(); S.nGroups=1;
+        const g=newGroup(); applyForm(g,c);
+        S.groups=[g]; S.cg=0; S.phase='run';
+        save(); render(true);
+      },'✕ Controlla ancora');
+  } else {
+    confirmDlg('Confermi le impostazioni?',
+      `<b>${esc(name)}</b><br>${k} gruppi<br><br>Dopo la conferma il numero di gruppi non potrà più essere modificato.<br>Per ogni gruppo imposterai abbinamenti, turni e giocatori.`,
+      '✓ Conferma',()=>{
+        S.name=name; S.date=today(); S.nGroups=k;
+        S.groups=Array.from({length:k},newGroup); S.cg=null; S.phase='run';
+        save(); render(true);
+      },'✕ Controlla ancora');
+  }
 }
 
-// ── Pagina 2: nomi dei giocatori ───────────────────────────────────
-function renderNames(m){
+// ── Pagina dei gruppi ──────────────────────────────────────────────
+function statusOf(g){
+  if(g.phase==='setup') return 'da impostare';
+  if(g.phase==='names') return `inserimento giocatori (${g.players.length} di ${g.nPlayers})`;
+  if(g.phase==='round') return `abbinamenti ${modeName(g.mode)} · turno ${g.rounds.length} di ${g.nTurns}`;
+  return '✓ concluso – classifica finale';
+}
+function renderGroups(m){
+  const all=S.groups.every(g=>g.phase==='final');
   m.innerHTML=`
+  <div class="card"><h3>Gruppi del torneo</h3>
+    <div class="tinfo"><b>${esc(S.name)}</b> · ${esc(S.date)}</div>
+    ${S.groups.map((g,i)=>`<button class="gbtn" data-g="${i}" style="background:${TH[i].bg};border-color:${TH[i].ac}">Gruppo ${i+1}<small>${esc(statusOf(g))}</small></button>`).join('')}
+  </div>
+  ${all?`<div class="card"><h3>Classifiche finali di tutti i gruppi</h3>
+    <div class="btns" style="margin-top:0">
+      <button class="btn-primary" id="b-share">📤 Condividi tutto (WhatsApp, mail…)</button>
+      <button class="btn-big" id="b-copy">📋 Copia testo</button>
+      <button class="btn-big" id="b-txt">💾 Salva PDF</button>
+    </div><div id="f-msg" class="okmsg"></div></div>`:''}
+  <div class="card"><div class="btns" style="margin-top:0">
+    <button class="btn-big" id="b-help">❓ Help</button>
+    <button class="btn-big" id="b-new"></button>
+  </div></div>`;
+  m.querySelectorAll('.gbtn').forEach(b=>b.addEventListener('click',()=>{ S.cg=+b.dataset.g; save(); render(true); }));
+  if(all) bindShare(S.groups.map((_,i)=>i));
+}
+
+// ── Impostazione di un gruppo ──────────────────────────────────────
+function renderGroupSetup(m){
+  const g=G(), d=g.draft;
+  m.innerHTML=gbarHTML()+memoHTML()+`
+  <div class="card"><h3>Impostazione del ${gLabel()}</h3>
+    ${formHTML(d)}
+    <div id="f-err" class="err"></div>
+    <div class="btns">
+      <button class="btn-primary" id="b-ok">✓ Fine inserimento dati</button>
+      <button class="btn-big" id="b-help">❓ Help</button>
+      <button class="btn-big" id="b-new"></button>
+    </div>
+  </div>`;
+  bindForm(d);
+  updForm(d);
+  on('b-ok','click',()=>{
+    const c=checkForm(d);
+    if(c.err){ $('f-err').textContent=c.err; return; }
+    confirmDlg(`Confermi le impostazioni del ${gLabel()}?`,
+      `Abbinamenti ${modeName(c.mode)}<br>${c.turns} turni · ${c.n} giocatori<br><br>Dopo la conferma le impostazioni del gruppo non potranno più essere modificate.`,
+      '✓ Conferma',()=>{ applyForm(g,c); save(); render(true); },'✕ Controlla ancora');
+  });
+}
+
+// ── Nomi dei giocatori ─────────────────────────────────────────────
+function renderNames(m){
+  m.innerHTML=gbarHTML()+`
   <div class="card"><h3 id="n-title"></h3>
     <label class="fl" for="n-in">Nome del giocatore</label>
     <input type="text" id="n-in" maxlength="40" autocomplete="off" enterkeyhint="done">
@@ -471,14 +637,12 @@ function renderNames(m){
     <div class="btns">
       <button class="btn-primary" id="b-ok">✓ Fine inserimento dati</button>
       <button class="btn-big" id="b-help">❓ Help</button>
-      <button class="btn-big" id="b-new">↺ Nuovo torneo</button>
+      <button class="btn-big" id="b-new"></button>
     </div>
   </div>`;
   on('b-add','click',addName);
   on('n-in','keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); addName(); } });
   on('b-ok','click',namesOk);
-  on('b-help','click',help);
-  on('b-new','click',askNew);
   updNames(true);
 }
 function updNames(toEnd){
@@ -501,7 +665,14 @@ function addName(){
   const v=inp.value.trim().replace(/\s+/g,' ');
   if(!v){ err.textContent='Scrivi il nome del giocatore.'; inp.focus(); return; }
   if(g.players.length>=g.nPlayers){ err.textContent=`Hai già inserito tutti i ${g.nPlayers} giocatori.`; return; }
-  if(g.players.some(p=>p.name.toLowerCase()===v.toLowerCase())){ err.textContent=`«${v}» è già nell'elenco: usa un nome diverso (per esempio con l'iniziale del cognome).`; inp.focus(); return; }
+  const low=v.toLowerCase();
+  const gi=S.groups.findIndex(x=>x.players.some(p=>p.name.toLowerCase()===low));
+  if(gi>=0){
+    err.textContent=gi===S.cg||!multi()
+      ? `«${v}» è già nell'elenco: usa un nome diverso (per esempio con l'iniziale del cognome).`
+      : `«${v}» è già nel Gruppo ${gi+1}: usa un nome diverso (per esempio con l'iniziale del cognome).`;
+    inp.focus(); return;
+  }
   g.players.push({name:v,withdrawn:false,wRound:null});
   save(); err.textContent=''; inp.value='';
   updNames(true);
@@ -514,22 +685,25 @@ function namesOk(){
     return;
   }
   confirmDlg('Confermi l\'elenco dei giocatori?',
-    `${g.nPlayers} giocatori.<br><br>Dopo la conferma verrà sorteggiato il primo turno e l'elenco non potrà più essere modificato.`,
+    `${multi()?gLabel()+': ':''}${g.nPlayers} giocatori.<br><br>Dopo la conferma verrà sorteggiato il primo turno e l'elenco non potrà più essere modificato.`,
     '✓ Conferma',startTournament,'✕ Controlla ancora');
 }
 
-// ── Pagina 3: turno di gioco ───────────────────────────────────────
+// ── Turno di gioco ─────────────────────────────────────────────────
+function afterNote(g,x){
+  return (x.after&&x.after.length)?x.after.map(j=>g.players[j].name).join(' e ')+(x.after.length>1?' si ritirano':' si ritira')+' dopo questa partita':'';
+}
 function renderRound(m){
   const g=G(), k=g.rounds.length, rd=cur(), last=k===g.nTurns;
   const gh=rd.games.map((x,i)=>{
     const fo=(x.forfeit!=null?`<div class="fo">Ritiro di ${esc(pname(x.forfeit))} durante la partita: persa per abbandono</div>`:'')+
-             (afterNote(x)?`<div class="fo">${esc(afterNote(x))}</div>`:'');
+             (afterNote(g,x)?`<div class="fo">${esc(afterNote(g,x))}</div>`:'');
     return `<div class="game" id="game-${i}">
       <div class="gnames"><span class="gnum">${i+1}.</span>${esc(pname(x.a))} – ${esc(pname(x.b))}</div>
       <div class="seg">${['2-0','1-1','0-2'].map(r=>`<button data-g="${i}" data-r="${r}" class="${x.res===r?'on':''}"${x.forfeit!=null?' disabled':''}>${r}</button>`).join('')}</div>${fo}</div>`;
   }).join('');
   const bh=rd.byes.map(y=>`<div class="bye">💤 ${esc(pname(y.p))} — ${y.why==='riposo'?'riposa':'senza avversario (ritirato)'}: 1 punto</div>`).join('');
-  m.innerHTML=`
+  m.innerHTML=gbarHTML()+`
   <div class="card">
     <div class="rtitle">Turno ${k} di ${g.nTurns}</div>
     ${last?'<div class="last">⚠ ULTIMO TURNO DI GIOCO</div>':''}
@@ -542,7 +716,7 @@ function renderRound(m){
       <button class="btn-big" id="b-prov">📊 Classifica provvisoria</button>
       <button class="btn-big" id="b-wd">🚪 Ritira giocatore</button>
       <button class="btn-big" id="b-help">❓ Help</button>
-      <button class="btn-big" id="b-new">↺ Nuovo torneo</button>
+      <button class="btn-big" id="b-new"></button>
     </div>
     <div id="r-err" class="err"></div>
   </div>`;
@@ -557,8 +731,6 @@ function renderRound(m){
   on('b-send','click',sendResults);
   on('b-prov','click',provisional);
   on('b-wd','click',withdrawDlg);
-  on('b-help','click',help);
-  on('b-new','click',askNew);
 }
 
 function sendResults(){
@@ -571,13 +743,13 @@ function sendResults(){
     return;
   }
   confirmDlg('Hai controllato i risultati?',
-    `Dopo l'invio i risultati del turno ${k} non potranno più essere modificati.<br><br>`+
+    `Dopo l'invio i risultati del turno ${k}${multi()?' del '+gLabel():''} non potranno più essere modificati.<br><br>`+
     (last?'<b>È l\'ultimo turno:</b> verrà elaborata la classifica finale.':'Verrà elaborato il turno successivo.'),
     '✓ Invia risultati',()=>{
       rd.done=true;
-      if(last){ S.phase='final'; save(); render(true); return; }
+      if(last){ g.phase='final'; save(); render(true); return; }
       if(!newRound()){
-        S.phase='final'; save(); render(true);
+        g.phase='final'; save(); render(true);
         infoDlg('Torneo concluso in anticipo',
           'Dopo i ritiri non è possibile formare il turno successivo senza far incontrare di nuovo giocatori che si sono già affrontati.<br><br>È stata elaborata la classifica finale.');
         return;
@@ -589,7 +761,7 @@ function sendResults(){
 function provisional(){
   const g=G(), done=g.rounds.filter(r=>r.done).length;
   if(!done){ infoDlg('Classifica provvisoria','Nessun turno ancora concluso.'); return; }
-  showDlg('Classifica provvisoria',`<div class="tinfo">dopo il turno ${done} di ${g.nTurns}</div>${rankingTable()}`,[{label:'✕ Chiudi',cls:'btn-primary'}]);
+  showDlg('Classifica provvisoria',`<div class="tinfo">${multi()?gLabel()+' · ':''}dopo il turno ${done} di ${g.nTurns}</div>${rankingTable(g)}`,[{label:'✕ Chiudi',cls:'btn-primary'}]);
 }
 
 function withdrawDlg(){
@@ -630,69 +802,69 @@ function doWithdraw(i,game,during){
   }
   save(); render(false);
 }
-function afterNote(x){
-  return (x.after&&x.after.length)?x.after.map(j=>pname(j)).join(' e ')+(x.after.length>1?' si ritirano':' si ritira')+' dopo questa partita':'';
-}
 
-// ── Pagina 4: classifica finale ────────────────────────────────────
-function roundsHtml(){
-  const g=G();
+// ── Classifica finale di un gruppo ─────────────────────────────────
+function roundsHtml(g){
+  const nm=i=>esc(g.players[i].name);
   return g.rounds.filter(r=>r.done).map((rd,k)=>`<div class="rd"><div class="rdt">Turno ${k+1}</div>`+
-    rd.games.map(x=>`<div class="rg"><span>${esc(pname(x.a))} – ${esc(pname(x.b))}${x.forfeit!=null?` <span class="wd" style="color:#b00020">(ritiro di ${esc(pname(x.forfeit))} durante la partita)</span>`:''}${afterNote(x)?` <span class="wd" style="color:#b00020">(${esc(afterNote(x))})</span>`:''}</span><b>${x.res}</b></div>`).join('')+
-    rd.byes.map(y=>`<div class="rg"><span>💤 ${esc(pname(y.p))} — ${y.why==='riposo'?'riposo':'senza avversario (ritirato)'}</span><b>1 pt</b></div>`).join('')+
+    rd.games.map(x=>`<div class="rg"><span>${nm(x.a)} – ${nm(x.b)}${x.forfeit!=null?` <span class="wd" style="color:#b00020">(ritiro di ${nm(x.forfeit)} durante la partita)</span>`:''}${afterNote(g,x)?` <span class="wd" style="color:#b00020">(${esc(afterNote(g,x))})</span>`:''}</span><b>${x.res}</b></div>`).join('')+
+    rd.byes.map(y=>`<div class="rg"><span>💤 ${nm(y.p)} — ${y.why==='riposo'?'riposo':'senza avversario (ritirato)'}</span><b>1 pt</b></div>`).join('')+
     `</div>`).join('');
 }
-function infoLine(){
-  const g=G(), done=g.rounds.filter(r=>r.done).length;
-  return `Abbinamenti ${g.mode==='complete'?'completi':'parziali'} · ${g.nTurns} turni · ${g.nPlayers} giocatori`+
+function infoLine(g){
+  const done=g.rounds.filter(r=>r.done).length;
+  return `Abbinamenti ${modeName(g.mode)} · ${g.nTurns} turni · ${g.nPlayers} giocatori`+
     (done<g.nTurns?` · turni giocati: ${done}`:'');
 }
 function renderFinal(m){
-  m.innerHTML=`
-  <div class="card"><h3>Classifica finale</h3>
-    <div class="tinfo"><b>${esc(S.name)}</b> · ${esc(S.date)}<br>${infoLine()}</div>
-    ${rankingTable()}
+  const g=G();
+  m.innerHTML=gbarHTML()+`
+  <div class="card"><h3>Classifica finale${multi()?' – '+gLabel():''}</h3>
+    <div class="tinfo"><b>${esc(S.name)}</b> · ${esc(S.date)}<br>${infoLine(g)}</div>
+    ${rankingTable(g)}
   </div>
-  <div class="card"><h3>Partite disputate</h3>${roundsHtml()}</div>
+  <div class="card"><h3>Partite disputate</h3>${roundsHtml(g)}</div>
   <div class="card">
     <div class="btns" style="margin-top:0">
-      <button class="btn-primary" id="b-share">📤 Condividi (WhatsApp, mail…)</button>
+      <button class="btn-primary" id="b-share">📤 Condividi${multi()?' classifica del '+gLabel():''} (WhatsApp, mail…)</button>
       <button class="btn-big" id="b-copy">📋 Copia testo</button>
-      <button class="btn-big" id="b-txt">💾 Salva file di testo</button>
+      <button class="btn-big" id="b-txt">💾 Salva PDF</button>
       <button class="btn-big" id="b-help">❓ Help</button>
-      <button class="btn-big" id="b-new">↺ Nuovo torneo</button>
+      <button class="btn-big" id="b-new"></button>
     </div>
     <div id="f-msg" class="okmsg"></div>
+    ${multi()?'<div class="note">Quando tutti i gruppi avranno finito, nella pagina dei gruppi potrai condividere le classifiche di tutti i gruppi in un unico testo.</div>':''}
   </div>`;
-  on('b-share','click',shareRes);
-  on('b-copy','click',()=>copyText(buildText()).then(()=>fmsg('✓ Testo copiato: puoi incollarlo dove vuoi.')));
-  on('b-txt','click',saveTxt);
-  on('b-help','click',help);
-  on('b-new','click',askNew);
+  bindShare([S.cg]);
 }
 
-// ── Testo della classifica (condivisione, copia, file) ────────────
-function buildText(){
-  const g=G(), done=g.rounds.filter(r=>r.done).length, L=[];
+// ── Testo delle classifiche (condivisione, copia, file) ───────────
+function buildText(idx){
+  const L=[];
   L.push('TORNEO DI DAMA: '+S.name);
   L.push('Data: '+S.date);
-  L.push(`Abbinamenti ${g.mode==='complete'?'completi':'parziali'} - ${g.nTurns} turni - ${g.nPlayers} giocatori`);
-  if(done<g.nTurns) L.push(`Turni giocati: ${done} (torneo concluso in anticipo)`);
-  L.push('');
-  L.push('CLASSIFICA FINALE');
-  const rows=rankRows();
-  const nw=Math.max(8,...rows.map(r=>r.name.length)), pw=Math.max(...rows.map(r=>r.pos.length));
-  rows.forEach(r=>L.push(`${r.pos.padEnd(pw)}  ${r.name.padEnd(nw)}  ${String(r.pts).padStart(3)} pt  V${r.w} N${r.d} P${r.l} R${r.r}  Avv.${r.b}${r.wd?'  (ritirato)':''}`));
+  if(multi()) L.push(idx.length>1?`Torneo in ${S.nGroups} gruppi`:`Gruppo ${idx[0]+1} di ${S.nGroups}`);
+  for(const k of idx){
+    const g=S.groups[k], nm=i=>g.players[i].name, done=g.rounds.filter(r=>r.done).length;
+    if(multi()&&idx.length>1){ L.push(''); L.push(''); L.push(`======== GRUPPO ${k+1} ========`); }
+    L.push(`Abbinamenti ${modeName(g.mode)} - ${g.nTurns} turni - ${g.nPlayers} giocatori`);
+    if(done<g.nTurns) L.push(`Turni giocati: ${done} (torneo concluso in anticipo)`);
+    L.push('');
+    L.push(multi()?`CLASSIFICA FINALE - GRUPPO ${k+1}`:'CLASSIFICA FINALE');
+    const rows=rankRows(g);
+    const nw=Math.max(8,...rows.map(r=>r.name.length)), pw=Math.max(...rows.map(r=>r.pos.length));
+    rows.forEach(r=>L.push(`${r.pos.padEnd(pw)}  ${r.name.padEnd(nw)}  ${String(r.pts).padStart(3)} pt  V${r.w} N${r.d} P${r.l} R${r.r}  Avv.${r.b}${r.wd?'  (ritirato)':''}`));
+    L.push('');
+    L.push(multi()?`PARTITE DISPUTATE - GRUPPO ${k+1}`:'PARTITE DISPUTATE');
+    g.rounds.filter(r=>r.done).forEach((rd,t)=>{
+      L.push('');
+      L.push('Turno '+(t+1));
+      rd.games.forEach(x=>L.push(`  ${nm(x.a)} - ${nm(x.b)}   ${x.res}${x.forfeit!=null?'  (ritiro di '+nm(x.forfeit)+' durante la partita)':''}${afterNote(g,x)?'  ('+afterNote(g,x)+')':''}`));
+      rd.byes.forEach(y=>L.push(`  ${y.why==='riposo'?'Riposa':'Senza avversario (ritirato)'}: ${nm(y.p)} (1 punto)`));
+    });
+  }
   L.push('');
   L.push('Pt = punti, V = vinte, N = nulle, P = perse, R = riposi, Avv. = somma dei punti degli avversari');
-  L.push('');
-  L.push('PARTITE DISPUTATE');
-  g.rounds.filter(r=>r.done).forEach((rd,k)=>{
-    L.push('');
-    L.push('Turno '+(k+1));
-    rd.games.forEach(x=>L.push(`  ${pname(x.a)} - ${pname(x.b)}   ${x.res}${x.forfeit!=null?'  (ritiro di '+pname(x.forfeit)+' durante la partita)':''}${afterNote(x)?'  ('+afterNote(x)+')':''}`));
-    rd.byes.forEach(y=>L.push(`  ${y.why==='riposo'?'Riposa':'Senza avversario (ritirato)'}: ${pname(y.p)} (1 punto)`));
-  });
   L.push('');
   L.push('Claude Dama - Tornei');
   return L.join('\n');
@@ -709,8 +881,8 @@ function copyText(t){
   if(navigator.clipboard&&navigator.clipboard.writeText) return navigator.clipboard.writeText(t).catch(()=>copyFallback(t));
   copyFallback(t); return Promise.resolve();
 }
-async function shareRes(){
-  const t=buildText();
+async function shareRes(idx){
+  const t=buildText(idx);
   if(navigator.share){
     try{ await navigator.share({title:S.name,text:t}); return; }
     catch(e){ if(e&&e.name==='AbortError') return; }
@@ -718,27 +890,186 @@ async function shareRes(){
   await copyText(t);
   fmsg('Condivisione non disponibile in questo browser: il testo è stato copiato, incollalo in WhatsApp o nella mail.');
 }
-function fileName(){
+function fileName(idx){
   const base=S.name.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z0-9\-]+/g,'_').replace(/^_+|_+$/g,'')||'Torneo';
-  return base+'.txt';
+  return base+(multi()&&idx.length===1?'_Gruppo'+(idx[0]+1):'')+'.txt';
 }
-function saveTxt(){
-  const t=buildText().replace(/\n/g,'\r\n');
-  const blob=new Blob(['﻿'+t],{type:'text/plain;charset=utf-8'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob); a.download=fileName();
-  document.body.appendChild(a); a.click();
-  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500);
-  fmsg('✓ File salvato: '+fileName());
+// ── PDF della classifica (tabelle allineate) ──────────────────────
+// Generatore PDF minimo: font standard Helvetica / Helvetica-Bold (codifica WinAnsi), nessun file esterno.
+const HW=[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584,761,556,0,222,556,333,1000,556,556,333,1000,667,333,1000,0,611,0,0,222,222,333,333,350,556,1000,333,1000,500,333,944,0,500,667,278,333,556,556,556,556,260,556,333,737,370,556,584,333,737,333,400,584,333,333,333,556,537,278,333,333,365,556,834,834,834,611,667,667,667,667,667,667,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,500,556,556,556,556,278,278,278,278,556,556,556,556,556,556,556,584,611,556,556,556,556,500,556,500];
+const HBW=[278,333,474,556,556,889,722,238,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,333,333,584,584,584,611,975,722,722,722,722,667,611,778,722,278,556,722,611,833,722,778,667,778,722,667,611,722,667,944,667,667,611,333,278,333,584,556,333,556,611,556,611,556,333,611,611,278,278,556,278,889,611,611,611,611,389,556,333,611,556,778,556,556,500,389,280,389,584,761,556,0,278,556,500,1000,556,556,333,1000,667,333,1000,0,611,0,0,278,278,500,500,350,556,1000,333,1000,556,333,944,0,500,667,278,333,556,556,556,556,280,556,333,737,370,556,584,333,737,333,400,584,333,333,333,611,556,278,333,333,365,556,834,834,834,611,722,722,722,722,722,722,1000,722,667,667,667,667,278,278,278,278,722,722,778,778,778,778,778,584,778,722,722,722,722,667,667,611,556,556,556,556,556,556,889,556,556,556,556,556,278,278,278,278,611,611,611,611,611,611,611,584,611,611,611,611,611,556,611,556];
+const WIN={0x20AC:128,0x201A:130,0x0192:131,0x201E:132,0x2026:133,0x2020:134,0x2021:135,0x02C6:136,0x2030:137,0x0160:138,0x2039:139,0x0152:140,0x017D:142,0x2018:145,0x2019:146,0x201C:147,0x201D:148,0x2022:149,0x2013:150,0x2014:151,0x02DC:152,0x2122:153,0x0161:154,0x203A:155,0x0153:156,0x017E:158,0x0178:159};
+function winCode(ch){
+  const u=ch.codePointAt(0);
+  if((u>=32&&u<127)||(u>=160&&u<=255)) return u;
+  if(WIN[u]) return WIN[u];
+  const b=ch.normalize('NFD')[0], c=b?b.codePointAt(0):0;   // lettera con segni non disponibili: lettera base
+  if(b!==ch&&c>=32&&c<127) return c;
+  return 63;
+}
+function winStr(s){ let o=''; for(const ch of String(s)) o+=String.fromCharCode(winCode(ch)); return o; }
+function tw(str,bold,size){
+  const W=bold?HBW:HW; let t=0;
+  for(let i=0;i<str.length;i++){ const c=str.charCodeAt(i); t+=(c>=32&&W[c-32])||556; }
+  return t*size/1000;
+}
+function fitW(str,bold,size,max){
+  if(tw(str,bold,size)<=max) return str;
+  while(str.length&&tw(str+'\x85',bold,size)>max) str=str.slice(0,-1);
+  return str+'\x85';
+}
+function pdfEsc(s){ return s.replace(/[\\()]/g,'\\$&'); }
+const f2=n=>n.toFixed(2);
+
+function PDFDoc(){
+  const PW=595.28, PH=841.89, M=42, pages=[];
+  let cur=null;
+  const d={PW,PH,M,y:0,pages,
+    newPage(){ cur=[]; pages.push(cur); d.y=PH-M; },
+    ensure(h){ if(d.y-h<M+18){ d.newPage(); return true; } return false; },
+    text(x,y,s,o){
+      o=o||{}; const size=o.size||10, bold=!!o.bold;
+      let w=winStr(s); if(o.max) w=fitW(w,bold,size,o.max);
+      let xx=x; if(o.align==='c') xx=x-tw(w,bold,size)/2; else if(o.align==='r') xx=x-tw(w,bold,size);
+      cur.push(`${typeof o.gray==='number'?o.gray:0} g BT /${bold?'F2':'F1'} ${size} Tf ${f2(xx)} ${f2(y)} Td (${pdfEsc(w)}) Tj ET 0 g`);
+    },
+    rect(x,y,w,h,gray){ cur.push(`${gray} g ${f2(x)} ${f2(y)} ${f2(w)} ${f2(h)} re f 0 g`); },
+    line(x1,y1,x2,y2,wd,gray){ cur.push(`${gray||0} G ${wd||0.5} w ${f2(x1)} ${f2(y1)} m ${f2(x2)} ${f2(y2)} l S`); },
+    build(title){
+      const n=pages.length;
+      pages.forEach((p,i)=>{ cur=p; d.text(PW/2,M-20,`Claude Dama – Tornei  ·  pagina ${i+1} di ${n}`,{size:8,align:'c',gray:0.45}); });
+      let out='%PDF-1.4\n%\xE2\xE3\xCF\xD3\n'; const off=[];
+      const obj=(k,body)=>{ off[k]=out.length; out+=`${k} 0 obj\n${body}\nendobj\n`; };
+      const kids=pages.map((_,i)=>`${6+2*i} 0 R`).join(' ');
+      obj(1,'<< /Type /Catalog /Pages 2 0 R >>');
+      obj(2,`<< /Type /Pages /Kids [${kids}] /Count ${n} >>`);
+      obj(3,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>');
+      obj(4,'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>');
+      obj(5,`<< /Title (${pdfEsc(winStr(title))}) /Producer (Claude Dama - Tornei) >>`);
+      pages.forEach((p,i)=>{
+        const s=p.join('\n');
+        obj(6+2*i,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PW} ${PH}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${7+2*i} 0 R >>`);
+        obj(7+2*i,`<< /Length ${s.length} >>\nstream\n${s}\nendstream`);
+      });
+      const N=6+2*n, xref=out.length;
+      out+=`xref\n0 ${N}\n0000000000 65535 f \n`;
+      for(let k=1;k<N;k++) out+=String(off[k]).padStart(10,'0')+' 00000 n \n';
+      out+=`trailer\n<< /Size ${N} /Root 1 0 R /Info 5 0 R >>\nstartxref\n${xref}\n%%EOF\n`;
+      const u=new Uint8Array(out.length);
+      for(let i=0;i<out.length;i++) u[i]=out.charCodeAt(i)&255;
+      return u;
+    }
+  };
+  return d;
+}
+
+// tabella con griglia; l'intestazione si ripete se la tabella continua sulla pagina dopo
+function pdfTable(d,cols,rows,keepH){
+  const X0=d.M, rh=17, fs=10, TW=cols.reduce((t,c)=>t+c.w,0), pad=4;
+  const drawRow=(cells,hdr,shade)=>{
+    const top=d.y, bot=d.y-rh;
+    if(hdr) d.rect(X0,bot,TW,rh,0.85); else if(shade) d.rect(X0,bot,TW,rh,0.955);
+    let x=X0;
+    cols.forEach((c,i)=>{
+      const cell=cells[i]==null?'':cells[i];
+      const s=typeof cell==='object'?cell.s:cell;
+      const bold=hdr||!!(cell&&cell.b), size=hdr?8.5:((cell&&cell.size)||fs);
+      const al=hdr?'c':(c.a||'l');
+      const tx=al==='c'?x+c.w/2:(al==='r'?x+c.w-pad:x+pad);
+      d.text(tx,bot+(rh-size*0.72)/2,s,{size,bold,align:al,max:c.w-2*pad,gray:(cell&&cell.gray)});
+      x+=c.w;
+    });
+    d.line(X0,bot,X0+TW,bot,0.4,0.55);
+    let gx=X0; d.line(gx,top,gx,bot,0.4,0.55);
+    cols.forEach(c=>{ gx+=c.w; d.line(gx,top,gx,bot,0.4,0.55); });
+    d.y=bot;
+  };
+  const header=()=>{ d.line(X0,d.y,X0+TW,d.y,0.4,0.55); drawRow(cols.map(c=>c.t),true); };
+  d.ensure((keepH||0)+rh*2);
+  header();
+  rows.forEach((r,i)=>{ if(d.ensure(rh)) header(); drawRow(r,false,i%2===1); });
+}
+
+function makePDF(idx){
+  const d=PDFDoc(), M=d.M, W=d.PW-2*M;
+  d.newPage();
+  d.text(M,d.y-16,'TORNEO DI DAMA: '+S.name,{size:16,bold:true,max:W}); d.y-=24;
+  d.text(M,d.y-10,'Data: '+S.date+(multi()?(idx.length>1?`   ·   torneo in ${S.nGroups} gruppi`:`   ·   Gruppo ${idx[0]+1} di ${S.nGroups}`):''),{size:10}); d.y-=22;
+  idx.forEach((k,n)=>{
+    const g=S.groups[k], nm=i=>g.players[i].name, done=g.rounds.filter(r=>r.done).length;
+    if(n>0) d.newPage();
+    if(multi()){
+      d.rect(M,d.y-22,W,22,0.25);
+      d.text(M+8,d.y-15.5,'GRUPPO '+(k+1),{size:13,bold:true,gray:1});
+      d.y-=30;
+    }
+    d.text(M,d.y-10,`Abbinamenti ${modeName(g.mode)}   ·   ${g.nTurns} turni   ·   ${g.nPlayers} giocatori`+(done<g.nTurns?`   ·   turni giocati: ${done} (concluso in anticipo)`:''),{size:10,max:W}); d.y-=22;
+    // classifica
+    d.ensure(14+17*3);
+    d.text(M,d.y-12,'Classifica finale'+(multi()?' – Gruppo '+(k+1):''),{size:12.5,bold:true}); d.y-=20;
+    const fixed=[48,34,28,28,28,28,44];
+    const cols=[{t:'Pos.',w:48,a:'c'},{t:'Giocatore',w:W-fixed.reduce((a,b)=>a+b,0)+48-48,a:'l'},{t:'Pt',w:34,a:'c'},{t:'V',w:28,a:'c'},{t:'N',w:28,a:'c'},{t:'P',w:28,a:'c'},{t:'R',w:28,a:'c'},{t:'Avv.',w:44,a:'c'}];
+    cols[1].w=W-cols.reduce((t,c,i)=>i===1?t:t+c.w,0);
+    pdfTable(d,cols,rankRows(g).map(r=>[r.pos,r.name+(r.wd?' (ritirato)':''),{s:String(r.pts),b:true},r.w,r.d,r.l,r.r,r.b].map(v=>typeof v==='number'?String(v):v)));
+    d.y-=6; d.ensure(12);
+    d.text(M,d.y-8,'Pt = punti · V = vinte · N = nulle (patte) · P = perse · R = riposi (1 punto) · Avv. = somma dei punti degli avversari incontrati',{size:7.5,gray:0.3,max:W});
+    d.y-=26;
+    // partite
+    d.ensure(14+20+17*3);
+    d.text(M,d.y-12,'Partite disputate'+(multi()?' – Gruppo '+(k+1):''),{size:12.5,bold:true}); d.y-=22;
+    const nw=(W-26-48-150)/2;
+    const pc=[{t:'N.',w:26,a:'c'},{t:'Primo giocatore',w:nw},{t:'Secondo giocatore',w:nw},{t:'Risultato',w:48,a:'c'},{t:'Note',w:150}];
+    g.rounds.filter(r=>r.done).forEach((rd,t)=>{
+      const rows=rd.games.map((x,i)=>{
+        let note='';
+        if(x.forfeit!=null) note='ritiro di '+nm(x.forfeit)+' durante la partita';
+        else if(afterNote(g,x)) note=afterNote(g,x);
+        return [String(i+1),nm(x.a),nm(x.b),{s:x.res,b:true},{s:note,size:8}];
+      });
+      rd.byes.forEach(y=>rows.push(['',nm(y.p),{s:y.why==='riposo'?'riposa':'senza avversario (ritirato)',size:9,gray:0.3},{s:'1 pt',b:true},'']));
+      d.ensure(16+17*2);
+      d.text(M,d.y-11,'Turno '+(t+1),{size:11,bold:true}); d.y-=16;
+      pdfTable(d,pc,rows);
+      d.y-=12;
+    });
+  });
+  return d.build(S.name);
+}
+function pdfName(idx){ return fileName(idx).replace(/\.txt$/,'.pdf'); }
+function savePDF(idx){
+  try{
+    const bytes=makePDF(idx), name=pdfName(idx);
+    const blob=new Blob([bytes],{type:'application/pdf'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },3000);
+    fmsg('✓ File PDF salvato: '+name);
+  }catch(e){ fmsg('Errore nella creazione del PDF.'); }
+}
+
+function bindShare(idx){
+  on('b-share','click',()=>shareRes(idx));
+  on('b-copy','click',()=>copyText(buildText(idx)).then(()=>fmsg('✓ Testo copiato: puoi incollarlo dove vuoi.')));
+  on('b-txt','click',()=>savePDF(idx));
 }
 
 // ── Disegno della pagina ───────────────────────────────────────────
 function render(top){
   const m=$('main'), sub=$('subtitle');
-  if(S.phase==='setup'){ sub.textContent='Impostazione del torneo'; renderSetup(m); }
-  else if(S.phase==='names'){ sub.textContent=S.name+' · inserimento giocatori'; renderNames(m); }
-  else if(S.phase==='round'){ sub.textContent=`${S.name} · turno ${G().rounds.length} di ${G().nTurns}`; renderRound(m); }
-  else { sub.textContent=S.name+' · classifica finale'; renderFinal(m); }
+  let theme='';
+  if(S.phase==='setup'){ sub.textContent='Impostazione del torneo'; renderStart(m); }
+  else if(S.cg==null){ sub.textContent=S.name+' · gruppi'; renderGroups(m); }
+  else{
+    const g=G(), pre=S.name+(multi()?' · '+gLabel():'');
+    if(multi()&&S.cg>0) theme='g'+(S.cg+1);
+    if(g.phase==='setup'){ sub.textContent=pre+' · impostazione'; renderGroupSetup(m); }
+    else if(g.phase==='names'){ sub.textContent=pre+' · inserimento giocatori'; renderNames(m); }
+    else if(g.phase==='round'){ sub.textContent=`${pre} · turno ${g.rounds.length} di ${g.nTurns}`; renderRound(m); }
+    else { sub.textContent=pre+' · classifica finale'; renderFinal(m); }
+  }
+  document.body.className=theme;
+  bindCommon();
   if(top) window.scrollTo(0,0);
 }
 
