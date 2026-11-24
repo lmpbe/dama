@@ -155,7 +155,7 @@ function today(){ const d=new Date(), p=n=>String(n).padStart(2,'0'); return `${
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
 
 function newState(){
-  return { v:1, phase:'setup', draft:{name:'',mode:'partial',turns:5,players:''}, name:'', date:'', groups:[] };
+  return { v:1, phase:'setup', draft:{name:'',mode:'partial',turns:null,players:''}, name:'', date:'', groups:[] };
 }
 // Il torneo ha un elenco di gruppi: per ora uno solo (in futuro fino a 3 gruppi autonomi)
 function G(){ return S.groups[0]; }
@@ -410,7 +410,7 @@ function renderSetup(m){
   </div>`;
   on('f-name','input',e=>{ d.name=e.target.value; save(); });
   on('f-players','input',e=>{ d.players=e.target.value; save(); $('f-err').textContent=''; });
-  on('m-complete','click',()=>{ d.mode='complete'; if(d.turns%2===0) d.turns--; save(); updSetup(); });
+  on('m-complete','click',()=>{ d.mode='complete'; if(d.turns&&d.turns%2===0) d.turns--; save(); updSetup(); });
   on('m-partial','click',()=>{ d.mode='partial'; save(); updSetup(); });
   document.querySelectorAll('#turns-seg button').forEach(b=>b.addEventListener('click',()=>{
     const t=+b.dataset.t; if(d.mode==='complete'&&t%2===0) return;
@@ -430,14 +430,18 @@ function updSetup(){
     b.disabled=(d.mode==='complete'&&t%2===0);
   });
   document.querySelectorAll('#memo tr[data-t]').forEach(tr=>tr.classList.toggle('sel',+tr.dataset.t===d.turns));
-  const r=rangeOf(d.mode,d.turns);
-  $('f-hint').textContent=d.mode==='complete'
+  const r=d.turns?rangeOf(d.mode,d.turns):null;
+  $('f-hint').textContent=!d.turns
+    ? (d.mode==='complete'?'Scegli il numero di turni (con gli abbinamenti completi: 3, 5 o 7).':'Scegli il numero di turni.')
+    : d.mode==='complete'
     ? `Con ${d.turns} turni e abbinamenti completi: ${r.min} oppure ${r.max} giocatori.`
     : `Con ${d.turns} turni e abbinamenti parziali: da ${r.min} a ${r.max} giocatori.`;
   $('f-err').textContent='';
 }
 function setupOk(){
-  const d=S.draft, r=rangeOf(d.mode,d.turns), n=Number(d.players);
+  const d=S.draft, n=Number(d.players);
+  if(!d.turns){ $('f-err').textContent='Scegli il numero di turni.'; return; }
+  const r=rangeOf(d.mode,d.turns);
   if(!r){ $('f-err').textContent='Con gli abbinamenti completi i turni possono essere solo 3, 5 o 7.'; return; }
   if(!Number.isInteger(n)||n<r.min||n>r.max){
     $('f-err').textContent=d.mode==='complete'
