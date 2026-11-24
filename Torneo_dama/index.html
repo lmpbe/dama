@@ -522,7 +522,8 @@ function namesOk(){
 function renderRound(m){
   const g=G(), k=g.rounds.length, rd=cur(), last=k===g.nTurns;
   const gh=rd.games.map((x,i)=>{
-    const fo=x.forfeit!=null?`<div class="fo">Ritiro di ${esc(pname(x.forfeit))}: partita persa per abbandono</div>`:'';
+    const fo=(x.forfeit!=null?`<div class="fo">Ritiro di ${esc(pname(x.forfeit))} durante la partita: persa per abbandono</div>`:'')+
+             (afterNote(x)?`<div class="fo">${esc(afterNote(x))}</div>`:'');
     return `<div class="game" id="game-${i}">
       <div class="gnames"><span class="gnum">${i+1}.</span>${esc(pname(x.a))} – ${esc(pname(x.b))}</div>
       <div class="seg">${['2-0','1-1','0-2'].map(r=>`<button data-g="${i}" data-r="${r}" class="${x.res===r?'on':''}"${x.forfeit!=null?' disabled':''}>${r}</button>`).join('')}</div>${fo}</div>`;
@@ -602,23 +603,42 @@ function withdrawDlg(){
 function confirmWithdraw(i){
   const g=G(), rd=cur(), p=g.players[i];
   const game=rd.games.find(x=>(x.a===i||x.b===i)&&x.forfeit==null);
-  const opp=game?pname(game.a===i?game.b:game.a):'';
-  confirmDlg('Confermi il ritiro?',
-    `<b>${esc(p.name)}</b> si ritira dal torneo.<br><br>`+
-    (game?`La partita di questo turno contro <b>${esc(opp)}</b> è persa per abbandono (0-2): 2 punti a ${esc(opp)}.<br><br>`:'')+
-    `Non verrà più abbinato nei turni successivi; i punti già ottenuti restano in classifica.<br><br>L'operazione non si può annullare.`,
-    '✓ Ritira',()=>{
-      p.withdrawn=true; p.wRound=g.rounds.length;
-      if(game){ game.res=game.a===i?'0-2':'2-0'; game.forfeit=i; }
-      save(); render(false);
-    });
+  if(!game){
+    // in questo turno riposa (o la sua partita e' gia' decisa): il ritiro vale dal turno successivo
+    confirmDlg('Confermi il ritiro?',
+      `<b>${esc(p.name)}</b> si ritira dal torneo.<br><br>Dal turno successivo non verrà più abbinato; i punti già ottenuti restano in classifica.<br><br>L'operazione non si può annullare.`,
+      '✓ Ritira',()=>doWithdraw(i,null,false));
+    return;
+  }
+  const opp=pname(game.a===i?game.b:game.a);
+  showDlg('Quando si ritira?',
+    `<b>${esc(p.name)}</b> si ritira dal torneo.<br>Partita di questo turno contro <b>${esc(opp)}</b>:`,
+    [{label:'Durante la partita',cls:'btn-primary',fn:()=>confirmDlg('Ritiro durante la partita',
+        `La partita di <b>${esc(p.name)}</b> contro <b>${esc(opp)}</b> è persa per abbandono (0-2): 2 punti a ${esc(opp)}.<br><br>Dal turno successivo ${esc(p.name)} non verrà più abbinato; i punti già ottenuti restano in classifica.<br><br>L'operazione non si può annullare.`,
+        '✓ Ritira',()=>doWithdraw(i,game,true))},
+     {label:'Dopo aver finito la partita',cls:'btn-primary',fn:()=>confirmDlg('Ritiro dopo la partita',
+        `Il risultato della partita di <b>${esc(p.name)}</b> contro <b>${esc(opp)}</b> si inserisce normalmente.<br><br>Dal turno successivo ${esc(p.name)} non verrà più abbinato; i punti già ottenuti restano in classifica.<br><br>L'operazione non si può annullare.`,
+        '✓ Ritira',()=>doWithdraw(i,game,false))},
+     {label:'✕ Annulla'}]);
+}
+function doWithdraw(i,game,during){
+  const g=G(), p=g.players[i];
+  p.withdrawn=true; p.wRound=g.rounds.length;
+  if(game){
+    if(during){ game.res=game.a===i?'0-2':'2-0'; game.forfeit=i; }
+    else { game.after=(game.after||[]).concat([i]); }
+  }
+  save(); render(false);
+}
+function afterNote(x){
+  return (x.after&&x.after.length)?x.after.map(j=>pname(j)).join(' e ')+(x.after.length>1?' si ritirano':' si ritira')+' dopo questa partita':'';
 }
 
 // ── Pagina 4: classifica finale ────────────────────────────────────
 function roundsHtml(){
   const g=G();
   return g.rounds.filter(r=>r.done).map((rd,k)=>`<div class="rd"><div class="rdt">Turno ${k+1}</div>`+
-    rd.games.map(x=>`<div class="rg"><span>${esc(pname(x.a))} – ${esc(pname(x.b))}${x.forfeit!=null?` <span class="wd" style="color:#b00020">(ritiro di ${esc(pname(x.forfeit))})</span>`:''}</span><b>${x.res}</b></div>`).join('')+
+    rd.games.map(x=>`<div class="rg"><span>${esc(pname(x.a))} – ${esc(pname(x.b))}${x.forfeit!=null?` <span class="wd" style="color:#b00020">(ritiro di ${esc(pname(x.forfeit))} durante la partita)</span>`:''}${afterNote(x)?` <span class="wd" style="color:#b00020">(${esc(afterNote(x))})</span>`:''}</span><b>${x.res}</b></div>`).join('')+
     rd.byes.map(y=>`<div class="rg"><span>💤 ${esc(pname(y.p))} — ${y.why==='riposo'?'riposo':'senza avversario (ritirato)'}</span><b>1 pt</b></div>`).join('')+
     `</div>`).join('');
 }
@@ -670,7 +690,7 @@ function buildText(){
   g.rounds.filter(r=>r.done).forEach((rd,k)=>{
     L.push('');
     L.push('Turno '+(k+1));
-    rd.games.forEach(x=>L.push(`  ${pname(x.a)} - ${pname(x.b)}   ${x.res}${x.forfeit!=null?'  (ritiro di '+pname(x.forfeit)+')':''}`));
+    rd.games.forEach(x=>L.push(`  ${pname(x.a)} - ${pname(x.b)}   ${x.res}${x.forfeit!=null?'  (ritiro di '+pname(x.forfeit)+' durante la partita)':''}${afterNote(x)?'  ('+afterNote(x)+')':''}`));
     rd.byes.forEach(y=>L.push(`  ${y.why==='riposo'?'Riposa':'Senza avversario (ritirato)'}: ${pname(y.p)} (1 punto)`));
   });
   L.push('');
