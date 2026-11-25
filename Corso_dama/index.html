@@ -1,13 +1,23 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
-<HTML>
-<HEAD>
-   <TITLE>Corso Elementare di Dama - Presentazione</TITLE>
-   
-   
-   <META NAME="keywords" CONTENT="dama italiana, italian checkers">
-   
-   
-   <META NAME="KeyWords" CONTENT="dama, dama italiana, italian checkers">
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+
+<HTML>
+
+<HEAD>
+
+   <TITLE>Corso Elementare di Dama - Presentazione</TITLE>
+
+   
+
+   
+
+   <META NAME="keywords" CONTENT="dama italiana, italian checkers">
+
+   
+
+   
+
+   <META NAME="KeyWords" CONTENT="dama, dama italiana, italian checkers">
+
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <meta charset="UTF-8">
    <link rel="icon" type="image/png" sizes="192x192" href="icona-192.png">
@@ -69,6 +79,13 @@
        border:2px solid #6b7a86; border-radius:8px; cursor:pointer; z-index:50; touch-action:manipulation; }
      #fs-btn[hidden] { display:none; }
      #fs-btn svg { width:22px; height:22px; }
+        /* Pagine del corso aperte a schermo intero (dentro questa pagina) */
+     #fs-pagina { position:fixed; inset:0; z-index:10000; background:#fff; display:none; flex-direction:column; }
+     #fs-pagina.aperta { display:flex; }
+     #fs-barra { flex:none; display:flex; gap:8px; align-items:center; padding:6px 8px; background:#eef2f7; border-bottom:1px solid #c8d2dc; }
+     #fs-barra button { font:bold 15px Verdana, sans-serif; color:#2060a0; background:#fff; border:2px solid #6b7a86; border-radius:8px; padding:6px 12px; cursor:pointer; touch-action:manipulation; }
+     #fs-barra button:last-child { margin-left:auto; }
+     #fs-cornice { flex:1; width:100%; border:0; }
    </style>
    <script>
    // Screen Wake Lock API: impedisce lo spegnimento dello schermo su mobile/tablet
@@ -94,164 +111,317 @@
      });
    })();
    </script>
-</HEAD>
+</HEAD>
+
 <BODY TEXT="#000000" BGCOLOR="#FFFFFF" ALINK="#FF0000">
    <div id="wl-badge">&#9679; schermo attivo</div>
    <button type="button" id="fs-btn" hidden aria-label="Schermo intero" title="Schermo intero"></button>
-
-
+
+
+
+
 <img id="logo" src="icona-192.png" alt="Corso Elementare di Dama">
 
-<CENTER><P><B><U><FONT FACE="Verdana"><FONT SIZE=+2>CORSO ELEMENTARE DI
-DAMA</FONT></FONT></U></B></P></CENTER>
-
-<CENTER><P><FONT FACE="Verdana"><FONT COLOR="#FF0000"><FONT SIZE=-2>(Ultima
-revisione il 03.11.2003)</FONT></FONT></FONT></P></CENTER>
-
-<CENTER><P><FONT FACE="Verdana">&nbsp; </FONT></P></CENTER>
-
-<P>
-<HR WIDTH="70%" SIZE=5></P>
-
-<CENTER><P><B><U><FONT FACE="Verdana"><FONT SIZE=+1>Indice</FONT></FONT></U></B></P></CENTER>
-
-<CENTER><TABLE CELLSPACING=0 >
-<TR>
-<TD VALIGN="MIDDLE">
-<CENTER><P><B><FONT FACE="Verdana"><FONT SIZE=+1>Capitoli:</FONT></FONT></B></P></CENTER>
-</TD>
-
-<TD VALIGN="MIDDLE"><FONT FACE="Verdana">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</FONT></TD>
-
-<TD VALIGN="MIDDLE">
-<CENTER><P><FONT FACE="Verdana"><B><FONT SIZE=+1>Appendici:</FONT></B>
-</FONT></P></CENTER>
-</TD>
-</TR>
-
-<TR>
-<TD VALIGN="MIDDLE">
-<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="regole.htm">Le
-regole</A></FONT></U></B> </FONT></FONT></P></CENTER>
-</TD>
-
-<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
-
-<TD VALIGN="MIDDLE">
-<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="fi-teo/indice.htm">Finali
-teorici</A></FONT></U></B> </FONT></FONT></P></CENTER>
-</TD>
-</TR>
-
-<TR>
-<TD VALIGN="MIDDLE">
-<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="el-tat.htm">Elementi
-tattici</A></FONT></U></B> </FONT></FONT></P></CENTER>
-</TD>
-
-<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
-
-<TD VALIGN="MIDDLE">
-<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="aperture/indice.htm">Il
-sorteggio delle aperture</A></FONT></U></B> </FONT></FONT></P></CENTER>
-</TD>
-</TR>
-
-<TR>
-<TD VALIGN="MIDDLE">
-<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="mo-tat.htm">Motivi
-tattici</A></FONT></U></B> </FONT></FONT></P></CENTER>
-</TD>
-
-<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
-
-<TD VALIGN="MIDDLE">
-<CENTER><P><FONT SIZE=-1>&nbsp;<B><FONT FACE="Verdana"><A HREF="checkers/checkers.htm">Il
-gioco inglese</A></FONT></B></FONT></P></CENTER>
-</TD>
-</TR>
-
-<TR>
-<TD VALIGN="MIDDLE">
-<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="el-str.htm">Elementi
-strategici</A></FONT></U></B> </FONT></FONT></P></CENTER>
-</TD>
-
-<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
-
-<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
-</TR>
-
-<TR>
-<TD VALIGN="MIDDLE">
-<CENTER><P><B><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-1><A HREF="part.htm">La
-partita</A></FONT></FONT></FONT></U></B></P></CENTER>
-</TD>
-
-<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
-
-<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
-</TR>
-
-<TR>
-<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
-
-<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
-
-<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
-</TR>
-</TABLE></CENTER>
-
-<P>
-<HR></P>
-
-<CENTER><P><FONT FACE="Verdana">&nbsp;<B><U><FONT SIZE=+1>Presentazione</FONT></U></B></FONT></P></CENTER>
-
-<P><FONT FACE="Verdana"><FONT SIZE=-1>La dama &egrave; un gioco che ha
-origini molto antiche, di cui si trovano tracce in opere tramandateci dal
-mondo greco-romano, ma il primo trattato vero e proprio sul gioco della
-dama giunto fino a noi &egrave; stato scritto nel 1537 dallo spagnolo Torquemada.
-Le regole della dama sono molto semplici e sono patrimonio tradizionale
-di ognuno, infatti la dama &egrave; tipicamente il primo gioco su tavoliere
-che viene insegnato ai bambini. Ma il gioco in realt&agrave; &egrave; complesso:
-&egrave; stato calcolato che nella dama sono possibili pi&ugrave; di 300
-miliardi di miliardi di posizioni. Un numero enorme, che supera ogni capacit&agrave;
-di memorizzazione e gestione umana. Il fascino del gioco della dama sta
-proprio nella sintesi di questi opposti: &egrave; il pi&ugrave; semplice
-fra i giochi complessi.</FONT></FONT></P>
-
-<P><FONT FACE="Verdana"><FONT SIZE=-1>Ma occorre fare una precisazione.
-La dama attualmente &egrave; diffusa in tutto il mondo di cultura europea,
-comprese Americhe e Oceania, ma, a differenza del gioco cugino degli scacchi,
-non si &egrave; arrivati ad una unificazione delle regole a livello internazionale,
-cos&igrave; permangono differenze anche rilevanti fra i vari paesi. In
-alcune nazioni (specialmente in Russia e Olanda) &egrave; praticata la
-cosiddetta &quot;dama internazionale&quot; che si gioca su damiera a 100
-caselle, con 20 pedine per giocatore. Questa variante della dama non &egrave;
-per niente un gioco &quot;semplice&quot;: ha una complessit&agrave; paragonabile
-a quella degli scacchi, e molto maggiore del gioco su damiera a 64 caselle,
-popolare in Italia, Spagna e nel mondo anglosassone (con alcune differenze
-di regole).</FONT></FONT></P>
-
-<P><FONT FACE="Verdana"><FONT SIZE=-1>Da secoli il gioco della dama trova
-cultori e studiosi. Esistono molte federazioni nazionali (fra cui la Federazione
-Italiana Dama, affiliata al CONI) e una federazione mondiale. Vengono organizzati
-regolarmente tornei nazionali ed internazionali. Esiste una letteratura
-specifica che comprende sia libri che riviste periodiche. Ma da sempre,
-proprio per la sua &quot;semplicit&agrave;&quot;, &egrave; molto diffuso
-un modo &quot;ingenuo&quot; di giocare a dama, ignaro di tattiche e strategie.
-Questo &quot;Corso Elementare di Dama&quot; si propone di fornire al giocatore
-&quot;ingenuo&quot; gli strumenti per comprendere il gioco e una base per
-un eventuale approfondimento.</FONT></FONT></P>
-
-<P><FONT FACE="Verdana">&nbsp; </FONT></P>
-
-<P>
-<HR></P>
-
-<P><I><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio
-Bellini</A></FONT></FONT></FONT></U></I></P>
-
+<CENTER><P><B><U><FONT FACE="Verdana"><FONT SIZE=+2>CORSO ELEMENTARE DI
+
+DAMA</FONT></FONT></U></B></P></CENTER>
+
+
+
+<CENTER><P><FONT FACE="Verdana"><FONT COLOR="#FF0000"><FONT SIZE=-2>(Ultima
+
+revisione il 03.11.2003)</FONT></FONT></FONT></P></CENTER>
+
+
+
+<CENTER><P><FONT FACE="Verdana">&nbsp; </FONT></P></CENTER>
+
+
+
+<P>
+
+<HR WIDTH="70%" SIZE=5></P>
+
+
+
+<CENTER><P><B><U><FONT FACE="Verdana"><FONT SIZE=+1>Indice</FONT></FONT></U></B></P></CENTER>
+
+
+
+<CENTER><TABLE CELLSPACING=0 >
+
+<TR>
+
+<TD VALIGN="MIDDLE">
+
+<CENTER><P><B><FONT FACE="Verdana"><FONT SIZE=+1>Capitoli:</FONT></FONT></B></P></CENTER>
+
+</TD>
+
+
+
+<TD VALIGN="MIDDLE"><FONT FACE="Verdana">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</FONT></TD>
+
+
+
+<TD VALIGN="MIDDLE">
+
+<CENTER><P><FONT FACE="Verdana"><B><FONT SIZE=+1>Appendici:</FONT></B>
+
+</FONT></P></CENTER>
+
+</TD>
+
+</TR>
+
+
+
+<TR>
+
+<TD VALIGN="MIDDLE">
+
+<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="regole.htm">Le
+
+regole</A></FONT></U></B> </FONT></FONT></P></CENTER>
+
+</TD>
+
+
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+
+
+
+<TD VALIGN="MIDDLE">
+
+<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="fi-teo/indice.htm">Finali
+
+teorici</A></FONT></U></B> </FONT></FONT></P></CENTER>
+
+</TD>
+
+</TR>
+
+
+
+<TR>
+
+<TD VALIGN="MIDDLE">
+
+<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="el-tat.htm">Elementi
+
+tattici</A></FONT></U></B> </FONT></FONT></P></CENTER>
+
+</TD>
+
+
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+
+
+
+<TD VALIGN="MIDDLE">
+
+<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="aperture/indice.htm">Il
+
+sorteggio delle aperture</A></FONT></U></B> </FONT></FONT></P></CENTER>
+
+</TD>
+
+</TR>
+
+
+
+<TR>
+
+<TD VALIGN="MIDDLE">
+
+<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="mo-tat.htm">Motivi
+
+tattici</A></FONT></U></B> </FONT></FONT></P></CENTER>
+
+</TD>
+
+
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+
+
+
+<TD VALIGN="MIDDLE">
+
+<CENTER><P><FONT SIZE=-1>&nbsp;<B><FONT FACE="Verdana"><A HREF="checkers/checkers.htm">Il
+
+gioco inglese</A></FONT></B></FONT></P></CENTER>
+
+</TD>
+
+</TR>
+
+
+
+<TR>
+
+<TD VALIGN="MIDDLE">
+
+<CENTER><P><FONT FACE="Verdana"><FONT SIZE=-1><B><U><FONT COLOR="#0000FF"><A HREF="el-str.htm">Elementi
+
+strategici</A></FONT></U></B> </FONT></FONT></P></CENTER>
+
+</TD>
+
+
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+
+
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+
+</TR>
+
+
+
+<TR>
+
+<TD VALIGN="MIDDLE">
+
+<CENTER><P><B><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-1><A HREF="part.htm">La
+
+partita</A></FONT></FONT></FONT></U></B></P></CENTER>
+
+</TD>
+
+
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+
+
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+
+</TR>
+
+
+
+<TR>
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+
+
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+
+
+
+<TD VALIGN="MIDDLE"><FONT SIZE=-1>&nbsp;</FONT></TD>
+
+</TR>
+
+</TABLE></CENTER>
+
+
+
+<P>
+
+<HR></P>
+
+
+
+<CENTER><P><FONT FACE="Verdana">&nbsp;<B><U><FONT SIZE=+1>Presentazione</FONT></U></B></FONT></P></CENTER>
+
+
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>La dama &egrave; un gioco che ha
+
+origini molto antiche, di cui si trovano tracce in opere tramandateci dal
+
+mondo greco-romano, ma il primo trattato vero e proprio sul gioco della
+
+dama giunto fino a noi &egrave; stato scritto nel 1537 dallo spagnolo Torquemada.
+
+Le regole della dama sono molto semplici e sono patrimonio tradizionale
+
+di ognuno, infatti la dama &egrave; tipicamente il primo gioco su tavoliere
+
+che viene insegnato ai bambini. Ma il gioco in realt&agrave; &egrave; complesso:
+
+&egrave; stato calcolato che nella dama sono possibili pi&ugrave; di 300
+
+miliardi di miliardi di posizioni. Un numero enorme, che supera ogni capacit&agrave;
+
+di memorizzazione e gestione umana. Il fascino del gioco della dama sta
+
+proprio nella sintesi di questi opposti: &egrave; il pi&ugrave; semplice
+
+fra i giochi complessi.</FONT></FONT></P>
+
+
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Ma occorre fare una precisazione.
+
+La dama attualmente &egrave; diffusa in tutto il mondo di cultura europea,
+
+comprese Americhe e Oceania, ma, a differenza del gioco cugino degli scacchi,
+
+non si &egrave; arrivati ad una unificazione delle regole a livello internazionale,
+
+cos&igrave; permangono differenze anche rilevanti fra i vari paesi. In
+
+alcune nazioni (specialmente in Russia e Olanda) &egrave; praticata la
+
+cosiddetta &quot;dama internazionale&quot; che si gioca su damiera a 100
+
+caselle, con 20 pedine per giocatore. Questa variante della dama non &egrave;
+
+per niente un gioco &quot;semplice&quot;: ha una complessit&agrave; paragonabile
+
+a quella degli scacchi, e molto maggiore del gioco su damiera a 64 caselle,
+
+popolare in Italia, Spagna e nel mondo anglosassone (con alcune differenze
+
+di regole).</FONT></FONT></P>
+
+
+
+<P><FONT FACE="Verdana"><FONT SIZE=-1>Da secoli il gioco della dama trova
+
+cultori e studiosi. Esistono molte federazioni nazionali (fra cui la Federazione
+
+Italiana Dama, affiliata al CONI) e una federazione mondiale. Vengono organizzati
+
+regolarmente tornei nazionali ed internazionali. Esiste una letteratura
+
+specifica che comprende sia libri che riviste periodiche. Ma da sempre,
+
+proprio per la sua &quot;semplicit&agrave;&quot;, &egrave; molto diffuso
+
+un modo &quot;ingenuo&quot; di giocare a dama, ignaro di tattiche e strategie.
+
+Questo &quot;Corso Elementare di Dama&quot; si propone di fornire al giocatore
+
+&quot;ingenuo&quot; gli strumenti per comprendere il gioco e una base per
+
+un eventuale approfondimento.</FONT></FONT></P>
+
+
+
+<P><FONT FACE="Verdana">&nbsp; </FONT></P>
+
+
+
+<P>
+
+<HR></P>
+
+
+
+<P><I><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio
+
+Bellini</A></FONT></FONT></FONT></U></I></P>
+
+
+
 <script>
 // ── Pulsante «Schermo intero» (dove il browser lo permette; su iPhone non compare) ──
 (function(){
@@ -278,5 +448,82 @@ Bellini</A></FONT></FONT></FONT></U></I></P>
   aggiorna();
 })();
 </script>
-</BODY>
-</HTML>
+<script>
+// ── Pagine del corso a schermo intero ──
+// Con lo schermo intero attivo, i link non fanno cambiare pagina (il browser uscirebbe dallo schermo intero):
+// la pagina richiesta si apre qui dentro, a tutto schermo. «Indietro» torna alla pagina precedente,
+// «Indice» richiude e torna a questa pagina. Se si esce dallo schermo intero, si passa alla pagina
+// che si stava leggendo, aperta normalmente.
+(function(){
+  var doc=document;
+  function schermoIntero(){ return !!(doc.fullscreenElement||doc.webkitFullscreenElement); }
+  if(!(doc.fullscreenEnabled||doc.webkitFullscreenEnabled)) return;
+
+  var box=doc.createElement('div'); box.id='fs-pagina';
+  box.innerHTML='<div id="fs-barra"><button type="button" id="fs-indietro">&#9664; Indietro</button>'+
+                '<button type="button" id="fs-indice">&#8962; Indice</button></div>'+
+                '<iframe id="fs-cornice" title="Pagina del corso" allow="fullscreen; screen-wake-lock"></iframe>';
+  doc.body.appendChild(box);
+  var cornice=doc.getElementById('fs-cornice');
+  var pila=[];          // pagine visitate dentro la cornice
+  var tornando=false;   // true mentre si torna indietro con il pulsante
+
+  function questaPagina(u){
+    try{
+      var a=new URL(u, location.href), b=new URL(location.href);
+      var pa=a.pathname.replace(/index[^\/]*\.html?$/i,''), pb=b.pathname.replace(/index[^\/]*\.html?$/i,'');
+      return a.origin===b.origin && (a.pathname===b.pathname || pa===pb && /\/$/.test(pa));
+    }catch(e){ return false; }
+  }
+  function chiudi(){
+    box.classList.remove('aperta'); pila=[];
+    try{ cornice.contentWindow.location.replace('about:blank'); }catch(e){ cornice.src='about:blank'; }
+  }
+  function apri(url){
+    pila=[]; box.classList.add('aperta');
+    try{ cornice.contentWindow.location.replace(url); }catch(e){ cornice.src=url; }
+  }
+
+  cornice.addEventListener('load',function(){
+    var u; try{ u=cornice.contentWindow.location.href; }catch(e){ return; }
+    if(!u||u==='about:blank') return;
+    if(questaPagina(u)){ chiudi(); return; }          // un link riporta all'indice: si richiude
+    if(tornando) tornando=false; else pila.push(u);
+  });
+
+  doc.getElementById('fs-indietro').addEventListener('click',function(){
+    pila.pop();
+    if(!pila.length){ chiudi(); return; }
+    tornando=true;
+    try{ cornice.contentWindow.location.replace(pila[pila.length-1]); }catch(e){ chiudi(); }
+  });
+  doc.getElementById('fs-indice').addEventListener('click',chiudi);
+
+  // link di questa pagina: con lo schermo intero attivo si aprono nella cornice
+  doc.addEventListener('click',function(e){
+    if(!schermoIntero()||e.defaultPrevented) return;
+    var a=e.target.closest&&e.target.closest('a[href]');
+    if(!a||(a.target&&a.target!=='_self')) return;
+    var href=a.getAttribute('href')||'';
+    if(/^(mailto:|tel:|javascript:|#)/i.test(href)) return;
+    var url; try{ url=new URL(href, location.href); }catch(err){ return; }
+    if(url.origin!==location.origin) return;
+    e.preventDefault();
+    apri(url.href);
+  });
+
+  // uscendo dallo schermo intero con una pagina aperta, la si apre normalmente
+  function cambio(){
+    if(schermoIntero()||!box.classList.contains('aperta')) return;
+    var u=pila[pila.length-1];
+    chiudi();
+    if(u) location.href=u;
+  }
+  doc.addEventListener('fullscreenchange',cambio);
+  doc.addEventListener('webkitfullscreenchange',cambio);
+})();
+</script>
+</BODY>
+
+</HTML>
+
