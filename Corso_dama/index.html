@@ -63,6 +63,12 @@
        z-index: 9999;
        user-select: none;
      }
+        /* Pulsante schermo intero (in alto a destra) */
+     #fs-btn { position:absolute; top:10px; right:10px; width:40px; height:40px; padding:0;
+       display:flex; align-items:center; justify-content:center; background:#fff; color:#2060a0;
+       border:2px solid #6b7a86; border-radius:8px; cursor:pointer; z-index:50; touch-action:manipulation; }
+     #fs-btn[hidden] { display:none; }
+     #fs-btn svg { width:22px; height:22px; }
    </style>
    <script>
    // Screen Wake Lock API: impedisce lo spegnimento dello schermo su mobile/tablet
@@ -91,6 +97,7 @@
 </HEAD>
 <BODY TEXT="#000000" BGCOLOR="#FFFFFF" ALINK="#FF0000">
    <div id="wl-badge">&#9679; schermo attivo</div>
+   <button type="button" id="fs-btn" hidden aria-label="Schermo intero" title="Schermo intero"></button>
 
 
 <img id="logo" src="icona-192.png" alt="Corso Elementare di Dama">
@@ -245,5 +252,31 @@ un eventuale approfondimento.</FONT></FONT></P>
 <P><I><U><FONT FACE="Verdana"><FONT COLOR="#0000FF"><FONT SIZE=-2><A HREF="mailto:lmpbe@tin.it">Antonio
 Bellini</A></FONT></FONT></FONT></U></I></P>
 
+<script>
+// ── Pulsante «Schermo intero» (dove il browser lo permette; su iPhone non compare) ──
+(function(){
+  var doc=document, el=doc.documentElement, btn=doc.getElementById('fs-btn');
+  if(!btn) return;
+  var richiedi=el.requestFullscreen||el.webkitRequestFullscreen;
+  var esci=doc.exitFullscreen||doc.webkitExitFullscreen;
+  if(!richiedi||!(doc.fullscreenEnabled||doc.webkitFullscreenEnabled)) return;
+  var APRI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+  var CHIUDI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
+  function attivo(){ return !!(doc.fullscreenElement||doc.webkitFullscreenElement); }
+  function aggiorna(){
+    var on=attivo(), t=on?'Esci da schermo intero':'Schermo intero';
+    btn.innerHTML=on?CHIUDI:APRI; btn.setAttribute('aria-label',t); btn.title=t;
+  }
+  btn.hidden=false;
+  btn.addEventListener('click',function(e){
+    e.preventDefault(); e.stopPropagation();
+    var r=attivo()?esci.call(doc):richiedi.call(el);
+    if(r&&r.catch) r.catch(function(){});
+  });
+  doc.addEventListener('fullscreenchange',aggiorna);
+  doc.addEventListener('webkitfullscreenchange',aggiorna);
+  aggiorna();
+})();
+</script>
 </BODY>
 </HTML>
