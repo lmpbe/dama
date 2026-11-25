@@ -114,6 +114,7 @@
   .gbtn { display:block; width:100%; text-align:left; padding:14px; border-radius:8px; border:1px solid; border-left-width:12px; font-size:1.2rem; font-weight:bold; color:var(--text); margin-bottom:10px; }
   .gbtn small { display:block; font-weight:normal; font-size:.92rem; margin-top:4px; }
   .overlay-btns.col { flex-direction:column; }
+  input.num3 { width:6.5em; text-align:center; font-weight:bold; }
 </style>
 <link rel="icon" type="image/png" sizes="192x192" href="icona-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icona-180.png">
@@ -162,6 +163,7 @@
 // ═══════════════════════════════════════════════════════════════════
 
 const KEY='claude_dama_tornei_v1';
+const NAME_MAX=40;   // lunghezza massima del nome del torneo (nel PDF il nome sta sempre per intero)
 const TH=[{bg:'#b8cfe0',ac:'#2060a0'},{bg:'#bfe0b6',ac:'#2e7d32'},{bg:'#f8cda2',ac:'#c4570f'}];
 let S=null;
 
@@ -469,7 +471,7 @@ function formHTML(d){
     <div class="fl">Numero di turni</div>
     <div class="seg" id="turns-seg">${[3,4,5,6,7,8].map(t=>`<button data-t="${t}">${t}</button>`).join('')}</div>
     <label class="fl" for="f-players">Numero di giocatori</label>
-    <input type="number" id="f-players" inputmode="numeric" min="3" max="256" value="${esc(d.players)}">
+    <input type="number" id="f-players" class="num3" inputmode="numeric" min="3" max="256" value="${esc(d.players)}">
     <div id="f-hint" class="hint"></div>`;
 }
 function bindForm(d){
@@ -519,8 +521,9 @@ function renderStart(m){
   const d=S.draft;
   m.innerHTML=memoHTML()+`
   <div class="card"><h3>Impostazione del torneo</h3>
-    <label class="fl" for="f-name">Nome del torneo</label>
-    <input type="text" id="f-name" maxlength="60" placeholder="Torneo del ${today()}" value="${esc(d.name)}">
+    <label class="fl" for="f-name">Nome del torneo (max ${NAME_MAX} caratteri)</label>
+    <input type="text" id="f-name" maxlength="${NAME_MAX}" placeholder="Torneo del ${today()}" value="${esc(d.name.slice(0,NAME_MAX))}">
+    <div class="note" id="f-count" style="text-align:right;margin-top:3px"></div>
     <div class="fl">Numero di gruppi</div>
     <div class="seg" id="ng-seg">${[1,2,3].map(k=>`<button data-k="${k}">${k}</button>`).join('')}</div>
     <div id="single">${formHTML(d)}</div>
@@ -531,7 +534,9 @@ function renderStart(m){
       <button class="btn-big" id="b-help">❓ Help</button>
     </div>
   </div>`;
-  on('f-name','input',e=>{ d.name=e.target.value; save(); });
+  const cnt=()=>{ $('f-count').textContent=`${d.name.length} / ${NAME_MAX}`; };
+  d.name=d.name.slice(0,NAME_MAX); cnt();
+  on('f-name','input',e=>{ d.name=e.target.value.slice(0,NAME_MAX); save(); cnt(); });
   document.querySelectorAll('#ng-seg button').forEach(b=>b.addEventListener('click',()=>{ d.ngroups=+b.dataset.k; save(); updStart(); }));
   bindForm(d);
   on('b-ok','click',startOk);
@@ -993,7 +998,9 @@ function pdfTable(d,cols,rows,keepH){
 function makePDF(idx){
   const d=PDFDoc(), M=d.M, W=d.PW-2*M;
   d.newPage();
-  d.text(M,d.y-16,'TORNEO DI DAMA: '+S.name,{size:16,bold:true,max:W}); d.y-=24;
+  d.text(M,d.y-9,'TORNEO DI DAMA',{size:9,bold:true,gray:0.4}); d.y-=14;
+  let ts=16; while(ts>10&&tw(winStr(S.name),true,ts)>W) ts-=0.5;   // il nome sta sempre per intero
+  d.text(M,d.y-ts,S.name,{size:ts,bold:true}); d.y-=ts+8;
   d.text(M,d.y-10,'Data: '+S.date+(multi()?(idx.length>1?`   ·   torneo in ${S.nGroups} gruppi`:`   ·   Gruppo ${idx[0]+1} di ${S.nGroups}`):''),{size:10}); d.y-=22;
   idx.forEach((k,n)=>{
     const g=S.groups[k], nm=i=>g.players[i].name, done=g.rounds.filter(r=>r.done).length;
