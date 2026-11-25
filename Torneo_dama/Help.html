@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Claude Dama – Tornei — Guida</title>
+<link rel="icon" type="image/png" sizes="192x192" href="icona-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icona-180.png">
+<style>
+  :root{
+    --bg:#d0e0f0; --panel:#f4f8fc; --border:#8aaac0; --accent:#2060a0; --accent2:#1a4880;
+    --text:#1a2a3a; --muted:#4a6a88; --code:#e3edf7;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{ --bg:#10202e; --panel:#182c3d; --border:#35566f; --accent:#4a8fd0; --accent2:#7ab4ec;
+           --text:#e4eef8; --muted:#9db6cc; --code:#223a50; }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;font-size:17px}
+  header{background:#2060a0;color:#fff;text-align:center;padding:14px 16px}
+  header h1{font-size:1.35rem;display:flex;align-items:center;justify-content:center;gap:10px}
+  header h1 img{width:34px;height:34px;border-radius:6px;border:2px solid #fff;flex-shrink:0}
+  header p{font-size:.85rem;color:#cce0ff;margin-top:2px}
+  main{max-width:760px;margin:0 auto;padding:14px 14px 40px}
+  nav{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:14px}
+  nav b{display:block;font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+  nav a{display:inline-block;margin:3px 10px 3px 0;color:var(--accent2);font-size:.95rem}
+  section{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+  h2{font-size:1.1rem;color:var(--accent2);margin-bottom:8px}
+  h3{font-size:1rem;margin:14px 0 4px}
+  p{margin-bottom:9px}
+  ul{margin:0 0 9px 1.2em}
+  li{margin-bottom:5px}
+  code,.file{font-family:'Courier New',monospace;font-weight:bold;background:var(--code);border-radius:4px;padding:1px 5px;font-size:.92em}
+  dl{margin-bottom:6px}
+  dt{font-weight:bold;margin-top:10px}
+  dd{margin-left:0;margin-bottom:4px}
+  .note{border-left:4px solid var(--accent);background:var(--code);padding:8px 12px;border-radius:0 6px 6px 0;margin:10px 0;font-size:.95rem}
+  table{border-collapse:collapse;margin:6px 0 10px;font-size:.92rem}
+  th,td{border:1px solid var(--border);padding:4px 10px;text-align:center}
+  th{background:var(--code)}
+  .back{display:block;text-align:center;background:var(--accent);color:#fff;text-decoration:none;font-weight:bold;
+        font-size:1.05rem;padding:14px;border-radius:8px;border:0;width:100%;cursor:pointer;font-family:inherit;margin-top:6px}
+  .back:hover{filter:brightness(1.1)}
+  .top{margin-bottom:14px}
+  @media (min-width:700px){ body{font-size:18px} main{padding-top:22px} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1><img src="icona-192.png" alt="">Claude Dama – Tornei — Guida</h1>
+  <p>Gestione dei tornei di dama, anche da telefono</p>
+</header>
+
+<main>
+
+  <button class="back top" onclick="tornaAlTorneo()">⮌ Torna al torneo</button>
+
+  <nav>
+    <b>In questa guida</b>
+    <a href="#concetti">Concetti di base</a>
+    <a href="#gruppi">Tornei in più gruppi</a>
+    <a href="#comandi">Comandi e operazioni</a>
+    <a href="#note">Note utili</a>
+    <a href="#file">I file del programma</a>
+    <a href="#segnalazioni">Segnalazioni</a>
+  </nav>
+
+  <!-- ═════════════════════════ CONCETTI DI BASE ═════════════════════════ -->
+  <section id="concetti">
+    <h2>Concetti di base</h2>
+    <p>Claude Dama – Tornei è un programma per la gestione dei tornei di dama, un po' semplificato rispetto al regolamento tecnico della Federazione Italiana Dama. Permette, anche da telefono o tablet, in modo facile, pratico e veloce, di impostare un torneo, elaborare gli abbinamenti dei giocatori nei vari turni e produrre la classifica finale.</p>
+
+    <h3>I due tipi di abbinamento</h3>
+    <p>Per gli abbinamenti fra i giocatori nei turni del torneo si può scegliere fra:</p>
+    <ul>
+      <li><b>ABBINAMENTI COMPLETI</b>: tutti i giocatori si incontrano con tutti gli altri, una sola volta;</li>
+      <li><b>ABBINAMENTI PARZIALI</b>: i giocatori si incontrano fra loro una sola volta, a partire da quelli con il punteggio più alto, a scalare; il numero limitato dei turni di gioco non consente però che tutti i giocatori si incontrino con tutti gli altri.</li>
+    </ul>
+    <p>Il numero di giocatori possibile per un certo numero di turni è riportato nella tabella della pagina iniziale del programma:</p>
+    <table>
+      <tr><th>Turni</th><th>Giocatori<br>abbinamenti completi</th><th>Giocatori (min – max)<br>abbinamenti parziali</th></tr>
+      <tr><td>3</td><td>3, 4</td><td>5 – 8</td></tr>
+      <tr><td>4</td><td>–</td><td>7 – 16</td></tr>
+      <tr><td>5</td><td>5, 6</td><td>9 – 32</td></tr>
+      <tr><td>6</td><td>–</td><td>11 – 64</td></tr>
+      <tr><td>7</td><td>7, 8</td><td>13 – 128</td></tr>
+      <tr><td>8</td><td>–</td><td>15 – 256</td></tr>
+    </table>
+
+    <h3>Abbinamenti completi</h3>
+    <p>Visto che tutti i giocatori giocano contro tutti gli altri, gli abbinamenti completi producono una classifica finale che rappresenta in dettaglio i valori di gioco espressi nel torneo.</p>
+    <p>Il numero dei turni può essere solo dispari (3, 5 o 7) e il numero dei giocatori è uguale al numero dei turni oppure al numero dei turni più 1. Il calendario di tutti i turni viene stabilito all'inizio, sorteggiando l'ordine dei giocatori.</p>
+    <p>Se un giocatore si ritira dal torneo, nei turni successivi chi avrebbe dovuto incontrarlo resta senza avversario e riceve 1 punto, come per il riposo.</p>
+
+    <h3>Abbinamenti parziali</h3>
+    <p>Anche se non tutti i giocatori si incontrano fra loro, gli abbinamenti parziali producono una classifica finale che dà effettivamente conto delle prestazioni messe in campo nel torneo. Il torneo si avvicina tanto più a un torneo con abbinamenti completi, e la classifica esprime tanto più in dettaglio i valori di gioco, quanto più sono pochi i giocatori rispetto ai turni (o, che è lo stesso, quanto più sono numerosi i turni rispetto ai giocatori).</p>
+    <p>È la modalità comune per le gare di mezza giornata o di una giornata, quando il numero dei turni è limitato e il numero dei giocatori è troppo alto per gli abbinamenti completi.</p>
+    <ul>
+      <li>Gli abbinamenti del primo turno sono sorteggiati. Nei turni successivi si parte dal giocatore con il punteggio più alto (se sono più di uno, si sorteggia fra loro), che incontra il giocatore con punteggio uguale o immediatamente inferiore che non ha ancora incontrato, e così via fino all'esaurimento dei giocatori. La regola che due giocatori non si incontrino mai più di una volta prevale su tutte le altre.</li>
+      <li>Il <b>numero minimo</b> di giocatori è il doppio dei turni meno 1: con meno giocatori, all'ultimo turno potrebbe non essere possibile alcun abbinamento.</li>
+      <li>Il <b>numero massimo</b> di giocatori è tale che due giocatori sempre vincenti debbano necessariamente incontrarsi fra loro all'ultimo turno.</li>
+      <li>Se un giocatore si ritira dal torneo, non viene più considerato negli abbinamenti successivi. Se, per il ritiro di più giocatori, non è possibile formare il turno successivo senza far incontrare di nuovo due giocatori, il torneo termina e vale la classifica raggiunta fino a quel turno.</li>
+    </ul>
+
+    <h3>Punteggi</h3>
+    <ul>
+      <li>Al termine di ogni partita si assegnano <b>2 punti</b> a chi vince, <b>1 punto</b> a ciascuno in caso di patta, <b>0 punti</b> a chi perde.</li>
+      <li>Se i giocatori sono dispari, a ogni turno un giocatore riposa e riceve <b>1 punto</b> a forfait. Un giocatore può riposare una sola volta. Negli abbinamenti completi il turno di riposo è fissato dal calendario; negli abbinamenti parziali riposa l'ultimo in classifica fra quelli che non hanno ancora riposato.</li>
+      <li>Se un giocatore si ritira <b>mentre sta giocando</b> una partita, perde la partita e all'avversario vanno 2 punti. Se si ritira <b>dopo aver terminato</b> la partita, il risultato viene registrato regolarmente. In ogni caso restano in classifica i punti degli incontri che ha sostenuto.</li>
+    </ul>
+
+    <h3>Classifica e spareggi</h3>
+    <p>In caso di parità di punteggio fra due o più giocatori prevale chi ha ottenuto:</p>
+    <ul>
+      <li>la vittoria nell'eventuale incontro diretto (solo in caso di parità fra 2 soli giocatori);</li>
+      <li>ancora in caso di parità, il maggior numero di vittorie;</li>
+      <li>ancora in caso di parità, la somma più alta dei punti in classifica di tutti gli avversari incontrati;</li>
+      <li>ancora in caso di parità, i giocatori sono considerati a pari merito (in classifica, per esempio, «3°–4°»).</li>
+    </ul>
+    <div class="note">Se un criterio separa un gruppo di giocatori pari ma ne lascia ancora 2 a pari merito, per questi 2 si riparte dal primo criterio, l'incontro diretto. Esempio: A, B e C hanno gli stessi punti; A ha più vittorie ed è primo dei tre; B e C hanno le stesse vittorie: fra loro decide l'incontro diretto.</div>
+  </section>
+
+  <!-- ═════════════════════════ GRUPPI ═════════════════════════ -->
+  <section id="gruppi">
+    <h2>Tornei in più gruppi</h2>
+    <p>Quando i giocatori sono più di quelli consentiti per il numero di turni disponibile, il torneo si può dividere in <b>2 o 3 gruppi</b>. Ogni gruppo è un torneo autonomo: ha il proprio tipo di abbinamenti, il proprio numero di turni, i propri giocatori, i propri risultati e la propria classifica. Per esempio, 20 giocatori con 4 turni parziali (massimo 16) si possono dividere in due gruppi da 10.</p>
+    <p>La divisione dei giocatori fra i gruppi la decide l'organizzatore, inserendo i nomi nel gruppo che preferisce. Lo stesso nome non può comparire in due gruppi.</p>
+    <p>Per riconoscere subito il gruppo su cui si sta lavorando, ogni gruppo ha il proprio colore: <b>Gruppo 1 azzurro</b>, <b>Gruppo 2 verde</b>, <b>Gruppo 3 arancione</b>, e il nome del gruppo è scritto in grande in cima alla pagina.</p>
+    <p>Con un solo gruppo il programma gestisce un torneo unico, senza la pagina dei gruppi e senza colori diversi.</p>
+  </section>
+
+  <!-- ═════════════════════════ COMANDI E OPERAZIONI ═════════════════════════ -->
+  <section id="comandi">
+    <h2>Comandi e operazioni</h2>
+
+    <h3>1. Pagina iniziale: impostazione del torneo</h3>
+    <dl>
+      <dt>Tabella promemoria</dt>
+      <dd>Indica, per ogni numero di turni, quanti giocatori sono consentiti con i due tipi di abbinamento. La riga dei turni scelti si colora di giallo.</dd>
+      <dt>Nome del torneo (max 40 caratteri)</dt>
+      <dd>Il nome che comparirà sulla classifica. Sotto la casella si vede quanti caratteri sono stati usati. Se si lascia vuota, il torneo si chiama «Torneo del» seguito dalla data del giorno.</dd>
+      <dt>Numero di gruppi: 1, 2, 3</dt>
+      <dd>Con <b>1</b> compaiono subito sotto i campi per gli abbinamenti, i turni e i giocatori. Con <b>2 o 3</b> questi dati si inseriscono poi, separatamente, per ogni gruppo.</dd>
+      <dt>Abbinamenti: Completi / Parziali</dt>
+      <dd>Il tipo di abbinamento. Con «Completi» i numeri di turni pari sono disattivati, perché non consentiti.</dd>
+      <dt>Numero di turni: 3 … 8</dt>
+      <dd>All'inizio nessun numero è scelto. Dopo la scelta compare, in blu, quanti giocatori sono consentiti.</dd>
+      <dt>Numero di giocatori</dt>
+      <dd>Il numero di partecipanti. Se non è fra quelli consentiti, il programma lo segnala in rosso e non lo accetta.</dd>
+      <dt>✓ Fine inserimento dati</dt>
+      <dd>Controlla i dati e mostra un riepilogo da confermare. <b>Dopo la conferma le impostazioni non si possono più modificare</b>; per cambiarle bisogna ricominciare con «Nuovo torneo».</dd>
+      <dt>❓ Help</dt>
+      <dd>Apre questa guida in una nuova scheda. Il torneo resta aperto nella scheda precedente: per tornarci usa «Torna al torneo» oppure chiudi la scheda.</dd>
+    </dl>
+
+    <h3>2. Pagina dei gruppi (solo con 2 o 3 gruppi)</h3>
+    <dl>
+      <dt>Pulsanti Gruppo 1, Gruppo 2, Gruppo 3</dt>
+      <dd>Ogni pulsante, del colore del suo gruppo, mostra a che punto è: «da impostare», «inserimento giocatori», «turno 2 di 5», «concluso». Toccandolo si entra nel gruppo. I gruppi si possono gestire nell'ordine che si vuole, passando dall'uno all'altro anche durante i turni.</dd>
+      <dt>◀ Gruppi</dt>
+      <dd>In cima a ogni pagina di un gruppo: riporta alla pagina dei gruppi. Non si perde nulla, il gruppo resta al punto in cui era.</dd>
+      <dt>Classifiche finali di tutti i gruppi</dt>
+      <dd>Quando tutti i gruppi hanno terminato, compaiono i pulsanti «Condividi tutto», «Copia testo» e «Salva PDF», che riportano le classifiche e le partite di tutti i gruppi insieme.</dd>
+    </dl>
+    <p>Entrando in un gruppo, la prima pagina è la sua <b>impostazione</b>, con la tabella promemoria e gli stessi campi della pagina iniziale (abbinamenti, turni, giocatori) e il pulsante «Fine inserimento dati».</p>
+
+    <h3>3. Inserimento dei giocatori</h3>
+    <dl>
+      <dt>Nome del giocatore e ➕ Inserisci giocatore</dt>
+      <dd>Scrivi il nome e premi «Inserisci giocatore» (oppure il tasto Invio della tastiera). Il nome si aggiunge all'elenco numerato sottostante, che scorre mostrando sempre gli ultimi inseriti. In alto si vede quanti giocatori sono stati inseriti su quanti previsti.</dd>
+      <dt>Nomi uguali</dt>
+      <dd>Due giocatori non possono avere lo stesso nome, nemmeno in gruppi diversi. Per gli omonimi aggiungi l'iniziale del nome o del cognome (per esempio «Rossi M.» e «Rossi L.»).</dd>
+      <dt>✕ accanto a un nome</dt>
+      <dd>Cancella quel giocatore dall'elenco, per correggere un errore.</dd>
+      <dt>✓ Fine inserimento dati</dt>
+      <dd>Si usa quando sono stati inseriti tutti i giocatori previsti (se ne mancano, il programma lo segnala). Dopo la conferma viene elaborato il primo turno e <b>l'elenco non si può più modificare</b>.</dd>
+    </dl>
+
+    <h3>4. Turni di gioco: inserimento dei risultati</h3>
+    <dl>
+      <dt>Turno N di M</dt>
+      <dd>In alto è indicato il turno in corso. All'ultimo turno compare la fascia rossa <b>«ULTIMO TURNO DI GIOCO»</b>.</dd>
+      <dt>Partite da disputare: 2-0 · 1-1 · 0-2</dt>
+      <dd>Per ogni partita si tocca il risultato: <b>2-0</b> vince il primo nome, <b>1-1</b> patta, <b>0-2</b> vince il secondo nome. Il risultato scelto si colora; finché il turno non viene inviato si può cambiare toccando un altro risultato.</dd>
+      <dt>Riquadri 💤</dt>
+      <dd>Indicano chi riposa in quel turno, oppure chi resta senza avversario perché l'avversario si è ritirato: in entrambi i casi 1 punto.</dd>
+      <dt>✓ Fine inserimento risultati</dt>
+      <dd>Se manca qualche risultato, le partite incomplete vengono bordate di rosso. Altrimenti il programma chiede «Hai controllato i risultati?»: <b>dopo l'invio i risultati del turno non si possono più modificare</b>. Poi elabora il turno successivo oppure, dopo l'ultimo turno, la classifica finale.</dd>
+      <dt>📊 Classifica provvisoria</dt>
+      <dd>Mostra la classifica dopo l'ultimo turno concluso. I risultati del turno in corso non sono ancora conteggiati, finché non vengono inviati.</dd>
+      <dt>🚪 Ritira giocatore</dt>
+      <dd>Si sceglie il giocatore che lascia il torneo. Se in quel turno ha una partita, il programma chiede quando si ritira:
+        <ul>
+          <li><b>Durante la partita</b>: la partita è persa 0-2 per abbandono e all'avversario vanno 2 punti; il risultato viene bloccato;</li>
+          <li><b>Dopo aver finito la partita</b>: il risultato si inserisce normalmente.</li>
+        </ul>
+        Se in quel turno riposa, la domanda non compare. In ogni caso, dal turno successivo il giocatore non viene più abbinato e i punti già ottenuti restano in classifica. Il ritiro va confermato e <b>non si può annullare</b>.</dd>
+    </dl>
+
+    <h3>5. Classifica finale</h3>
+    <p>Al termine dell'ultimo turno compaiono la classifica finale e, sotto, tutte le partite disputate turno per turno, con i risultati, i riposi e i ritiri.</p>
+    <p>Colonne della classifica: <b>Pos.</b> posizione (i pari merito come «3°–4°») · <b>Pt</b> punti · <b>V</b> vinte · <b>N</b> nulle (patte) · <b>P</b> perse · <b>R</b> riposi · <b>Avv.</b> somma dei punti degli avversari incontrati. Accanto ai giocatori che hanno lasciato il torneo compare «(ritirato)».</p>
+    <dl>
+      <dt>📤 Condividi (WhatsApp, mail…)</dt>
+      <dd>Apre il menu di condivisione del telefono, per inviare la classifica e le partite in forma di testo semplice. Se il browser non lo consente, il testo viene copiato e si può incollare dove si vuole.</dd>
+      <dt>📋 Copia testo</dt>
+      <dd>Copia lo stesso testo negli appunti.</dd>
+      <dt>💾 Salva PDF</dt>
+      <dd>Salva un file PDF, nella cartella dei download, con la classifica e le partite in tabelle ben allineate, adatto alla stampa e all'archivio. È il formato da preferire per conservare il torneo.</dd>
+    </dl>
+    <p>Con più gruppi, nella pagina di un gruppo concluso questi pulsanti riguardano solo quel gruppo, anche se gli altri stanno ancora giocando; nella pagina dei gruppi, quando tutti hanno finito, riguardano tutti i gruppi.</p>
+
+    <h3>6. ↺ Nuovo torneo · Nuovo torneo / gruppo</h3>
+    <dl>
+      <dt>↺ Nuovo torneo (torneo con un solo gruppo)</dt>
+      <dd>Cancella il torneo e riporta alla pagina iniziale, dopo una richiesta di conferma.</dd>
+      <dt>↺ Nuovo torneo / gruppo (torneo con 2 o 3 gruppi)</dt>
+      <dd>Chiede cosa cancellare:
+        <ul>
+          <li><b>Ricomincia solo il Gruppo N</b>: cancella impostazioni, giocatori e risultati di quel gruppo, che riparte dalla sua impostazione; gli altri gruppi non cambiano;</li>
+          <li><b>Cancella tutto il torneo</b>: cancella tutti i gruppi e riporta alla pagina iniziale.</li>
+        </ul>
+      </dd>
+    </dl>
+    <div class="note">Prima di cancellare un torneo o un gruppo concluso, salva il PDF o condividi la classifica: dopo la cancellazione i dati non sono più recuperabili.</div>
+  </section>
+
+  <!-- ═════════════════════════ NOTE UTILI ═════════════════════════ -->
+  <section id="note">
+    <h2>Note utili</h2>
+    <ul>
+      <li><b>Il torneo si salva da solo.</b> Ogni dato inserito viene memorizzato subito dal browser sul dispositivo: se arriva una telefonata, si spegne lo schermo o si chiude la pagina, riaprendola si riprende esattamente da dove si era.</li>
+      <li><b>Un dispositivo, un torneo.</b> Il torneo resta memorizzato solo nel browser in cui è stato creato: non si può proseguire su un altro telefono o con un altro browser. Cancellando i dati di navigazione del browser il torneo si perde, quindi alla fine conviene sempre salvare il PDF.</li>
+      <li><b>Schermo acceso.</b> Mentre si usa il programma, il telefono viene invitato a non spegnere lo schermo, se il browser lo permette.</li>
+      <li><b>Icona sullo schermo.</b> Dal menu del browser, «Aggiungi a schermata Home» crea sul telefono l'icona di Claude Dama – Tornei, per aprire il programma con un tocco.</li>
+    </ul>
+  </section>
+
+  <!-- ═════════════════════════ FILE ═════════════════════════ -->
+  <section id="file">
+    <h2>I file del programma</h2>
+    <p>Tutti i file devono trovarsi nella <b>stessa cartella</b> (o nello stesso indirizzo web).</p>
+    <dl>
+      <dt><span class="file">index.html</span></dt>
+      <dd>Il programma di gestione dei tornei. È l'unico file indispensabile.</dd>
+      <dt><span class="file">Help.html</span></dt>
+      <dd>Questa guida. Se manca, il pulsante Help non mostra nulla.</dd>
+      <dt><span class="file">icona-192.png</span> · <span class="file">icona-180.png</span></dt>
+      <dd>Il logo del programma, che compare in alto nella pagina e come icona sullo schermo del telefono.</dd>
+    </dl>
+  </section>
+
+  <!-- ═════════════════════════ SEGNALAZIONI ═════════════════════════ -->
+  <section id="segnalazioni">
+    <h2>Segnalazioni</h2>
+    <p>Per eventuali segnalazioni scrivere a <a href="mailto:claudedama.segnalazioni@gmail.com">claudedama.segnalazioni@gmail.com</a>.</p>
+  </section>
+
+  <button class="back" onclick="tornaAlTorneo()">⮌ Torna al torneo</button>
+
+</main>
+
+<script>
+// Chiude questa scheda e riporta alla pagina del torneo, rimasta aperta; se il browser non permette di chiuderla,
+// si riapre il programma (il torneo in corso viene ripreso dal browser).
+function tornaAlTorneo(){
+  window.close();
+  setTimeout(function(){ location.href='index.html'; },400);
+}
+</script>
+</body>
+</html>

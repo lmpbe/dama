@@ -233,7 +233,8 @@ function confirmDlg(title,html,okLabel,fn,cancelLabel){
   showDlg(title,html,[{label:okLabel,cls:'btn-primary',fn},{label:cancelLabel||'✕ Annulla'}]);
 }
 function infoDlg(title,html){ showDlg(title,html,[{label:'✓ OK',cls:'btn-primary'}]); }
-function help(){ showDlg('Help','Help, lavori in corso…',[{label:'✕ Chiudi',cls:'btn-primary'}]); }
+// apre la guida in una nuova scheda (il torneo resta aperto in questa); se il browser blocca la scheda, la apre qui
+function help(){ save(); const w=window.open('Help.html','_blank'); if(!w) location.href='Help.html'; }
 
 // ── Nuovo torneo / nuovo gruppo ────────────────────────────────────
 function newLabel(){ return multi()&&S.phase==='run'?'↺ Nuovo torneo / gruppo':'↺ Nuovo torneo'; }
