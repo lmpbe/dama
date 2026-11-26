@@ -115,14 +115,6 @@
   .gbtn small { display:block; font-weight:normal; font-size:.92rem; margin-top:4px; }
   .overlay-btns.col { flex-direction:column; }
   input.num3 { width:6.5em; text-align:center; font-weight:bold; }
-  /* ── Pulsante schermo intero (in alto a destra nella testata) ── */
-  header { position:relative; padding-left:52px !important; padding-right:52px !important; }
-  #fs-btn { position:absolute; top:50%; right:8px; transform:translateY(-50%); width:40px; height:40px; padding:0;
-    display:flex; align-items:center; justify-content:center; background:transparent; color:#fff;
-    border:2px solid rgba(255,255,255,.85); border-radius:8px; cursor:pointer; touch-action:manipulation; }
-  #fs-btn[hidden] { display:none; }
-  #fs-btn svg { width:22px; height:22px; }
-  #fs-btn:active { background:rgba(255,255,255,.2); }
 </style>
 <link rel="icon" type="image/png" sizes="192x192" href="icona-192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icona-180.png">
@@ -131,7 +123,6 @@
 <body>
 
 <header>
-  <button type="button" id="fs-btn" hidden aria-label="Schermo intero" title="Schermo intero"></button>
   <h1><img src="icona-192.png" alt="" class="logo">Claude Dama – Tornei</h1>
   <p id="subtitle"></p>
 </header>
@@ -988,7 +979,10 @@ function pdfTable(d,cols,rows,keepH){
     cols.forEach((c,i)=>{
       const cell=cells[i]==null?'':cells[i];
       const s=typeof cell==='object'?cell.s:cell;
-      const bold=hdr||!!(cell&&cell.b), size=hdr?8.5:((cell&&cell.size)||fs);
+      const bold=hdr||!!(cell&&cell.b);
+      let size=hdr?8.5:((cell&&cell.size)||fs);
+      // testo troppo lungo per la colonna: prima si rimpicciolisce il carattere (fino a 6,5), solo dopo si accorcia con «…»
+      while(size>6.5&&tw(winStr(s),bold,size)>c.w-2*pad) size-=0.5;
       const al=hdr?'c':(c.a||'l');
       const tx=al==='c'?x+c.w/2:(al==='r'?x+c.w-pad:x+pad);
       d.text(tx,bot+(rh-size*0.72)/2,s,{size,bold,align:al,max:c.w-2*pad,gray:(cell&&cell.gray)});
@@ -1034,13 +1028,14 @@ function makePDF(idx){
     // partite
     d.ensure(14+20+17*3);
     d.text(M,d.y-12,'Partite disputate'+(multi()?' – Gruppo '+(k+1):''),{size:12.5,bold:true}); d.y-=22;
-    const nw=(W-26-48-150)/2;
-    const pc=[{t:'N.',w:26,a:'c'},{t:'Primo giocatore',w:nw},{t:'Secondo giocatore',w:nw},{t:'Risultato',w:48,a:'c'},{t:'Note',w:150}];
+    const nw=(W-26-48-136)/2;
+    const pc=[{t:'N.',w:26,a:'c'},{t:'Primo giocatore',w:nw},{t:'Secondo giocatore',w:nw},{t:'Risultato',w:48,a:'c'},{t:'Note',w:136}];
     g.rounds.filter(r=>r.done).forEach((rd,t)=>{
       const rows=rd.games.map((x,i)=>{
         let note='';
-        if(x.forfeit!=null) note='ritiro di '+nm(x.forfeit)+' durante la partita';
-        else if(afterNote(g,x)) note=afterNote(g,x);
+        // il tipo di ritiro viene prima del nome, cosi' resta leggibile anche se il nome va accorciato
+        if(x.forfeit!=null) note='Ritiro durante la partita: '+nm(x.forfeit);
+        else if(x.after&&x.after.length) note='Ritiro dopo la partita: '+x.after.map(nm).join(', ');
         return [String(i+1),nm(x.a),nm(x.b),{s:x.res,b:true},{s:note,size:8}];
       });
       rd.byes.forEach(y=>rows.push(['',nm(y.p),{s:y.why==='riposo'?'riposa':'senza avversario (ritirato)',size:9,gray:0.3},{s:'1 pt',b:true},'']));
@@ -1115,32 +1110,6 @@ function init(){
 }
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init);
 else init();
-</script>
-<script>
-// ── Pulsante «Schermo intero» (dove il browser lo permette; su iPhone non compare) ──
-(function(){
-  var doc=document, el=doc.documentElement, btn=doc.getElementById('fs-btn');
-  if(!btn) return;
-  var richiedi=el.requestFullscreen||el.webkitRequestFullscreen;
-  var esci=doc.exitFullscreen||doc.webkitExitFullscreen;
-  if(!richiedi||!(doc.fullscreenEnabled||doc.webkitFullscreenEnabled)) return;
-  var APRI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
-  var CHIUDI='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>';
-  function attivo(){ return !!(doc.fullscreenElement||doc.webkitFullscreenElement); }
-  function aggiorna(){
-    var on=attivo(), t=on?'Esci da schermo intero':'Schermo intero';
-    btn.innerHTML=on?CHIUDI:APRI; btn.setAttribute('aria-label',t); btn.title=t;
-  }
-  btn.hidden=false;
-  btn.addEventListener('click',function(e){
-    e.preventDefault(); e.stopPropagation();
-    var r=attivo()?esci.call(doc):richiedi.call(el);
-    if(r&&r.catch) r.catch(function(){});
-  });
-  doc.addEventListener('fullscreenchange',aggiorna);
-  doc.addEventListener('webkitfullscreenchange',aggiorna);
-  aggiorna();
-})();
 </script>
 </body>
 </html>
