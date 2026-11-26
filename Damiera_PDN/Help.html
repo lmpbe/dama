@@ -57,6 +57,7 @@
     <a href="#presentazione">Presentazione</a>
     <a href="#giocare">Come si gioca</a>
     <a href="#pulsanti">Pulsanti e comandi</a>
+    <a href="#commento">Commento</a>
     <a href="#valutazione">Valutazione</a>
     <a href="#pdn">Salvare la partita (PDN)</a>
     <a href="#database">Aperture e finali</a>
@@ -105,7 +106,7 @@
     <h3>Partita</h3>
     <dl>
       <dt>💡 Suggerisci</dt>
-      <dd>Mostra sulla scacchiera la mossa che il programma giocherebbe al tuo posto, senza eseguirla. Sotto i pulsanti compare un commento con la mossa in notazione PDN e con le informazioni sul calcolo (profondità raggiunta in semimosse, posizioni esaminate, tempo). Compare anche quando il programma ha usato il database delle aperture o quello dei finali.</dd>
+      <dd>Mostra sulla scacchiera la mossa che il programma giocherebbe al tuo posto, senza eseguirla.</dd>
       <dt>↩ Annulla mossa</dt>
       <dd>Torna indietro di una mossa. Contro il computer si torna indietro fino al tuo turno, cioè si annullano anche la risposta del computer e la tua mossa precedente. Si può ripetere più volte.</dd>
       <dt>📊 Valutazione: SÌ / NO</dt>
@@ -117,10 +118,14 @@
     </dl>
   </section>
 
+  <section id="commento">
+    <h2>Il commento</h2>
+    <p>Sotto i pulsanti compare il commento dell'ultima mossa, sia per le mosse del computer sia per i suggerimenti. Riporta la mossa in notazione PDN e le informazioni sul calcolo (profondità raggiunta in semimosse, posizioni esaminate, tempo), oppure l'indicazione che la mossa viene dal database delle aperture o da quello dei finali.</p>
+  </section>
+
   <section id="valutazione">
     <h2>La valutazione</h2>
     <p>Accanto al conteggio dei pezzi compare la <b>Valutazione</b>: un numero, dal punto di vista del Bianco, espresso in pedine. +1,00 significa una pedina di vantaggio per il Bianco, −1,00 una pedina di vantaggio per il Rosso. Una dama vale due pedine. Il valore viene ricalcolato dopo ogni mossa con una breve ricerca (circa un secondo e mezzo) e tiene conto anche di prese, scambi e promozioni imminenti. Mentre si ricalcola, l'ultimo valore resta visibile in tono più chiaro.</p>
-    <p>La valutazione si può nascondere e rimostrare con il pulsante <b>📊 Valutazione: SÌ / NO</b> (vedi “Pulsanti e comandi”).</p>
     <p>Quando il programma accerta una vittoria forzata, compare “vince il Bianco” o “vince il Rosso”.</p>
     <div class="note"><b>Database dei finali:</b> quando il programma accerta, grazie al database dei finali, che da quella posizione si arriva con certezza a una posizione vinta, alla valutazione materiale vengono sommate (o sottratte) 10 pedine e compare la dicitura “(database finali)”. Un valore come +14,30 (database finali) significa quindi: vittoria certa del Bianco, con 4,30 pedine di vantaggio materiale.</div>
   </section>
@@ -139,11 +144,11 @@
 
     <h3>Aperture</h3>
     <p>Se è presente il file <span class="file">libro-aperture.js</span>, nelle prime mosse il programma sceglie tra le mosse di teoria contenute nel libro, valutandole con il motore e con un po' di varietà tra mosse equivalenti. Il commento sotto i pulsanti segnala quando una mossa viene dal libro. Terminata la teoria, o se il file manca, il programma gioca calcolando le mosse migliori.</p>
-    <p>Il libro contiene oltre 75.500 posizioni, con oltre 145.500 mosse.</p>
+    <p>Il libro contiene oltre 75.800 posizioni, con oltre 125.000 mosse.</p>
 
     <h3>Finali</h3>
-    <p>Se è presente il file <span class="file">libro-finali.js</span>, il programma conosce con certezza l'esito di tutte le posizioni da 2 a 5 pezzi: vincente, perdente o pari. Fino a 4 pezzi conosce anche la distanza dalla prossima presa o promozione, quindi sa portare a termine le vittorie anche lunghe, le cosiddette “finali di manovra” che il solo calcolo non riuscirebbe a vedere. A 5 pezzi conosce l'esito e lo usa per orientare la ricerca verso le posizioni vinte.</p>
-    <p>Il database dei finali è stato generato applicando esattamente le regole di gioco del programma. Viene caricato in memoria solo quando in gioco restano 10 pezzi o meno, per non appesantire il dispositivo durante il mediogioco: in quel momento il programma può impiegare qualche secondo in più per prepararlo. Se il file manca, i finali vengono giocati dal solo motore di calcolo.</p>
+    <p>Se è presente il file <span class="file">libro-finali.js</span>, il programma conosce con certezza l'esito di tutte le posizioni da 2 a 5 pezzi: vincente, perdente o pari. Fino a 4 pezzi conosce anche la distanza dalla prossima presa o promozione, quindi sa portare a termine le vittorie anche lunghe, dette “finali di manovra” che il solo calcolo non riuscirebbe a vedere. A 5 pezzi conosce l'esito e lo usa per orientare la ricerca verso le posizioni vinte.</p>
+    <p>Il database dei finali viene caricato in memoria solo quando in gioco restano 10 pezzi o meno, per non appesantire il dispositivo durante il mediogioco: in quel momento il programma può impiegare qualche secondo in più per prepararlo. Se il file manca, i finali vengono giocati dal solo motore di calcolo.</p>
   </section>
 
   <section id="file">
@@ -168,12 +173,11 @@
     <ul>
       <li>Si gioca sulle 32 caselle scure di una scacchiera 8×8. Il Bianco muove per primo; ciascun giocatore ha 12 pedine.</li>
       <li>La <b>pedina</b> muove e cattura solo in avanti, in diagonale, di una casella. La <b>dama</b> (la pedina che raggiunge l'ultima riga) muove e cattura in avanti e indietro, sempre di una casella per volta.</li>
-      <li>La <b>presa è obbligatoria</b>. Se sono possibili più prese, si deve scegliere quella che cattura più pezzi; a parità, quella che cattura più dame; a parità ancora, la presa con una dama ha la precedenza su quella con una pedina.</li>
+      <li>La <b>presa è obbligatoria</b>. Se sono possibili più prese, si deve scegliere quella che cattura più pezzi; a parità di pezzi catturati, si deve scegliere la presa con la dama rispetto a quella con la pedina. Se più dame possono catturare lo stesso numero di pezzi, si deve scegliere la presa che cattura più dame; a parità anche di pezzi e dame catturati, si deve scegliere la presa in cui una dama viene catturata prima.</li>
       <li>La <b>pedina non può catturare la dama</b>.</li>
       <li>Quando una pedina raggiunge l'ultima riga in una presa, la presa termina e la pedina diventa dama.</li>
       <li>Perde chi resta senza pezzi o non può più muovere.</li>
     </ul>
-    <div class="note">Nelle prese multiple il programma toglie ogni pezzo catturato subito, e non alla fine della presa. È una piccola differenza rispetto al regolamento ufficiale, che si nota solo in rarissime sequenze con dame.</div>
   </section>
 
   <section id="note">
